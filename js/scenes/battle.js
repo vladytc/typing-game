@@ -14,6 +14,7 @@ Scenes.battle = {
       st: { chars: 0, errors: 0, ms: 0, perfect: 0 },
       cmd: 0, phase: 'intro', timers: [],
     });
+    Music.play(def.boss ? 'boss' : 'battle');
     const NAME = upper(def.name);
     Game.root.innerHTML = `
       <div class="battle ${def.boss ? 'boss' : ''}">
@@ -283,7 +284,7 @@ Scenes.battle = {
     const d = Save.data;
     const def = this.def;
     if (!spared) $('.esprite').classList.add('fled');
-    Sfx.win();
+    Music.play('victory');
 
     const wpm = this.st.ms > 0 ? Math.round((this.st.chars / 5) / (this.st.ms / 60000)) : 0;
     const typed = this.st.chars + this.st.errors;
@@ -310,6 +311,7 @@ Scenes.battle = {
       }
       if (def.console) {
         d.consoles[def.console] = true;
+        Quests.complete('rescate_gb');
         const c = CONSOLES.find((x) => x.id === def.console);
         pages.push(`* ¡¡RESCATASTE LA ${upper(c.name)}!!\n* Ya brilla en tu vitrina.`);
         pages.push('* Un nuevo mundo se abrirá pronto...\n* (Pídele a tu papá el siguiente.)', '* (Pssst... Don Chip, en el pueblo, querrá verla.)');

@@ -13,7 +13,10 @@ function defaultSave() {
     tutorialDone: false,
     muted: false,
     konami: false,
-    flags: {},     // cosas que pasaron en el pueblo (diálogos, quests)
+    starter: null, // monstruo inicial elegido contra el Entrenador Max
+    flags: {},
+    quests: {},    // id -> 'active' | 'done'
+    arcade: {},    // récords de minijuegos     // cosas que pasaron en el pueblo (diálogos, quests)
     stats: { keys: {}, battles: [], bestWpm: 0 },
   };
 }

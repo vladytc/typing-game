@@ -90,8 +90,10 @@ class ListMenu {
 // Respuesta escrita: el jugador teclea una de las opciones para elegirla.
 // Solo acepta letras que sigan alguna opción; BORRAR corrige.
 class ChoicePrompt {
-  constructor(el, options, onPick) {
-    Object.assign(this, { el, options, onPick, buf: '', done: false });
+  // onPick(i, { ms, errors }) recibe también cuánto tardó (desde la primera letra) y los errores.
+  // tags: texto pequeño opcional junto a cada opción (por ejemplo, el tipo de un ataque).
+  constructor(el, options, onPick, { prompt = 'Escribe tu respuesta:', tags = [] } = {}) {
+    Object.assign(this, { el, options, onPick, prompt, tags, buf: '', done: false, errors: 0, t0: 0 });
     this.render();
   }
   fits(opt, text) {
@@ -104,7 +106,8 @@ class ChoicePrompt {
     const next = this.buf + e.key;
     const live = this.options.filter((o) => this.fits(o, this.buf));
     if (live.length === 1) Stats.record(live[0][this.buf.length] || e.key, this.fits(live[0], next));
-    if (!this.options.some((o) => this.fits(o, next))) { Sfx.error(); this.render(true); return; }
+    if (!this.options.some((o) => this.fits(o, next))) { this.errors++; Sfx.error(); this.render(true); return; }
+    if (!this.t0) this.t0 = performance.now();
     Sfx.key();
     this.buf = next;
     this.render();
@@ -112,16 +115,18 @@ class ChoicePrompt {
     if (picked >= 0) {
       this.done = true;
       Sfx.confirm();
-      setTimeout(() => this.onPick(picked), 250);
+      const ms = performance.now() - this.t0;
+      setTimeout(() => this.onPick(picked, { ms, errors: this.errors }), 250);
     }
   }
   render(err = false) {
     const n = this.buf.length;
     this.el.innerHTML = `<div class="choice ${err ? 'err' : ''}">
-      <div class="cprompt">Escribe tu respuesta:</div>
-      ${this.options.map((o) => {
+      <div class="cprompt">${esc(this.prompt)}</div>
+      ${this.options.map((o, i) => {
         const live = this.fits(o, this.buf);
-        return `<div class="copt ${live ? '' : 'off'}">▸ <span class="typed">${esc(live ? o.slice(0, n) : '')}</span>${esc(live ? o.slice(n) : o)}</div>`;
+        const tag = this.tags[i] ? `<span class="ctag">${esc(this.tags[i])}</span>` : '';
+        return `<div class="copt ${live ? '' : 'off'}">▸ <span class="typed">${esc(live ? o.slice(0, n) : '')}</span>${esc(live ? o.slice(n) : o)}${tag}</div>`;
       }).join('')}
     </div>`;
   }
@@ -146,5 +151,6 @@ const Game = {
     this.root.innerHTML = '';
     this.lockUntil = performance.now() + 300;
     this.scene.enter(params);
+    if (this.scene.music) Music.play(this.scene.music);
   },
 };

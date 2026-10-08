@@ -1,6 +1,7 @@
 // Mapa del mundo: el camino de enemigos hasta el jefe.
 
 Scenes.map = {
+  music: 'title',
   enter() {
     this.world = WORLDS[0];
     const nodes = this.world.nodes;
@@ -41,7 +42,7 @@ Scenes.map = {
           <span>NV ${d.level} · HP ${playerMaxHp()} · XP ${d.xp}/${xpToNext(d.level)}${best ? ` · RECORD ${best} PPM` : ''}</span>
         </div>
         <div class="map-keys">
-          <span data-k="v">[V] Vitrina</span><span data-k="e">[E] Estadísticas</span><span data-k="Escape">[ESC] Pueblo</span>
+          <span data-k="m">[M] Misiones</span><span data-k="v">[V] Vitrina</span><span data-k="e">[E] Estadísticas</span><span data-k="Escape">[ESC] Pueblo</span>
         </div>
       </div>`;
     this.world.nodes.forEach((id, i) => {
@@ -69,7 +70,8 @@ Scenes.map = {
   play() {
     if (this.state(this.i) === 'locked') { Sfx.error(); return; }
     Sfx.confirm();
-    Game.go('battle', { enemyId: this.world.nodes[this.i] });
+    const id = this.world.nodes[this.i];
+    Game.go(ENEMIES[id].mode || 'battle', { enemyId: id });
   },
 
   onKey(e) {
@@ -79,6 +81,7 @@ Scenes.map = {
     else if (isConfirm(e)) this.play();
     else if (e.key === 'v' || e.key === 'V') Game.go('vitrina', { back: 'map' });
     else if (e.key === 'e' || e.key === 'E') Game.go('stats', { back: 'map' });
+    else if (e.key === 'm' || e.key === 'M') Game.go('diario', { back: 'map' });
     else if (e.key === 'Escape') { Sfx.warp(); Game.go('town', { from: 'world' }); }
   },
 };

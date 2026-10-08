@@ -34,7 +34,7 @@ const BIT_TIPS = [
   '* Si te quedas quieto mucho rato, a veces digo cosas raras.',
   '* Dicen que en la pantalla de título hay un código secreto...\n* Uno muy, muy famoso.',
   '* Ese ronquido enorme no me deja pensar.',
-  '* Don Chip sabe MUCHÍSIMO de consolas. Pregúntale algo.',
+  '* Don Chip sabe MUCHISIMO de consolas. Pregúntale algo.',
 ];
 
 const TOWN = {
@@ -64,7 +64,7 @@ const TOWN = {
   },
   signs: {
     '10,11': '* PUEBLO VITRINA\n* Población: unos cuantos píxeles.',
-    '18,11': '* TUBERÍA AL VALLE GAME BOY\n* Párate encima para entrar.',
+    '18,11': '* TUBERIA AL VALLE GAME BOY\n* Párate encima para entrar.',
   },
   looks: {
     agua: '* El agua refleja tu cara.\n* Te ves... rápido.',
@@ -84,6 +84,7 @@ const TOWN = {
             '* El apagón se llevó todas las consolas de mi museo.\n* Si las rescatas, las pondré en la vitrina.',
             '* La puerta del museo está aquí a mi lado.\n* ¡Entra cuando quieras!',
           ], 'DON CHIP');
+          Quests.start('coleccion');
         }
         if (d.consoles.gameboy && !ctx.flag('chipGB')) {
           ctx.setFlag('chipGB');
@@ -141,6 +142,7 @@ const TOWN = {
           '* ¡Guau! Soy TOBY.\n* Mi abuelo se reía de los cazadores que fallaban.',
           '* ¿Te atreves? Escribe "pato" tres veces seguidas sin ningún error.',
         ], 'TOBY');
+        Quests.start('pato');
         if (await ctx.choose(['acepto', 'no'], 'TOBY') === 1) {
           await ctx.say(['* Je je. ¿Gallina? Digo... ¿pato?'], 'TOBY');
           return;
@@ -149,6 +151,7 @@ const TOWN = {
         if (res.completed && res.errors === 0) {
           await ctx.say(['* ¡GUAU! ¡Ni un solo error!\n* Te ganaste esto.'], 'TOBY');
           await ctx.give('zapper');
+          Quests.complete('pato');
         } else {
           Sfx.laugh();
           await ctx.say(['* Je je je je je.', '* ¡Inténtalo otra vez cuando quieras!'], 'TOBY');
@@ -162,9 +165,20 @@ const TOWN = {
         if (await ctx.choose(['despierta', 'dejarlo dormir']) === 0) {
           await ctx.say(['* ¡¡DESPIERTA!!', '* ...', '* Zzz. Ni se movió.']);
           await ctx.say(['* Creo que necesitamos algo especial para despertarlo...\n* ¿Una flauta, tal vez?'], 'BIT');
+          Quests.start('flauta');
         } else {
           await ctx.say(['* Lo dejas dormir. Se ve muy cómodo.']);
         }
+      },
+    },
+
+    {
+      id: 'arcade', sprite: 'arcade', x: 14, y: 4,
+      async talk(ctx) {
+        const best = (Save.data.arcade || {}).bloques || 0;
+        await ctx.say([`* Una máquina arcade: BLOQUES.\n* Récord: ${best} puntos.`]);
+        Quests.start('arcade');
+        if (await ctx.choose(['jugar', 'ahora no']) === 0) Game.go('bloques', { back: 'town' });
       },
     },
 
@@ -204,8 +218,9 @@ async function bitIntro(ctx) {
     i === 0 ? '* ¡Genial! Seremos el mejor equipo.' : '* ...Lo voy a tomar como un sí. ¡Vamos!',
     '* Aquí se habla ESCRIBIENDO la respuesta.\n* ¡Justo como acabas de hacer!',
     '* La tubería verde nos lleva al Valle Game Boy.\n* ¡Ahí está la primera consola!',
-    '* (Muévete con las flechas. ENTER para hablar o revisar.)',
+    '* (Muévete con las flechas. ENTER para hablar o revisar.)\n* (M abre tu diario de misiones.)',
   ], 'BIT');
+  Quests.start('rescate_gb');
 }
 
 async function bitTalk(ctx) {
