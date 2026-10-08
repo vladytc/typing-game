@@ -1,6 +1,7 @@
 // Pantalla de título, historia inicial y pantalla de "game over".
 
 Scenes.title = {
+  music: 'title',
   enter() {
     const d = Save.data;
     const started = d.seenIntro;
@@ -23,6 +24,7 @@ Scenes.title = {
   },
   toggleSound() {
     Sfx.muted = !Sfx.muted;
+    Music.muted = Sfx.muted;
     Save.data.muted = Sfx.muted;
     Save.write();
     this.lastPick = 3;
@@ -44,7 +46,7 @@ Scenes.title = {
     this.secret = true;
     Game.root.insertAdjacentHTML('beforeend', `
       <div class="box secret-box">
-        * ¡¡CÓDIGO SECRETO!!<br>
+        * ¡¡CODIGO SECRETO!!<br>
         * En 1988 este código daba 30 vidas en Contra.<br>
         * Aquí te da 3 Galletas Pixel extra en cada batalla.${first ? '' : '<br>* (Ya lo tenías activado. ¡Eres un experto!)'}
         <span class="more">▼</span>
@@ -55,6 +57,7 @@ Scenes.title = {
 const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 
 Scenes.story = {
+  music: 'title',
   enter() {
     Game.root.innerHTML = `
       <div class="story">
@@ -74,8 +77,9 @@ Scenes.story = {
 };
 
 Scenes.gameover = {
-  enter({ enemyId, back = 'map' }) {
-    Save.write(); // guarda las estadísticas de tecleo aunque haya perdido
+  enter({ enemyId, back = 'map', scene = 'battle' }) {
+    Save.write();
+    Music.stop(); // guarda las estadísticas de tecleo aunque haya perdido
     Game.root.innerHTML = `
       <div class="gameover">
         <h1>GAME OVER</h1>
@@ -84,7 +88,7 @@ Scenes.gameover = {
         <div class="go-menu"></div>
       </div>`;
     const items = [
-      { label: 'Reintentar', go: () => Game.go('battle', { enemyId, back }) },
+      { label: 'Reintentar', go: () => Game.go(scene, { enemyId, back }) },
       { label: back === 'town' ? 'Volver al pueblo' : 'Volver al mapa', go: () => Game.go(back, back === 'town' ? {} : undefined) },
     ];
     this.menu = new ListMenu($('.go-menu'), items, { onPick: (i) => items[i].go() });

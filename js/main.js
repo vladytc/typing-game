@@ -3,6 +3,7 @@
 Game.root = document.getElementById('game');
 Save.load();
 Sfx.muted = Save.data.muted;
+Music.muted = Save.data.muted;
 
 function fit() {
   const device = document.getElementById('device');

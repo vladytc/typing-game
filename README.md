@@ -16,11 +16,24 @@ ese navegador.
 
 Los acentos y la Ñ son opcionales (escribir `a` vale por `á`).
 
+### Batalla de monstruos (Entrenador Max)
+
+Minijefe del Valle Game Boy. Escoges a tu compañero escribiendo su nombre y luego cada
+ataque se usa **escribiendo su nombre**: más rápido = más daño. Fuego le gana a planta,
+planta a agua, agua a fuego y eléctrico a agua. En el turno rival hay que escribir una
+palabra corta a tiempo para recibir la mitad del daño.
+
+### Minijuego: BLOQUES
+
+En la máquina arcade del pueblo. Caen palabras; si no las escribes, se apilan. Las apiladas
+valen doble. Llegar a 40 puntos da un premio.
+
 ### Pueblo Vitrina
 
 El punto de partida. Muévete con las flechas y usa ENTER para hablar. Para contestar,
 **escribes** tu respuesta. La tubería verde lleva al Valle Game Boy y la puerta del museo
-lleva a la vitrina. Los enemigos que perdones se mudan al pueblo.
+lleva a la vitrina. Los enemigos que perdones se mudan al pueblo. La tecla **M** abre el
+diario de misiones.
 
 ## Para papá
 
@@ -33,6 +46,9 @@ lleva a la vitrina. Los enemigos que perdones se mudan al pueblo.
 - Por ahora solo existe el Mundo 1. Los demás (`soon: true` en `WORLDS`) aparecen como
   "próximamente". La paleta de colores de cada mundo son 4 variables en `css/style.css`.
 - Los sprites son dibujos de 16×16 hechos con letras en `js/sprites.js`.
+- La música (`js/music.js`) son melodías originales escritas como notas (`E5/2` = mi de la
+  quinta octava durante 2 pasos). Cada pantalla elige su pista.
+- Las misiones están en `js/quests.js`; los monstruos y entrenadores, en `js/monsters.js`.
 
 ### Secretos (no se los cuentes 🤫)
 

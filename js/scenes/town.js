@@ -7,6 +7,7 @@ const KEY_DIRS = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRig
 const OPPOSITE = { up: 'down', down: 'up', left: 'right', right: 'left' };
 
 Scenes.town = {
+  music: 'town',
   p: null, // posición del jugador; se recuerda al volver de batallas o del museo
 
   enter({ from } = {}) {
@@ -25,7 +26,7 @@ Scenes.town = {
         <canvas class="tmap" width="640" height="480"></canvas>
         <div class="ents"></div>
         <div class="area-name">${esc(upper(m.name))}</div>
-        <div class="town-keys">ENTER hablar · V vitrina · E estadísticas · ESC título</div>
+        <div class="town-keys">ENTER hablar · M misiones · V vitrina · E estadísticas · ESC título</div>
         <div class="tbox hidden"><div class="speaker hidden"></div><div class="tbody"></div></div>
       </div>`;
     this.paintMap();
@@ -154,7 +155,7 @@ Scenes.town = {
   // Guiño a Pokémon: en el pasto alto aparecen enemigos salvajes para practicar.
   wildEncounter() {
     const d = Save.data;
-    const pool = ['pixelito', ...Object.keys(ENEMIES).filter((id) => d.done[id] && !ENEMIES[id].boss)];
+    const pool = ['pixelito', ...Object.keys(ENEMIES).filter((id) => d.done[id] && !ENEMIES[id].boss && !ENEMIES[id].mode)];
     const id = rand(pool);
     this.grace = 4;
     $('.town').classList.add('flash');
@@ -264,6 +265,7 @@ Scenes.town = {
     if (isConfirm(e)) this.interact();
     else if (e.key === 'v' || e.key === 'V') Game.go('vitrina', { back: 'town' });
     else if (e.key === 'e' || e.key === 'E') Game.go('stats', { back: 'town' });
+    else if (e.key === 'm' || e.key === 'M') Game.go('diario', { back: 'town' });
     else if (e.key === 'Escape') Game.go('title');
   },
 

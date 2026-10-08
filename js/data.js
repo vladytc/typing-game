@@ -77,6 +77,14 @@ const ENEMIES = {
     drop: 'pilas',
     keysHint: 'Todas las letras + sílabas',
   },
+  max: {
+    name: 'Entrenador Max',
+    sprite: 'max',
+    mode: 'monster', // usa la batalla de monstruos (js/scenes/monster.js)
+    xp: 25,
+    blurb: '¡MINIJEFE! Un rival con monstruos. Cada ataque se escribe... y los tipos importan.',
+    keysHint: 'Nombres de ataques + defensa rápida',
+  },
   tetrorey: {
     name: 'Tetro Rey',
     sprite: 'tetrorey',
@@ -105,7 +113,7 @@ const ENEMIES = {
 };
 
 const WORLDS = [
-  { id: 'gb', name: 'Valle Game Boy', short: 'GB', nodes: ['pixelito', 'cartuchon', 'pilabat', 'tetrorey'] },
+  { id: 'gb', name: 'Valle Game Boy', short: 'GB', nodes: ['pixelito', 'cartuchon', 'pilabat', 'max', 'tetrorey'] },
   { id: 'nes', name: 'Castillo 8-Bit', short: 'NES', soon: true },
   { id: 'snes', name: 'Reino 16-Bit', short: 'SNES', soon: true },
   { id: 'n64', name: 'Isla Polígono', short: 'N64', soon: true },
@@ -184,6 +192,8 @@ const TREASURES = {
   cable: { name: 'Cable Link', desc: 'Sirve para jugar con un amigo. ¡Ya tienes varios!' },
   bloques: { name: 'Cartucho de bloques', sprite: 'cartucho', desc: 'Regalo de Don Chip. Venía incluido con la Game Boy.' },
   espada: { name: 'Espada de madera', desc: 'Es peligroso ir solo. Un clásico de 1986.' },
+  medalla: { name: 'Medalla Pixel', desc: 'Se la ganaste al Entrenador Max. ¡Tu primera medalla!' },
+  ficha: { name: 'Ficha dorada', desc: 'Premio por llegar a 40 puntos en BLOQUES.' },
   zapper: { name: 'Pistola de luz', desc: 'Premio de Toby. Las de verdad solo funcionaban en teles de tubo.' },
 };
 
