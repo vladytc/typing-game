@@ -607,8 +607,8 @@ Fantasmín (*"Toma, vivía en mi pantalla. Hace burbujas."*).
 
 #### Minijefe C (opcional) — CAMPEÓN PUÑÍN (guiño: Punch-Out!!, NES 1987)
 
-- **Concepto:** boxeador enorme con guantes verdes. Tú eres chiquito y ves su espalda... no:
-  él está de frente y tú abajo, pequeño, como en el original.
+- **Concepto:** boxeador enorme con guantes verdes. Él está de frente y tú abajo,
+  pequeño, como en el original.
 - **Mecánica — "Esquivar escribiendo":** Puñín avisa su golpe con una palabra que parpadea
   durante 1.2 s (`izquierda`, `derecha`, `gancho`, `abajo`). Escribirla antes de que termine
   el parpadeo = esquivas. Tras 3 esquives seguidos, se "marea" (una estrella aparece) y se
@@ -937,7 +937,7 @@ Cactín (Tecloide BROTE) se obtiene perdonando a Cactín Salvaje.
   cada 25 % de vuelta: al pasar una, aparece un objeto que se activa escribiendo su palabra:
   - `plátano` → el rival derrapa 1.5 s.
   - `caparazón` → el rival se detiene 2 s (solo si está adelante).
-  - `rayo` → el rival escribe... no: el rival se encoge, baja 30 % su velocidad por 4 s.
+  - `rayo` → el rival se encoge y baja 30 % su velocidad por 4 s.
   - `estrella` → tú eres inmune a objetos 5 s y +20 % velocidad.
   El rival también usa objetos: cuando te lanza uno, aparece una **palabra de defensa** de 1
   s (`esquiva`) — escribirla a tiempo anula el objeto.
@@ -950,8 +950,7 @@ Cactín (Tecloide BROTE) se obtiene perdonando a Cactín Salvaje.
 
 #### Minijefe B — OCARÍN y el Templo de la Melodía (guiño: Ocarina of Time, 1998)
 
-- **Concepto:** músico poligonal con un ocarina triangular... no: con una **flauta de
-  polígonos**. No pelea: te enseña melodías. "Vencerlo" es tocar las 5 melodías perfectas.
+- **Concepto:** músico poligonal con una **flauta de polígonos**. No pelea: te enseña melodías. "Vencerlo" es tocar las 5 melodías perfectas.
 - **Mecánica — "Melodías con teclas":** las notas son 5 teclas: `s d f j k` (dos manos, la
   posición base). Ocarín toca una melodía (se iluminan las teclas en pantalla y suena cada
   nota con el motor chiptune), de 4 a 8 notas. Tú la repites escribiendo la secuencia; cada
@@ -1394,7 +1393,7 @@ palabras de "curva" (`izquierda`, `derecha`) se intercalan en el párrafo y hay 
   gente."*
 - Una balanza blanca en el gimnasio: *"Pésate y haz yoga. 2007."* (Wii Fit, sin nombrar).
 - Bit: *"Esta consola vendió más de cien millones. Cien. Millones."*
-- Un cartucho de GameCube... no: una ranura con un control de cubo: *"Los primeros modelos
+- Una ranura con un control de cubo: *"Los primeros modelos
   de esta consola todavía leían los discos del cubo. Familia es familia."*
 
 ### 9.9 Consola y tesoros
@@ -1411,3 +1410,332 @@ textos invertidos/espejo (lectura), mano izquierda/derecha por separado. Objetiv
 PPM**, precisión 96 %.
 
 ---
+
+## 10. Final — El Canal Vacío
+
+### 10.1 Identidad visual
+
+Fondo negro con estática magenta `#FF00FF` y gris `#444444`; la interfaz "se rompe": bordes
+de la caja de batalla desalineados, texto con 1 de cada 10 letras corrompidas al inicio.
+Conforme avanza la batalla, **la paleta se va arreglando**: fase 1 en 4 verdes (GB), fase 2
+en NES, fase 3 en SNES... hasta terminar en los colores de la Wii. Es decir: la batalla
+final es un viaje por todas las eras, y el jugador lo nota solo por los colores y la música.
+
+### 10.2 Antes de la batalla
+
+Al entrar al Canal Vacío, todo el pueblo aparece detrás de ti (todos los perdonados). Cada
+uno te da una **frase** (las copias de sombra perdonadas dan frases extra). Las frases se
+guardan en `Save.data.finalPhrases` y son las que se usan en la fase 3. Ejemplos:
+- Pixelito: *"¡Boing!"* → frase: `un pixel también cuenta`
+- Tetro Rey: `todo encaja si lo giras`
+- Don Chip: `nada viejo es basura`
+- Dani Turbo: `el segundo más rápido te apoya`
+- Toby: `guau` (Bit: *"...Gracias, Toby."*)
+- Bit (al final, bajito): `no estás solo`
+
+### 10.3 La batalla: EL GLITCH (3 fases + decisión)
+
+**Fase 1 — "Pausa" (paleta GB).** HP 200. El Glitch intenta **congelar** tus palabras: en
+LUCHAR, cada 3ª palabra aparece como `[PAUSA]`; escribir `continuar` la destraba (cuenta como
+PERFECTO si en < 1.5 s). Lluvia: letras que **se detienen en el aire** 1 s a mitad de caída y
+luego caen el doble de rápido. ACTUAR aquí no funciona todavía: *"No te oigo."* (PAZ no
+sube; Bit: *"No nos escucha... todavía."*).
+
+**Fase 2 — "Repetición" (paletas NES → SNES → N64).** HP 250. Usa las mecánicas de los jefes
+anteriores en versión corta, en orden: 20 s de plataformas al ritmo (Caparazón), 20 s de
+oscuridad (Nébula), 20 s de un cuadro (Marco). Cada una que completas sin error quita 50
+HP. Lluvia: palabras repetidas (`nombre nombre nombre`) que hay que escribir una sola vez
+(enseñanza: no repitas lo que te dicen; escribe lo que es). ACTUAR se desbloquea: `Escuchar`
+("te quedas quieto y lo escuchas" +25), `Hermano` (solo Bit: "bit dice que lo recuerda"
++35).
+
+**Fase 3 — "Nombre" (paletas GC → Wii).** HP 300. El Glitch deja de atacar con estática y
+**te pregunta cosas**; respondes **escribiendo las frases de tus amigos** (§10.2): aparece la
+pregunta (*"¿Por qué sigues?"*) y tres frases de amigos; eliges una escribiéndola. Cada
+frase escrita PERFECTA sube la PAZ +20 y quita 40 HP (el daño aquí es simbólico: "le
+llega"). Lluvia: la de la fase 1 pero con letras magenta que, al escribirlas, se vuelven del
+color del mundo (visual de "arreglar").
+
+**Decisión.** Con PAZ 100 aparece `NOMBRE: _______` y el comando PERDONAR cambia a
+**NOMBRAR**. El jugador escribe un nombre (sin tiempo, sin errores contados, 2-12 letras,
+se guarda en `Save.data.glitchName`). Si prefiere pelear hasta 0 HP, también termina; ver
+§1.3 para ambos finales.
+
+### 10.4 Después
+
+- Final bueno: el Glitch (ahora con nombre) se muda al pueblo; su cartucho entra a la
+  vitrina con el nombre escrito por el niño; la vitrina muestra las 6 consolas y el cartucho
+  en medio. Créditos: desfile de todos los perdonados con un reto de tecleo opcional (los
+  nombres de los créditos; sin castigo).
+- Final neutral: cartucho "SIN NOMBRE" en la vitrina; Bit sugiere volver. La batalla se puede
+  repetir desde el museo.
+- Ambos desbloquean §11.
+
+---
+
+## 11. Post-game y mundo secreto — La Cueva Roja
+
+### 11.1 El Roncatón y la flauta
+
+Con la **Flauta Polígono** (Mundo 4), al hablar con el Roncatón aparece la opción `tocar la
+flauta`: se toca la Canción de Despertar (`s d f j k j f d`) con ritmo. El Roncatón despierta,
+bosteza, y resulta ser un **Tecloide gigante de tipo BYTE** que llevaba dormido "desde
+1995". No pelea: pide que le escribas su sueño (reto de 3 frases) y luego se hace a un lado:
+*"Soñé que todo era rojo. ...Ah, no. Eso está allá atrás."* Se puede seguir hablando con él;
+funciona como "banca" de récords. Si se lo perdona (sin batalla: se le "perdona" por
+haberte bloqueado el camino 6 mundos) se mueve a la entrada del este.
+
+### 11.2 La Cueva Roja (Virtual Boy, 1995)
+
+| | |
+|--|--|
+| **Paleta** | **Solo rojo y negro**, 4 tonos: `#000000`, `#550000`, `#AA0000`, `#FF0000`. Como el Virtual Boy real, que solo mostraba rojo. |
+| **Estilo** | Todo con **profundidad falsa**: cada sprite se dibuja dos veces con un desplazamiento de 1-2 píxeles (fantasma más oscuro detrás) para simular el 3D estereoscópico. Overworld oscuro, con "capas": cercana (rojo vivo) y lejana (rojo oscuro). |
+| **Datos reales** (Don Chip) | Salió en 1995. Solo mostraba rojo sobre negro. Se descontinuó en menos de un año. Lo diseñó el mismo creador del Game Boy, Gunpei Yokoi, quien también hizo los Game & Watch. |
+
+**Historia.** Detrás del Roncatón hay un cartucho que todos olvidaron: la consola que
+"fracasó". Don Chip la guardaba en el sótano con pena. Aquí vive **Visorio**, el jefe
+secreto: un visor rojo con patas que cree que nadie lo quiere. Es el espejo del Glitch:
+otra cosa olvidada, pero esta vez el jugador ya sabe qué hacer.
+
+**Enemigos (3):** **Rojito** (píxel rojo, idéntico a Pixelito pero en rojo; se saludan como
+primos), **Doble Visión** (enemigo que se dibuja dos veces: sus palabras aparecen
+desfasadas y hay que escribir la "de adelante", la más brillante), **Trípode** (soporte
+que se tambalea; sus palabras oscilan).
+
+**JEFE SECRETO — VISORIO (guiño: Virtual Boy, 1995).** Mecánica "Profundidad": las palabras
+de LUCHAR y de la lluvia aparecen en **dos capas** (adelante = rojo brillante, atrás = rojo
+oscuro) y la regla es escribir **siempre la capa de adelante**; cada 10 s las capas se
+intercambian (un parpadeo lo avisa). Escribir una de atrás = daño 0 y "se te cansan los
+ojos" (−3 HP, guiño al problema real del aparato). HP 420. PAZ: `Descanso` ("tomas un
+descanso cada quince minutos" → +50; dato real: el Virtual Boy recomendaba pausas),
+`Rojo` ("le dices que el rojo es tu color favorito"), `Abuelo` ("le cuentas que su creador
+también hizo la game boy" → *"...¿En serio? ...Entonces soy familia."* +50). Recompensa:
+**Virtual Boy** en la vitrina (7ª consola, en su propio estante con un letrero: "Fracaso
+famoso. Lo queremos igual."), tesoro `tripode` y minijuego **Eco Rojo** (palabras en dos
+capas, récord de capa correcta).
+
+### 11.3 Otras cosas de post-game
+
+- **Torneo de Tecloides** en el pueblo (Profesora Letra): 8 entrenadores (todos los NPC con
+  equipos), bracket, Dani en la final. Premio: Tecloide **Kilobyte** brillante.
+- **Modo Turbo** en el museo: repetir cualquier jefe con +25 % de velocidad en todo y
+  mostrar PPM en pantalla. Objetivo final: **50+ PPM**.
+- **Vitrina completa:** con las 7 consolas y el cartucho con nombre, Don Chip da un último
+  dato: *"La mejor consola es la que juegas con alguien."* y regala `foto_vitrina`.
+- **Nueva partida +:** conserva Tecloides y Fichas; acentos estrictos desde el Mundo 1.
+
+---
+
+## 12. Pueblo Vitrina a lo largo del juego
+
+### 12.1 Cómo crece
+
+El mapa actual (20×15) se conserva; se agregan "salidas" nuevas al este (Roncatón) y al
+norte (cueva) y los edificios cerrados se abren.
+
+| Después de | Cambio en el pueblo |
+|-----------|---------------------|
+| Inicio | Lo que existe hoy. Se agrega el **Laboratorio de la Profesora Letra** (casa cerrada `d` en la esquina superior derecha: ahora abre). Dani Turbo pasea. |
+| Mundo 1 | Pixelito, Cartuchón, Pilabat, Tetro Rey, Monedín, Linkito, Chupín se mudan (los que se perdonaron). Don Chip abre el **Ala Game Boy** del museo (sala con la consola y sus tesoros). Tetro Rey "ordena" las flores en bloques. |
+| Mundo 2 | Llegan **Doña Tecla** (tienda) y los gemelos **Gorro y Berenjena**, que arreglan la tubería: ahora, al pararse en la tubería, aparece un **Mapa de Mundos** para elegir destino. Robotito en el museo (Modo Práctica). Hongo-paje: *"Tu consola está en... ¡en la vitrina! ¡Por fin!"* |
+| Mundo 3 | **Maestra Modo** abre la **Sala de Arcade** (nuevo edificio al oeste del lago): todos los minijuegos. Dino Huevín pasta junto al lago. La etiqueta en blanco se puede ver en la vitrina. |
+| Mundo 4 | **Ocarín** se instala con un quiosco de música junto al letrero del pueblo. Se abre la **Cueva** del norte (Anciano): dentro, el Anciano vende mapas y cuenta la leyenda del cartucho sin nombre. Con la flauta, el **Roncatón** despierta (puede hacerse ya o después). |
+| Mundo 5 | **Alcaldesa Bellota** y el **buzón**: cartas semanales (quests cortas de frases largas). Don Chip tiene la caja del prototipo sobre el mostrador. Champi se reencuentra con Don Chip (escena corta). |
+| Mundo 6 | **Entrenador Mi** abre el gimnasio (los 3 deportes). Capitán Cometa instala un observatorio en el techo del museo (muestra tus récords como constelaciones). |
+| Final | El Glitch (con nombre) sentado en la banca junto a la vitrina. Cuenta un chiste nuevo cada día (fecha real). La Cueva Roja abre detrás del Roncatón. |
+
+### 12.2 La quest de la flauta (completa)
+
+1. **Mundo 1-3:** el Roncatón bloquea el camino del este. Bit sugiere una flauta.
+2. **Mundo 4:** Ocarín enseña 4 melodías para abrir la isla; tras el jefe, enseña la
+   **Canción de Despertar** y entrega la **Flauta Polígono**.
+3. **Pueblo:** con la flauta, opción `tocar la flauta` frente al Roncatón → reto de ritmo
+   (la melodía de 8 notas). Despierta, cuenta su sueño, se mueve.
+4. **Detrás:** el camino del este lleva a un claro con un cartucho rojo gigante: la entrada
+   a la **Cueva Roja** (§11), que se abre al terminar el juego (antes, dice *"Zzz... todavía
+   no. Primero lo morado."*).
+
+### 12.3 Los amigos perdonados (reglas de diálogo)
+
+Cada perdonado tiene: 1 línea de llegada, 1 dato curioso real, 1 línea nueva cuando se
+termina cada mundo siguiente (así el pueblo "habla del presente"). Ejemplo, Tetro Rey tras
+el Mundo 2: *"Conocí a Lord Caparazón. Ese castillo no encaja con NADA."* Si se perdonaron
+las copias de sombra (§8.4), el original lo menciona: *"Sentí que alguien me abrazaba desde
+lejos. ¿Fuiste tú?"*
+
+---
+
+## 13. Progresión de mecanografía
+
+| Mundo | Teclas / habilidad | Longitud | PPM objetivo | Precisión | Tiempo de lluvia base |
+|------|---------------------|----------|--------------|-----------|------------------------|
+| 1 GB | fila del medio, fila de arriba, fila de abajo; minúsculas; sílabas | 3-6 letras | 15-20 | 90 % | 1300 ms / 30 px/s |
+| 2 NES | todas las letras; **Shift** (mayúscula inicial, nombres propios); punto final; números 1-9 | 4-8 letras, frases de 3 palabras | 20-25 | 92 % | 1150 ms / 34 px/s |
+| 3 SNES | **acentos y ñ obligatorios**; `¿? ¡!`; comas; palabras largas | 8-10 letras, frases de 4-6 palabras | 25-32 | 93 % | 1050 ms / 38 px/s |
+| 4 N64 | **fila numérica** 0-9; fechas; posición base `s d f j k` con ritmo; lectura rápida | frases de 6-8 palabras; cifras | 32-38 | 94 % | 950 ms / 42 px/s |
+| 5 GC | **frases completas** con puntuación, dos puntos, cambio de contexto; cartas | frases de 8-12 palabras | 38-44 | 95 % | 900 ms / 46 px/s |
+| 6 Wii | todo mezclado + símbolos `° % /`; ritmo constante; mano izq/der; texto invertido | párrafos de 30-40 palabras | 44-50 | 96 % | 800 ms / 50 px/s |
+| Final | todo; frases libres | — | 50 | — | variable por fase |
+| Secreto | lectura de profundidad | — | 50+ | 97 % | 750 ms / 54 px/s |
+
+Reglas generales:
+- El juego ya elige palabras según las teclas falladas (`Stats`): mantener eso y agregar
+  que cada mundo tiene **teclas de enfoque** que entran al pool con peso extra.
+- Los retos de tecleo del diálogo (`ctx.challenge`) usan la misma tabla de PPM para calcular
+  `timeLimit`: `letras × (60000 / (PPM_objetivo × 5)) × 1.4 + 1500`.
+- Las "palabras invertidas / inclinadas / borrosas" son solo **presentación** (CSS
+  transform / blur) del mismo `TypingTask`; lo que se escribe es la palabra normal.
+- Mostrar siempre al final de cada batalla: PPM, precisión y una tecla a mejorar ("Hoy la
+  tecla ñ te costó. Dino Huevín te espera.").
+
+---
+
+## 14. Música
+
+Todas las pistas son **originales**, descritas por estilo para componer con el motor chiptune
+propio. No se transcribe ninguna melodía existente. Convención de canales: `P1` y `P2` =
+ondas cuadradas (melodía y armonía), `T` = triángulo (bajo), `N` = ruido (percusión), `W` =
+tabla de ondas (solo mundos 3+), `S` = muestras cortas (solo mundo 6, si el motor las
+soporta; si no, se usa `W`).
+
+### 14.1 Paleta sonora por era
+
+| Era | Canales | Carácter |
+|-----|---------|----------|
+| GB | P1 P2 (con duty 12.5 %/25 %/50 %), W simple, N | Melodías pegajosas, bajo marcado, mucho **arpegio** rápido para fingir acordes. Eco simulado repitiendo la nota a menor volumen. |
+| NES | P1 P2 T N | Bajo en triángulo (sin volumen, suena "hueco"), percusión de ruido corta, melodía con **vibrato** manual y duty 50 %. Tempos vivos 140-170. |
+| SNES | P1 P2 T N W + "reverb" (repetición a −6 dB, 90 ms) | Más capas, **acordes reales** en 3 voces, sonidos tipo orquesta de 16 bits (metales y cuerdas imitados con W). Tempos variados. |
+| N64 | igual que SNES + pads largos | Ambientes amplios, melodías más lentas y "cinemáticas", sonidos de viento y eco; percusión más seca. |
+| GC | igual + bajo "slap" (T con ataque rápido) | Pop alegre, ritmos latin/swing, campanitas (W de ataque corto). |
+| Wii | todo | Limpio y luminoso, marimbas/campanas, ritmos de 2 compases que se repiten (como música de menú), silbidos. |
+| Canal Vacío | todo, con "corrupción" | Notas desafinadas ±30 cents aleatorias, cortes de canal, silencio súbito; se va limpiando por fase. |
+| Cueva Roja | P1 P2 N, mono | Grave, lento, un solo canal "doblado" con desfase (eco estéreo-falso), misterioso. |
+
+### 14.2 Pistas por mundo
+
+| Pista | Tempo | Compás | Tono / ánimo | Notas de composición |
+|-------|-------|--------|--------------|----------------------|
+| Pueblo Vitrina | 96 | 4/4 | Do mayor, hogareño | Melodía de 8 compases en P1 (duty 25 %), contramelodía en P2 a terceras; bajo T en negras; sin percusión. Debe poder sonar en loop 10 minutos sin cansar. |
+| Valle Game Boy (overworld) | 128 | 4/4 | Sol mayor, alegre y verde | Arpegios rápidos en P2 (semicorcheas), melodía saltarina con muchas notas repetidas, bajo que alterna tónica-quinta. |
+| Batalla normal GB | 150 | 4/4 | Mi menor → Sol mayor en el estribillo | Riff de 2 compases en P1, N marcando corchea, bajo en octavas. |
+| **Reto de Tecloides** (GB; es la pista "Pokémon") | 160 | 4/4 | La menor, urgente | Empieza con 4 golpes de N + un "subidón" cromático en P1 (como una sirena), luego riff de bajo T muy rítmico (tónica, octava, séptima) y melodía en P1 con frases de 2 compases que terminan en nota larga con vibrato. Puente a Do mayor cuando el rival tiene poca vida ("¡casi!"). Variación "estadio" en N64 con pads W. |
+| Chupín (minijefe) | 138 | 4/4 | Fa mayor, dulce y traviesa | Melodía redonda, staccato; un "inhalar" = glissando descendente en P2. |
+| **Tetro Rey (jefe)** | 140 → 160 → 180 | 4/4 | Re menor, marcial y "de Europa del Este" por el estilo (sin citar nada) | Ritmo de marcha en N; melodía en P1 con saltos de octava; en fase 2 (Bloques) la pista se acelera cada 20 segundos; fase 3 añade arpegios de P2 en tresillos. |
+| Castillo 8-Bit (overworld) | 150 | 4/4 | Do mayor, muy "brincadora" | Bajo T sincopado (como caminar), melodía con muchas síncopas y notas de adorno, N solo en hi-hat. |
+| Batalla normal NES | 165 | 4/4 | Sol menor | Riff de 1 compás, cambios de acorde cada 2 compases. |
+| Mazmorra de Llaves | 100 | 4/4 | La menor, misteriosa | Solo P1 con eco (repetición en P2 un tiempo después a −6 dB), bajo largo, N como "gotas" cada 4 tiempos. |
+| Kongo Tambor | 132 | 4/4 | Mi menor, percusiva | N protagonista con patrón de tambores (bombo-caja-bombo-bombo-caja), melodía corta y repetitiva de 4 notas. |
+| Campeón Puñín | 170 | 4/4 | Si bemol mayor, de gimnasio | Metales imitados con duty 12.5 %, fanfarria de 2 compases, silencios para los "avisos". |
+| **Lord Caparazón (jefe)** | 120 → 135 → 150 | 4/4 | Do menor, grandiosa | Debe tener **pulso evidente** (el jefe usa metrónomo): N en cada negra, bajo T en cada tiempo, melodía heroica de 4 compases. Fase 3: cada 4 compases un "tartamudeo" (nota repetida 4 veces en semicorcheas) para sonar trabada. |
+| Reino 16-Bit (overworld) | 118 | 4/4 | Re mayor, luminosa | Acordes de 3 voces, melodía en W (tipo flauta), pad largo, percusión suave con "reverb". |
+| Batalla normal SNES | 155 | 4/4 | Mi menor, orquestal | Metales en P1+P2 a quintas, timbal en N, cuerdas W. |
+| Rayo Cero (carrera) | 175 | 4/4 | Fa# menor, rock | Bajo T en corcheas constantes, "guitarra" P1 duty 50 % con ritmo de power chords, N con bombo en 4. Loop corto de 8 compases. |
+| Capitán Vulpino | 140 | 4/4 | Si bemol mayor, espacial-heroica | Fanfarria de metales, arpegio en W, N con redoble en cada oleada. |
+| Arena Modo 7 (Dani) | 165 | 4/4 | Variación del Reto de Tecloides con cuerdas W y acordes completos | — |
+| **Reina Nébula (jefe)** | 92 | 6/8 | Do menor, submarina y lenta | Pad largo en W, melodía de 3 notas repetidas en P1 con mucho vibrato, bajo muy grave en T, N casi inaudible (burbujas). Al 60 %: sube a 110 y entra un contratiempo en N. |
+| Isla Polígono (overworld) | 104 | 4/4 | La mayor, aventurera y ventosa | Pads largos, melodía "silbada" en P1 duty 12.5 %, bajo lento, N seco con eco. |
+| Batalla normal N64 | 148 | 4/4 | Re menor | Percusión más seca, bajo slap, melodía angular. |
+| Circuito Isla (kart) | 160 | 4/4 | Mi mayor, alegre | Ritmo de "ska" (acordes en contratiempo en P2), melodía pegajosa, campanas W. |
+| Templo de la Melodía | 80 | 3/4 | Fa mayor, serena | Solo W (flauta) y pad; cada melodía aprendida se **superpone** como contramelodía al loop del templo (sistema: capas que se activan por flag). |
+| Estadio Polígono | 165 | 4/4 | Reto de Tecloides con "público": N con palmadas en 2 y 4 | — |
+| **Marco, Rey de los Cuadros (jefe)** | 112 (pasillo) / varía por cuadro | 4/4 | Sol mayor, juguetona | El pasillo es un vals lento disfrazado de 4/4; cada cuadro tiene una **variación de 8 compases** del mismo tema (fría = notas largas; reloj = tempo exacto 60 BPM con N en cada segundo; arcoíris = modulación por tonos). La pelea final es el tema en Sol menor a 150. |
+| Cubo Galáctico (overworld) | 124 | 4/4 | Do mayor, pop y brillante | Campanitas W, bajo slap, ritmo de bossa simplificada en N, melodía con muchos silencios. |
+| Batalla normal GC | 158 | 4/4 | La menor | Riff de bajo funky, "metales" cortos. |
+| Capitán Brotes | 130 | 4/4 | Fa mayor, de expedición | Marcha ligera, silbido en P1, "pasos" en N; cada escuadrón tiene un motivo de 2 notas (rojo: ascendente, azul: descendente, amarillo: repetida). |
+| Casco Escáner | 96 | 4/4 | Si menor, fría | Pad, pulsos de N cada 2 tiempos, melodía escasa; al escanear, sube un semitono. |
+| Copias de sombra | — | — | La pista del jefe original, **desafinada −30 cents** y con cortes | Se implementa como efecto sobre la pista existente. |
+| **El Guante Crossover (jefe)** | 170 | 4/4 | Mi menor, épica de torneo | Fanfarria inicial de 2 compases, luego riff rápido, cada "figurita" cambia el **timbre** del canal P1 al de la era correspondiente por un turno (duty, filtro). SMASH = redoble de N + silencio de 1 tiempo + acorde completo. |
+| Ciudad Sensor (overworld) | 110 | 4/4 | Do mayor, limpia y moderna | Marimba W, silbido P1, bajo redondo, ritmo de 2 compases repetido; sensación de "menú". |
+| Batalla normal Wii | 160 | 4/4 | Sol menor | Más "electrónica": N con patrón de 16 pasos, P2 en arpegio sincopado. |
+| Gimnasio Sensor | 90 (boliche) / 120 (tenis) / 100 (box) | 4/4 | Fa mayor | **El tempo es la mecánica**: el metrónomo visible es la N de la pista. Melodías simples, repetitivas, alegres. |
+| Torneo Sensor | 170 | 4/4 | Reto de Tecloides versión final: todas las capas, modulación a mitad | — |
+| **Capitán Cometa (jefe)** | 100 → 128 | 3/4 → 4/4 | Mi bemol mayor, majestuosa y espacial | Vals lento con pads W y melodía larga en P1; cuando cambia la gravedad, la pista **se invierte** (melodía al revés durante 4 compases); fase final en 4/4 a 128 con arpegios de 7 notas (una por estrellita). |
+| **El Glitch (final)** | 60 → 120 → 150 | libre → 4/4 | Fase 1: una sola nota en P1 que se corta; fase 2: collage de 2 compases de cada jefe, cada vez más limpio; fase 3: tema nuevo en Do mayor, sencillo (8 notas), que es **el tema del Pueblo Vitrina tocado lento** | La revelación musical: el tema del Glitch siempre fue el del pueblo, porque siempre fue parte del pueblo. |
+| Pantalla de NOMBRAR | 70 | 4/4 | Do mayor, solo P1 | Las 8 notas del pueblo, una por cada letra que el niño escribe (si escribe más, se repite el motivo). |
+| Créditos | 112 | 4/4 | Popurrí: 4 compases de cada mundo, terminando en el pueblo | — |
+| Cueva Roja | 72 | 4/4 | Do# menor, mono grave | P1 doblado en P2 con 20 ms de desfase, N como latido, melodía de 5 notas. |
+| Visorio | 126 | 4/4 | Do# menor, tensa | Dos melodías "capas": una brillante (P1) y una oscura (P2 una octava abajo) que se intercambian cada 10 s, igual que la mecánica. |
+
+### 14.3 Efectos de sonido (chiptune)
+
+Tecla correcta: blip P1 corto (C6, 30 ms). Error: N 60 ms + nota baja. PERFECTO: arpegio
+ascendente de 4 notas. PAZ +: dos notas a quinta. Perdonar: arpegio mayor lento. Jefe
+derrotado: fanfarria de 2 compases en la paleta de la era. Glitch presente: nota desafinada
+que corta la música 200 ms.
+
+---
+
+## 15. Prioridades de implementación
+
+Ordenadas por **diversión por hora de trabajo**, aprovechando lo que ya existe y lo que se
+está construyendo.
+
+1. **Terminar el Reto de Tecloides en el Mundo 1 con su música** (Profesora Letra, 3
+   iniciales, Dani Turbo 1v1, tipos). Es lo que el niño pidió a través del papá y reutiliza
+   el `TypingTask`. Incluye la pista "Reto de Tecloides" en el motor chiptune.
+2. **Mundo 2 (Castillo 8-Bit) completo con 4 enemigos + Lord Caparazón** usando el
+   combate existente. Para el jefe, la mecánica de "plataformas al ritmo" se puede
+   simplificar en v1 a: LUCHAR normal + el metrónomo visual que acelera (el salto se hace
+   solo si la palabra sale dentro del compás). Nuevo contenido con el sistema ya hecho =
+   muchas horas de juego nuevas.
+3. **Bloques integrado como fase 2 de Tetro Rey + Sala de Arcade con Bloques y Patos de
+   Letras.** El marco de minijuegos ya está en curso; Patos es muy barato (letras sueltas) y
+   Toby ya existe.
+4. **Diario de misiones con 6 quests** (las 4 del Mundo 1 + "Los patos de Toby" + "La
+   etiqueta en blanco" como gancho de historia) y el Mapa de Mundos en la tubería. Esto le da
+   al niño "cosas que hacer" y hace visible la historia del Glitch desde temprano.
+5. **Las pistas sembradas del Glitch** (línea final de Tetro Rey, cartucho sin etiqueta en
+   la vitrina, píxel magenta, Don Chip en el Mundo 2). Cuesta solo texto y da sensación de
+   un juego grande.
+
+Después, en este orden: Mundo 3 (acentos obligatorios + Rayo Cero, que reusa la carrera) →
+Mundo 4 (Melodías reusa el motor chiptune + Marco, que reusa retos cortos) → Mundo 5 →
+Mundo 6 → Final → Cueva Roja.
+
+Reglas de ahorro:
+- Las carreras (Rayo Cero, Kart, Rueda) son **un solo componente** con parámetros.
+- Las variantes visuales (inclinado, borroso, invertido, dos capas) son **CSS sobre el
+  mismo TypingTask**.
+- Los deportes de la Wii y Puñín comparten el componente "palabra en ventana de tiempo".
+- Las copias de sombra reutilizan los jefes con `hp × 0.4` y una pista desafinada.
+
+---
+
+## 16. Apéndice: listas de palabras por mundo
+
+Sugerencia de pools (`WORDS.nes`, `WORDS.snes`, etc.) para `data.js`. Siempre palabras
+comunes para un niño de 11 años; nada de nombres con derechos.
+
+**NES (mayúscula inicial y nombres propios):** `Castillo`, `Ladrillo`, `Tubería`, `Hongo`,
+`Moneda`, `Bandera`, `Puente`, `Lava`, `Nube`, `Robot`, `Pato`, `Red`, `Bosque`, `Llave`,
+`Mazmorra`, `Mapa`, `Bomba`, `Escudo`, `Ring`, `Guante`, `Campeón`, `Torre`, `Princesa`,
+`Paje`, `Puerta`, `Cofre`, `Corona`, `Hacha`, `Cuerda`, `Martillo`.
+
+**SNES (acentos, ñ, signos):** `plátano`, `dinosaurio`, `caballero`, `armadura`, `piña`,
+`niño`, `sueño`, `montaña`, `cañón`, `pequeño`, `rápido`, `música`, `fácil`, `difícil`,
+`galaxia`, `polígono`, `órbita`, `medusa`, `océano`, `estrellita`, `¡alto!`, `¿quién va?`,
+`¡turbo!`, `¿listo?`, `piloto, nave, pista`, `uva, pera, kiwi`.
+
+**N64 (números, fechas, posición base):** `64`, `120`, `1996`, `4 puertos`, `3 lados`, `8
+cuadros`, `estrella`, `cuadro`, `castillo`, `niebla`, `cámara`, `polígono`, `textura`,
+`triángulo`, `isla`, `playa`, `templo`, `melodía`, `flauta`, `kart`, `plátano`, `caparazón`,
+`rayo`, `derretir`, `reloj`.
+
+**GC (frases):** `El cubo tiene manija.`, `Salta Delfinito, salta.`, `rojo: apagar`, `azul:
+nadar`, `amarillo: saltar`, `Querido vecino, ¿cómo estás?`, `Hoy llovió en la isla.`, `La
+fantasmita se escondió en el cuadro.`, `Gracias por tu carta.`, `Nos vemos en la plaza a las
+cinco.`
+
+**Wii (todo + símbolos):** `24°`, `75%`, `10 km/h`, `¡Ponte la correa!`, `izq`, `der`,
+`agacha`, `chuza`, `saque`, `raqueta`, `estrella`, `gravedad`, `planeta`, `observatorio`,
+`canal`, `sensor`, `remoto`, `gimnasio`, `boliche`, `tenis`, `cometa`.
+
+**Final (frases de amigos):** ver §10.2; se generan a partir de `Save.data.spared`.
+
+---
+
+*Fin de la biblia. Cualquier dato curioso nuevo que se agregue debe verificarse antes; los de
+este documento se limitaron a hechos ampliamente documentados (años de lanzamiento, nombres
+clave "Dolphin" y "Revolution", 4 puertos de la N64, discos de 8 cm, pantalla roja del
+Virtual Boy, etc.).*
