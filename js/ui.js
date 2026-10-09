@@ -148,6 +148,7 @@ const Game = {
     if (this.scene && this.scene.exit) this.scene.exit();
     this.scene = Scenes[name];
     this.root.className = `scene-${name}`;
+    document.body.className = 'theme-gb'; // cada escena puede cambiarlo (el mapa usa el tema de su mundo)
     this.root.innerHTML = '';
     this.lockUntil = performance.now() + 300;
     this.scene.enter(params);
