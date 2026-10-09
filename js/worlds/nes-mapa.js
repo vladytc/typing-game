@@ -767,14 +767,4 @@ addEventListener('DOMContentLoaded', () => {
     SPRITES.luigi = Object.assign(SPRITES.mario.slice(), { pal: { b: NES.S, c: NES.G, d: NES.B } });
     SPRITES.arbitro = Object.assign(SPRITES.mario.slice(), { pal: { b: NES.S, c: NES.W, d: NES.K } });
   }
-  // Patos de Letras desde el mapa: Scenes.patos trata cualquier `back` distinto de 'map' como
-  // modo arcade (sin meta y sin marcar el nodo). En las zonas el nodo tiene que poder ganarse.
-  const patosEnter = Scenes.patos && Scenes.patos.enter;
-  if (patosEnter) {
-    Scenes.patos.enter = function enter(p = {}) {
-      const node = p.back === 'town' && (p.enemyId || 'patos') === 'patos' && !p.arcade && !Save.data.done.patos;
-      patosEnter.call(this, node ? { ...p, back: 'map' } : p);
-      if (node) this.back = 'town';
-    };
-  }
 });
