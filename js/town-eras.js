@@ -78,34 +78,46 @@ const HUB_ERAS = {
   },
 };
 
-// Eras que solo se ven en su barrio del pueblo (todavía no son era de todo el pueblo).
-// Mismo formato que HUB_ERAS. Los colores de la N64 son los de .theme-n64 (css/worlds/n64.css).
-const BARRIO_ERAS = {
-  n64: {
-    label: 'ERA POLIGONO',
-    shadows: true,
-    tiles: {
-      grass: { a: '#58b85c', b: '#7fd07f', c: '#2f7d3a', d: '#202030' },
-      tall: { a: '#58b85c', b: '#7fd07f', c: '#2f7d3a', d: '#202030' },
-      flower: { a: '#58b85c', b: '#f7e463', c: '#2f7d3a', d: '#d64545' },
-      path: { a: '#e8dcb5', b: '#c9a66b', c: '#8a6a3a', d: '#202030' },
-      rock: { a: '#ffffff', b: '#c9d6e3', c: '#7e57c2', d: '#202030' },
-      water: { a: '#ffffff', b: '#9fd3ff', c: '#3c8dd6', d: '#202030' },
-      roof: { a: '#ffffff', b: '#f7e463', c: '#d64545', d: '#202030' },
-      wall: { a: '#ffffff', b: '#c9d6e3', c: '#3c8dd6', d: '#202030' },
-      door: { a: '#f7e463', b: '#c9a66b', c: '#7e57c2', d: '#202030' },
-      tree: { a: '#ffffff', b: '#7fd07f', c: '#2f7d3a', d: '#202030' },
-      pipe: { a: '#ffffff', b: '#7fd07f', c: '#2f7d3a', d: '#202030' },
-      sign: { a: '#ffffff', b: '#f7e463', c: '#7e57c2', d: '#202030' },
-      cave: { a: '#ffffff', b: '#c9d6e3', c: '#7e57c2', d: '#202030' },
-    },
-    chars: { a: '#c9d6e3', b: '#3c8dd6', c: '#7e57c2', d: '#202030' },
-    charOverrides: {
-      bit: { a: '#ffffff', b: '#ffffff', c: '#7e57c2', d: '#202030' },
-      heroe: { a: '#f7e463', b: '#ffffff', c: '#d64545', d: '#202030' },
-    },
+// Era Polígono (N64): desde aquí el pueblo es 3D de verdad (render: '3d', js/scenes/town3d.js).
+// Las paletas sirven para el suelo con textura, los cartones de los personajes y el modo clásico
+// (si three.js no carga, el pueblo se ve en 2D con estos colores). Los de .theme-n64 (css/worlds/n64.css).
+HUB_ERAS.n64 = {
+  label: 'ERA POLIGONO',
+  theme: 'theme-hub-n64',
+  render: '3d',
+  shadows: true,
+  tiles: {
+    grass: { a: '#58b85c', b: '#7fd07f', c: '#2f7d3a', d: '#202030' },
+    tall: { a: '#58b85c', b: '#7fd07f', c: '#2f7d3a', d: '#202030' },
+    flower: { a: '#58b85c', b: '#f7e463', c: '#2f7d3a', d: '#d64545' },
+    path: { a: '#e8dcb5', b: '#c9a66b', c: '#8a6a3a', d: '#202030' },
+    rock: { a: '#ffffff', b: '#c9d6e3', c: '#7e57c2', d: '#202030' },
+    water: { a: '#ffffff', b: '#9fd3ff', c: '#3c8dd6', d: '#202030' },
+    roof: { a: '#ffffff', b: '#f7e463', c: '#d64545', d: '#202030' },
+    wall: { a: '#ffffff', b: '#c9d6e3', c: '#3c8dd6', d: '#202030' },
+    door: { a: '#f7e463', b: '#c9a66b', c: '#7e57c2', d: '#202030' },
+    tree: { a: '#ffffff', b: '#7fd07f', c: '#2f7d3a', d: '#202030' },
+    pipe: { a: '#ffffff', b: '#7fd07f', c: '#2f7d3a', d: '#202030' },
+    sign: { a: '#ffffff', b: '#f7e463', c: '#7e57c2', d: '#202030' },
+    cave: { a: '#ffffff', b: '#c9d6e3', c: '#7e57c2', d: '#202030' },
+  },
+  chars: { a: '#c9d6e3', b: '#3c8dd6', c: '#7e57c2', d: '#202030' },
+  charOverrides: {
+    bit: { a: '#ffffff', b: '#ffffff', c: '#7e57c2', d: '#202030' },
+    heroe: { a: '#f7e463', b: '#ffffff', c: '#d64545', d: '#202030' },
+    donchip: { a: '#f4f4f4', b: '#c9d6e3', c: '#7e57c2', d: '#202030' },
+    champi: { a: '#f4f4f4', b: '#d64545', c: '#f7e463', d: '#202030' },
+    toby: { a: '#f4f4f4', b: '#f0953c', c: '#8a6a3a', d: '#202030' },
+    roncaton: { a: '#f4f4f4', b: '#e8dcb5', c: '#3c8dd6', d: '#202030' },
+    profesora: { a: '#f4f4f4', b: '#f7e463', c: '#9a8c7a', d: '#202030' },
+    viejo: { a: '#f4f4f4', b: '#c9d6e3', c: '#9a8c7a', d: '#202030' },
+    arcade: { a: '#f4f4f4', b: '#f7e463', c: '#d64545', d: '#202030' },
   },
 };
+
+// Eras que solo se ven en su barrio del pueblo (todavía no son era de todo el pueblo).
+// Mismo formato que HUB_ERAS. (La N64 ya es era del pueblo; GameCube y Wii llegarán aquí.)
+const BARRIO_ERAS = {};
 // Paleta de una era, sea de todo el pueblo o solo de un barrio.
 const eraDef = (era) => HUB_ERAS[era] || BARRIO_ERAS[era];
 
@@ -148,5 +160,11 @@ const ERA_CHANGE_LINES = {
     '* Bienvenido a la ERA DE LOS 16 BITS.\n* Hasta mis píxeles se sienten más suaves.',
   ],
 };
+ERA_CHANGE_LINES.n64 = [
+  '* ¡¿QUE?! ¡El piso se está... LEVANTANDO!',
+  '* ¡Los árboles tienen ESQUINAS! ¡Las casas tienen techo de verdad, con dos lados!\n* Bienvenido a la ERA POLIGONO: el pueblo ahora es 3D.',
+  '* Y mira atrás de nosotros: la cámara nos sigue sola.\n* Como si alguien nos filmara desde una nube.',
+  '* Tranquilo: se camina igual, casilla por casilla. ¡Solo que ahora hay ARRIBA!',
+];
 // Si hay amigos de una era anterior, alguno lo comenta (conservan su estética original).
 const NATIVE_LOOK_LINE = '* PIXELITO: ¡Yo me quedo verde, gracias!\n* Así nací y así me gusta.';

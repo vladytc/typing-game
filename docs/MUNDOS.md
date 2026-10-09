@@ -300,6 +300,8 @@ aunque el resto del pueblo esté en otra), letreros y anuncio de Bit.
 | + Barrio 16 Bits (sureste) y Sala de Arcade de la Maestra Modo | 13 amigos + Reino 16-Bit | 32×27 |
 | + Barrio Polígono (más al este) y quiosco de Ocarín | 18 amigos + Isla Polígono | 44×27 |
 
+Con la Isla Polígono abierta, el pueblo entero pasa a la **era Polígono** y se ve en 3D (§3f).
+
 Agregar el barrio de un mundo nuevo:
 
 ```js
@@ -316,6 +318,7 @@ Agregar el barrio de un mundo nuevo:
 - Agrega en `TOWN_GATES` las casillas de paso entre tu pedazo y los vecinos (son árbol
   mientras tu barrio no exista) y una frase en `BARRIO_NEWS`.
 - Si la era todavía no es de todo el pueblo, pon su paleta en `BARRIO_ERAS` (js/town-eras.js).
+  Si es 3D, ponle `render: '3d'`: con el pueblo ya en 3D, su barrio va con polígonos (§3f).
 - Si un amigo llega antes que su barrio, espera en el pueblo viejo (`TOWN_CAMP`); los lugares
   sin barrio usan `PLACE_CAMP`.
 - **Valida** con un BFS en Node, en cada etapa y con muchas combinaciones de amigos: filas del
@@ -329,6 +332,78 @@ Object.assign(Save.data.consoles, { gameboy: true, nes: true, snes: true });   /
 BARRIOS.flatMap((b) => b.friends).slice(0, 13).forEach((id) => { Save.data.spared[id] = true; });
 Game.go('town');                       // el pueblo con los barrios que tocan
 townStage();                           // cuántos barrios hay (0-4)
+```
+
+## 3f. Zonas en 3D (N64, GameCube, Wii...)
+
+Desde la N64 las zonas se ven en **3D de verdad**, pero se juegan **igual**: mismas filas de
+casillas, mismas flechas casilla por casilla, mismos encuentros, cofres, salidas, letreros,
+pasto alto, variantes y ESC. `Scenes.town` hace toda la lógica; el **renderer 3D**
+(`js/scenes/town3d.js`, clase `Town3D`) solo dibuja. Ejemplo completo: `js/worlds/n64-mapa.js`.
+
+Para que un mapa se dibuje en 3D, agrega `render: '3d'` (y, si quieres, `view3d`):
+
+```js
+'gc-plaza': {
+  name: 'Plaza Cubo',
+  render: '3d',
+  view3d: {
+    edge: 'sea',          // fuera del mapa: 'sea' (mar), 'grass', 'forest' (pasto y pinos) o 'void' (islas flotantes)
+    fog: [22, 70],        // niebla: empieza y termina (en unidades; 1 casilla = 2)
+    fogColor: '#C9D6E3', sky: '#9FD3FF',
+    missing: false,       // parches MISSING en el cielo (los de la Isla Polígono)
+    cam: [11.5, 9],       // cámara: altura y distancia detrás del jugador
+  },
+  tiles: {
+    '^': { s: 'grass', colors: {...}, h: 1.2 },             // h = altura del suelo (mesetas, escalones)
+    p: { s: 'tree', solid: true, d3: 'palm' },              // d3 = qué modelo 3D usar
+    b: { s: 's16_puente', d3: 'bridge', over: 'void' },      // puente colgado sobre el vacío
+    v: { s: 'water', solid: true, d3: 'void' },             // vacío: no hay suelo
+  },
+  decor3d: [{ model: 'bear', path: [[24, 2], [26, 2]], speed: 0.8 }],  // adornos que caminan (Poly.models)
+  // ... todo lo demás igual que en §3d (map, npcs, encounters, chests, exits, signs, wild...)
+},
+```
+
+Cómo se dibuja cada casilla (en `Town3D.prop`):
+- **Suelo**: un cuadro con la textura de su sprite de 16 px (los mismos colores que el 2D). En lo
+  3D va con filtro suave (borroso, como la N64); en los barrios de eras viejas, nítido.
+- **Por sprite** (si no trae `d3`): `water` agua (más abajo, con plano transparente), `tree` pino,
+  `roof`/`wall`/`door` casa (las casillas pegadas se juntan en UNA casa con techo de dos aguas,
+  puertas y ventanas), `pipe` tubería, `sign` letrero, `cave` cueva, `rock` roca, puentes.
+  Sólida sin modelo = bloque con la textura de su sprite. Caminable = suelo.
+- **`d3`** disponibles: `palm`, `rock`, `cliff`, `bridge`, `void`, `fog` (suelo con nubecitas),
+  `castle` (muralla con almenas), `tower`, `pillar`, `wall` (muro con franja, `c3`/`c3b`),
+  `stand` (gradas que miran a la cancha), `tire`, `itembox` (caja ? que gira), `missing`,
+  `cube`, `tv`, `chair`, `mask`. Opcionales: `bh` (alto del bloque), `c3` (color).
+- Las paredes de tierra/roca entre alturas distintas salen solas; junto al vacío, la roca cuelga.
+- **Personajes**: si su sprite (o `model` del enemigo) existe en `Poly.models`, se ve el modelo
+  3D; si no, un **cartón** (billboard) con su sprite y la paleta de SU era. El jugador es el
+  héroe 3D. Para un mundo nuevo, agrega sus modelos a `Poly.models` (js/scenes/poly3d.js) y su
+  sprite a `T3_MODELS` (town3d.js).
+- **Regiones de eras 2D** (`regions` con era sin `render: '3d'`): se ven como relieves de pixel
+  art (bloques con su sprite, árboles de dos planos cruzados) con su paleta original.
+
+Reglas para que vaya fluido: todo lo quieto se **junta en pocas mallas** (`T3Bake`: una por
+material), sin sombras, render a 320×240 escalado (como `poly3d.js`) y `dispose()` al salir
+(libera el contexto WebGL). Si three.js no carga, el 2D de siempre se queda (con la paleta de
+la era) y aparece "SIN MOTOR 3D: MODO CLASICO".
+
+**El pueblo en 3D**: una era con `render: '3d'` en `HUB_ERAS` (js/town-eras.js) dibuja el pueblo
+con este renderer. La primera vez, `Town3D.riseTo()` hace la cinemática: el pueblo plano (el
+dibujo 2D de la era anterior) se ve desde el cielo, los árboles y casas se levantan en ondas
+desde el jugador y la cámara baja detrás de él. Los barrios viejos siguen con su estética.
+Para GameCube/Wii: agrega su era a `HUB_ERAS` con `render: '3d'` y sus `ERA_CHANGE_LINES`.
+
+**Valida** con el BFS de siempre (las casillas y reglas son las mismas que en 2D).
+
+Para probar desde la consola del navegador:
+
+```js
+Save.data.flags.metBit = true; Object.assign(Save.data.consoles, { gameboy: true, nes: true, snes: true });
+Game.go('town', { map: 'n64-playa' });             // la Isla Polígono en 3D
+Save.data.flags.hubEra = 'snes'; Game.go('town', { map: 'pueblo' });   // ver al pueblo levantarse
+Scenes.town.r3                                     // el renderer 3D activo (null = 2D)
 ```
 
 ## 4. Sprites
