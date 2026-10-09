@@ -1,0 +1,267 @@
+/* ==========================================================================
+   MUNDO 6 — Ciudad Sensor (Wii, 2006). Paleta del lore §9.1.
+   Blanco y azul cielo del menú de la consola, muy limpio: esquinas redondas,
+   bordes grises suaves y "canales" como ventanitas. Un cursor-mano flota al fondo.
+   ========================================================================== */
+
+.theme-wii {
+  --c0: #0D47A1; /* azul oscuro (contorno, texto) */
+  --c1: #1E88E5; /* azul menú */
+  --c2: #5BC0EB; /* azul cielo */
+  --c3: #FAFAFA; /* blanco */
+  --w-light: #E6E9EE;
+  --w-gray: #AAB2BD;
+  --w-green: #43D17A;
+  --w-yellow: #FFD54F;
+  --w-orange: #FF8A3D;
+  --w-red: #F44336;
+  --w-pink: #F48FB1;
+  --w-ink: #2B3445;
+}
+
+/* Observatorio del Capitán Cometa: el espacio, con texto blanco. */
+.theme-cometa {
+  --c0: #FAFAFA;
+  --c1: #9FD8F5;
+  --c2: #FFD54F;
+  --c3: #0B1638;
+  --w-light: #1B2A55;
+  --w-gray: #5C6E99;
+  --w-green: #43D17A;
+  --w-yellow: #FFD54F;
+  --w-red: #F44336;
+  --w-ink: #FAFAFA;
+}
+
+/* La consola de afuera también se pone blanca, como la de verdad. */
+.theme-wii #device, .theme-cometa #device { background: #eef1f5; box-shadow: inset 0 0 0 2px #d4d9e0; }
+.theme-wii #device-label, .theme-cometa #device-label { color: #8a94a3; }
+.theme-wii #device-label span, .theme-cometa #device-label span { color: #b0b8c4; }
+.theme-wii #screen-frame, .theme-cometa #screen-frame { background: #1c2230; }
+
+/* Ventanas redondas y limpias, como el menú. */
+.theme-wii .box {
+  border: 3px solid var(--w-gray);
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 2px 0 var(--w-light), inset 0 0 0 2px #f3f5f8;
+}
+.theme-cometa .box {
+  color: var(--c0);
+  border: 3px solid #5C6E99;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #1B2A55, #0B1638);
+  box-shadow: 0 0 0 2px #050a1c;
+}
+.theme-wii .bar, .theme-cometa .bar { border-radius: 6px; border-color: var(--w-gray); overflow: hidden; }
+.theme-wii .bar i { background: var(--c2); }
+.theme-wii .cmd, .theme-cometa .cmd { border-radius: 10px; }
+.theme-wii .cmd.sel { background: var(--c2); color: #ffffff; border-color: var(--c1); }
+.theme-wii .tt-ready { background: #ffffff; border-radius: 12px; }
+.theme-cometa .tt-ready { background: transparent; }
+.theme-wii .bullet, .theme-cometa .bullet { border-radius: 10px; border-width: 2px; }
+.theme-wii .bullet { background: #ffffff; border-color: var(--w-gray); color: var(--c0); }
+.theme-wii .bullet.target { background: var(--c2); color: #ffffff; }
+.theme-wii .bubble { border-radius: 12px; border-color: var(--w-gray); background: #ffffff; }
+.theme-wii .bubble::before { border-right-color: var(--w-gray); }
+.theme-wii .smb-pause, .theme-cometa .smb-pause { background: rgba(13, 71, 161, 0.75); color: #ffffff; border-radius: 0; }
+.theme-wii .smb-pause .opt, .theme-cometa .smb-pause .opt { color: #b8dcff; }
+.theme-wii .smb-pause .opt.sel, .theme-cometa .smb-pause .opt.sel { color: #ffffff; }
+
+/* ---------- Cursor-mano (el "tío" de Bit) ---------- */
+.wii-hand {
+  position: absolute;
+  width: 34px;
+  height: 40px;
+  pointer-events: none;
+  background: no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 20' shape-rendering='crispEdges'%3E%3Cpath fill='%23ffffff' stroke='%231E88E5' stroke-width='1' d='M5.5 1.5h2v8h1v-3h2v3h1v-2h2v3h1v-1h1.5v6l-2 3h-8l-3-4v-4h2v2h0.5z'/%3E%3C/svg%3E");
+  animation: wiiHand 6s ease-in-out infinite;
+  opacity: 0.7;
+}
+@keyframes wiiHand {
+  0% { transform: translate(0, 0) rotate(-8deg); }
+  25% { transform: translate(60px, -12px) rotate(4deg); }
+  50% { transform: translate(110px, 10px) rotate(-4deg); }
+  75% { transform: translate(40px, 18px) rotate(6deg); }
+  100% { transform: translate(0, 0) rotate(-8deg); }
+}
+
+/* ---------- Mapa: 9 "canales" en dos filas ---------- */
+.theme-wii .map {
+  height: 100%;
+  background: repeating-linear-gradient(180deg, #fafafa 0 12px, #f1f3f6 12px 24px);
+  position: relative;
+}
+.theme-wii .map::after {
+  content: '';
+  position: absolute;
+  right: 150px;
+  top: 30px;
+  width: 30px;
+  height: 36px;
+  pointer-events: none;
+  background: no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 20' shape-rendering='crispEdges'%3E%3Cpath fill='%23ffffff' stroke='%231E88E5' stroke-width='1' d='M5.5 1.5h2v8h1v-3h2v3h1v-2h2v3h1v-1h1.5v6l-2 3h-8l-3-4v-4h2v2h0.5z'/%3E%3C/svg%3E");
+  animation: wiiHand 7s ease-in-out infinite;
+}
+.theme-wii .map h2 { margin: 6px 0 8px; color: var(--c1); }
+.theme-wii .path { flex-wrap: wrap; row-gap: 4px; }
+.theme-wii .path > .link:nth-child(10) { display: none; } /* la fila de arriba termina en la 5ª parada */
+.theme-wii .node { width: 92px; }
+.theme-wii .link { width: 18px; margin-top: 52px; border-top: 3px solid var(--w-light); }
+.theme-wii .ncursor { height: 16px; font-size: 12px; color: var(--c1); }
+.theme-wii .nsprite {
+  height: 58px;
+  margin: 0 6px;
+  background: #ffffff;
+  border: 3px solid var(--w-light);
+  border-radius: 14px;
+  box-shadow: 0 2px 0 var(--w-gray);
+}
+.theme-wii .node.sel .nsprite { border-color: var(--c2); box-shadow: 0 0 0 3px rgba(91, 192, 235, 0.35), 0 2px 0 var(--w-gray); }
+.theme-wii .node.locked .nsprite { background: var(--w-light); }
+.theme-wii .nsprite canvas { width: 44px; height: 44px; }
+.theme-wii .node:last-child .nsprite { background: #0B1638; border-color: #1B2A55; }
+.theme-wii .node:last-child .nsprite canvas { width: 50px; height: 50px; }
+.theme-wii .nname { font-size: 7px; line-height: 1.4; margin-top: 4px; min-height: 20px; }
+.theme-wii .nstate { margin-top: 2px; }
+.theme-wii .map-info { margin-top: 6px; height: 100px; line-height: 1.9; font-size: 9px; }
+.theme-wii .map-foot { margin-top: 6px; }
+
+/* ---------- Combate (wii-battle.js) ---------- */
+.battle.wii { overflow: hidden; }
+.wii-backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(250, 250, 250, 0) 0, #fafafa 215px),
+    repeating-linear-gradient(90deg, #eef1f5 0 2px, transparent 2px 80px),
+    repeating-linear-gradient(180deg, #fafafa 0 12px, #f2f4f7 12px 24px);
+}
+.wii-backdrop .wii-hand { left: 40px; top: 120px; }
+.theme-cometa .wii-backdrop { display: none; }
+.esprite.has3d canvas.idle { display: none; }
+.poly-cv.wii-cv { image-rendering: auto; }
+.poly-cv.bwii { position: static; width: 300px; height: 180px; }
+
+/* Sensorín: la palabra salta de un lado al otro. */
+.tt-words.wii-side { text-align: left; transition: none; }
+.tt-words.wii-side.right { text-align: right; }
+.tt-words.wii-side .w:not(.cur) { display: none; }
+
+/* Nunchuquín: dos mitades unidas por un cable. */
+.wii-half { display: inline-flex; align-items: center; }
+.wii-half .h1, .wii-half .h2 { padding: 2px 8px; border: 2px solid var(--w-gray); border-radius: 10px; background: #ffffff; }
+.wii-half .cable { display: inline-block; width: 46px; height: 4px; margin: 0 4px; background: repeating-linear-gradient(90deg, var(--w-gray) 0 6px, transparent 6px 9px); border-radius: 2px; }
+.wii-rest { font-size: 10px; color: var(--c1); margin-left: 12px; }
+
+/* Zumbito: metrónomo. */
+.wii-metro {
+  position: absolute;
+  right: 16px;
+  top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 8px;
+  color: var(--c1);
+}
+.wii-metro i { width: 14px; height: 14px; border-radius: 50%; background: var(--w-light); border: 2px solid var(--w-gray); }
+.wii-metro.on i { background: var(--w-yellow); border-color: var(--w-orange); transform: scale(1.25); }
+.dodge.wii-beat.tick { animation: wiiTick 0.18s ease-out; }
+@keyframes wiiTick { from { background: rgba(255, 213, 79, 0.25); } to { background: transparent; } }
+
+/* Canal Clima: cintilla del clima. */
+.tt.wii-ticker .tt-words { background: #eaf6fd; border-radius: 10px; padding: 0 10px; white-space: nowrap; overflow: hidden; }
+.wii-ticker-head { position: absolute; right: 16px; top: 12px; font-size: 7px; color: #ffffff; background: var(--w-red); padding: 2px 6px; border-radius: 6px; animation: blink 1.2s steps(1) infinite; }
+
+/* Sensorín: las luces caen de un lado y del otro. */
+.bullet.from-left { border-color: var(--c2); }
+.bullet.from-right { border-color: var(--w-pink); }
+
+/* ---------- Capitán Cometa (wii-cometa.js) ---------- */
+.battle.cometa .cm-sky { position: absolute; inset: 0; width: 640px; height: 480px; }
+.cm-stars {
+  position: absolute;
+  top: 34px;
+  left: 16px;
+  font-size: 8px;
+  color: #9FD8F5;
+  letter-spacing: 1px;
+}
+.cm-stars b { color: var(--w-yellow); font-weight: normal; }
+.theme-cometa .bubble { background: #1B2A55; color: #ffffff; border-color: #5C6E99; border-radius: 12px; }
+.theme-cometa .bubble::before { border-right-color: #5C6E99; }
+.theme-cometa .bullet { background: #1B2A55; color: #ffffff; border-color: #9FD8F5; }
+.theme-cometa .bullet .t { color: var(--w-yellow); }
+.theme-cometa .bullet.target { background: #5BC0EB; color: #0B1638; }
+.dodge.gravity .cm-planet {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #a8f0c4, #43D17A 45%, #1E88E5 100%);
+  box-shadow: 0 0 0 4px rgba(255, 213, 79, 0.35), 0 0 18px rgba(91, 192, 235, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #ffffff;
+  animation: cmSpin 6s linear infinite;
+}
+.dodge.gravity .cm-planet.hurt { animation: blink 0.1s steps(1) 6; }
+@keyframes cmSpin { to { transform: rotate(360deg); } }
+.battle.grav-flip .tt-words { display: inline-block; transform: rotate(180deg); }
+.battle.grav-mirror .tt-words { display: inline-block; transform: scaleX(-1); }
+.battle.freefall .cm-sky { filter: hue-rotate(20deg); }
+.cm-block { font-size: 9px; color: var(--w-yellow); }
+
+/* ---------- Gimnasio Sensor (wii-gym.js) ---------- */
+.wiigym { position: absolute; inset: 0; background: #fafafa; }
+.wg-cv { position: absolute; left: 0; top: 0; width: 640px; height: 300px; image-rendering: auto; }
+.wg-hud {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 304px;
+  height: 22px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--c1);
+}
+.wg-panel { position: absolute; left: 12px; right: 12px; top: 330px; bottom: 10px; padding: 12px 16px; }
+.wg-panel .tb-text { font-size: 11px; line-height: 2; }
+.wg-label { font-size: 9px; color: var(--c1); margin-bottom: 14px; }
+.wg-word { font-size: 28px; letter-spacing: 4px; }
+.wg-word span { display: inline-block; color: var(--w-gray); }
+.wg-word .ok { color: var(--c1); }
+.wg-word .ok.m-good { color: var(--w-green); }
+.wg-word .ok.m-meh { color: var(--w-orange); }
+.wg-word .ok.m-bad { color: var(--w-red); }
+.wg-word .nx { color: var(--c0); border-bottom: 4px solid var(--c2); animation: pulse 0.9s ease-in-out infinite; }
+.wg-word .nx.bad { color: #ffffff; background: var(--w-red); border-radius: 4px; }
+.wg-word.dim { color: var(--w-gray); }
+.wg-menu { margin-top: 6px; }
+
+/* ---------- Torneo Sensor (wii-torneo.js) ---------- */
+.mon.wiitorneo .wt-stadium { position: absolute; left: 0; top: 0; width: 640px; height: 480px; }
+.mon.wiitorneo .info { background: rgba(255, 255, 255, 0.94); border-radius: 10px; border-color: var(--w-gray) !important; z-index: 2; }
+.mon.wiitorneo .info .bar i { background: var(--w-green); }
+.mon.wiitorneo .spr { z-index: 2; }
+.mon.wiitorneo .mbox { z-index: 3; }
+.wt-board {
+  position: absolute;
+  left: 50%;
+  top: 140px;
+  transform: translateX(-50%);
+  z-index: 2;
+  font-size: 8px;
+  color: #ffffff;
+  background: var(--c1);
+  padding: 4px 10px;
+  border-radius: 10px;
+}
+.wt-board b { font-weight: normal; color: var(--w-yellow); }
