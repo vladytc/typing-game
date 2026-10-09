@@ -287,14 +287,18 @@ function paletteColors() {
 }
 
 // Pinta un sprite dentro de un canvas ya existente, en la posición (ox, oy).
+// Un sprite puede traer su propia paleta fija (rows.pal = { R: '#e8393d', ... }) para tener
+// más de 4 colores (por ejemplo, los del Reino 16-Bit). Las letras que no estén en rows.pal
+// usan los 4 tonos del mundo, como siempre.
 function paintSprite(g, name, ox, oy, scale, colors, silhouette = false) {
   const rows = SPRITES[name];
   if (!rows) return;
+  const pal = rows.pal || {};
   rows.forEach((row, y) => {
     for (let x = 0; x < 16; x++) {
       const ch = row[x];
       if (!ch || ch === '.') continue;
-      g.fillStyle = silhouette ? colors.c : colors[ch];
+      g.fillStyle = silhouette ? colors.c : pal[ch] || colors[ch];
       g.fillRect(ox + x * scale, oy + y * scale, scale, scale);
     }
   });

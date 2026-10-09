@@ -1,7 +1,8 @@
 // Mapa del mundo: el camino de enemigos hasta el jefe.
 
 Scenes.map = {
-  music: 'title',
+  // Cada mundo puede traer su pista de mapa (world.music); si no, suena la del título.
+  get music() { return (this.world && this.world.music) || 'title'; },
   // Se entra desde la tubería de un mundo en el pueblo: { world: 'gb' }.
   enter({ world } = {}) {
     this.world = WORLDS.find((w) => w.id === world) || this.world || WORLDS[0];

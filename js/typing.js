@@ -2,11 +2,28 @@
 //   TypingTask: escribir palabras o frases contra el reloj (LUCHAR, ACTUAR, OBJETO).
 //   Dodge: el turno del enemigo; caen letras/palabras y hay que escribirlas antes de que toquen el suelo.
 
+// Modo estricto (opcional, desde el Mundo 3): los acentos y la ñ sí cuentan; las mayúsculas no.
+// Se puede apagar en toda la partida con Save.data.strictAccents = false.
+const strictOn = (wanted) => !!wanted && Save.data.strictAccents !== false;
+function strictMatch(expected, typed) {
+  return typed === expected || typed.toLowerCase() === expected.toLowerCase();
+}
+// ¿Le faltó solo el acento o la tilde? (para darle una pista en vez de solo marcar error)
+const missingAccent = (expected, typed) => typed !== expected && norm(typed) === norm(expected);
+const accentTip = (ch) => (norm(ch) === 'n' ? '¡Es Ñ, con tilde!' : `¡Lleva acento! ${ch}`);
+// Pista para el error en modo estricto ('' si el error no tiene que ver con acentos ni signos).
+function strictTip(expected, typed) {
+  if (missingAccent(expected, typed)) return accentTip(expected);
+  if (expected === '¿' || expected === '¡') return `Empieza con ${expected} (en Mac: Option+1 = ¡, Option+Shift+? = ¿)`;
+  return '';
+}
+
 class TypingTask {
   // texts: lista de palabras/frases. onUnit(unit) se llama al terminar cada una;
   // si devuelve false, la tarea se detiene (por ejemplo, porque el enemigo ya cayó).
-  constructor(box, { label, texts, timeLimit, onUnit, onDone }) {
-    Object.assign(this, { box, label, texts, timeLimit: timeLimit * diff().time, onUnit, onDone });
+  // strict: true exige acentos y ñ (ver strictOn).
+  constructor(box, { label, texts, timeLimit, onUnit, onDone, strict = false }) {
+    Object.assign(this, { box, label, texts, timeLimit: timeLimit * diff().time, onUnit, onDone, strict: strictOn(strict) });
     this.totalChars = texts.join('').length;
   }
 
@@ -14,7 +31,7 @@ class TypingTask {
     Object.assign(this, { i: 0, pos: 0, chars: 0, errors: 0, unitErrors: 0, active: false, done: false });
     this.box.innerHTML = `
       <div class="tt">
-        <div class="tt-label">${esc(this.label)}</div>
+        <div class="tt-label">${esc(this.label)}${this.strict ? ' <span class="tt-strict">ACENTOS Y Ñ CUENTAN</span>' : ''}</div>
         <div class="tt-words"></div>
         <div class="tt-timer"><i></i></div>
         <div class="tt-ready">¿LISTO?</div>
@@ -44,14 +61,16 @@ class TypingTask {
     if (!this.active || e.repeat || e.key.length !== 1) return;
     const text = this.texts[this.i];
     const expected = text[this.pos];
-    if (!keyMatches(expected, e.key)) {
+    if (!(this.strict ? strictMatch : keyMatches)(expected, e.key)) {
       Stats.record(expected, false);
       this.errors++;
       this.unitErrors++;
       Sfx.error();
+      this.tip = this.strict ? strictTip(expected, e.key) : '';
       this.render(true);
       return;
     }
+    this.tip = '';
     Stats.record(expected, true);
     Sfx.key();
     this.pos++;
@@ -88,7 +107,7 @@ class TypingTask {
       if (j < this.i) return `<span class="w done">${esc(t)}</span>`;
       if (j > this.i) return `<span class="w">${esc(t)}</span>`;
       return `<span class="w cur">${chars(t)}</span>`;
-    }).join(' ');
+    }).join(' ') + (this.tip ? `<div class="tt-tip">${esc(this.tip)}</div>` : '');
   }
 
   finish(completed, aborted = false) {
@@ -197,10 +216,11 @@ class Dodge {
   key(e) {
     if (!this.active || e.repeat || e.key.length !== 1 || e.key === ' ') return;
     const k = e.key;
+    const match = strictOn(this.cfg.strict) ? strictMatch : keyMatches;
     let b = this.target;
     if (b) {
       const expected = b.text[b.pos];
-      if (!keyMatches(expected, k)) {
+      if (!match(expected, k)) {
         Stats.record(expected, false);
         this.errors++;
         Sfx.error();
@@ -209,7 +229,7 @@ class Dodge {
       Stats.record(expected, true);
     } else {
       // Sin objetivo: apunta a lo que va más abajo y empieza con esa letra.
-      const options = this.bullets.filter((x) => keyMatches(x.text[0], k));
+      const options = this.bullets.filter((x) => match(x.text[0], k));
       if (!options.length) { this.errors++; Sfx.error(); return; }
       b = options.reduce((a, x) => (x.y > a.y ? x : a));
       Stats.record(b.text[0], true);
