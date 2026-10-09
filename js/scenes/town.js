@@ -5,6 +5,11 @@
 //   Game.go('town')                                       se queda en el mapa y lugar de siempre
 //   Game.go('town', { map: 'gb-valle', spawn: [x, y, 'up'] })   va a otro mapa
 //   Game.go('town', { from: 'pipe:gb' })                  al pueblo, junto a la tubería de un mundo
+//
+// Dibujo: el 2D (canvas + personajes en el DOM) siempre se arma. Si el mapa trae `render: '3d'`
+// o el pueblo está en una era 3D (HUB_ERAS.n64), el renderer 3D (js/scenes/town3d.js) se pone
+// encima en `this.r3` y recibe los mismos avisos (place, face, sink, repaint). Sin three.js,
+// se queda el 2D. La lógica de aquí no cambia con el renderer.
 
 const TILE = 32;
 const STEP_MS = 150;
@@ -99,6 +104,8 @@ Scenes.town = {
     this.paintMap();
     this.makeEntities();
     this.camera(true);
+    this.r3 = null;
+    if (typeof Town3D !== 'undefined' && Town3D.wants(this)) Town3D.open(this);
     this.idleIv = setInterval(() => this.idleCheck(), 1000);
     window.onblur = () => { this.held = null; };
 
@@ -137,23 +144,37 @@ Scenes.town = {
     }), 600);
   },
 
-  // Cinemática: la pantalla se distorsiona, el pueblo cambia a la nueva era y Bit lo comenta.
-  async timeWarp(ctx, era) {
-    const town = $('.town');
-    Sfx.warp();
-    town.classList.add('warp-out');
-    await townWait(900);
+  // El pueblo pasa a otra era: paleta, tema de la interfaz y dibujo nuevo.
+  setEra(era) {
     this.era = era;
     Save.data.flags.hubEra = era;
     Save.write();
     document.body.className = HUB_ERAS[era].theme;
     this.css = paletteColors();
-    town.className = `town era-${era} warp-in`;
+    $('.town').className = `town era-${era}${this.r3 ? ' r3d' : ''}`;
     this.paintMap();
     this.repaintEntities();
+  },
+
+  // Cinemática: la pantalla se distorsiona, el pueblo cambia a la nueva era y Bit lo comenta.
+  // Al saltar a una era 3D (N64), el pueblo plano se levanta en polígonos (js/scenes/town3d.js);
+  // si three.js no carga, viaja en el tiempo en 2D como siempre.
+  async timeWarp(ctx, era) {
+    const town = $('.town');
+    Sfx.warp();
+    const rose = typeof Town3D !== 'undefined' && Town3D.eraIs3d(era) && !this.r3 && await Town3D.riseTo(this, era);
+    if (Game.scene !== this) return;
+    if (!rose) {
+      town.classList.add('warp-out');
+      await townWait(900);
+      this.setEra(era);
+      town.classList.add('warp-in');
+    }
     Sfx.secret();
-    await townWait(900);
-    town.classList.remove('warp-in');
+    if (!rose) {
+      await townWait(900);
+      town.classList.remove('warp-in');
+    }
     const lines = [...(ERA_CHANGE_LINES[era] || ['* ¡El pueblo viajó en el tiempo!'])];
     await ctx.say(lines, 'BIT');
     if (this.npcs.some((n) => n.era && n.era !== era)) await ctx.say([NATIVE_LOOK_LINE]);
@@ -165,6 +186,8 @@ Scenes.town = {
     clearTimeout(this.later);
     window.onblur = null;
     if (this.ui && this.ui.stop) this.ui.stop();
+    this.tok3 = null;
+    if (this.r3) { this.r3.dispose(); this.r3 = null; }
     Save.write();
   },
 
@@ -238,6 +261,7 @@ Scenes.town = {
 
   repaint(e) {
     e.el.replaceChild(this.entityCanvas(e), e.el.querySelector('canvas'));
+    if (this.r3) this.r3.repaint(e);
   },
 
   repaintEntities() {
@@ -302,6 +326,7 @@ Scenes.town = {
     e.el.style.transition = instant ? 'none' : `transform ${STEP_MS}ms linear`;
     e.el.style.transform = `translate(${e.x * TILE + off}px, ${e.y * TILE + off * 2}px)`;
     e.el.style.zIndex = 10 + e.y;
+    if (this.r3) this.r3.place(e, instant);
   },
 
   // La cámara sigue al jugador sin salirse del mapa (si el mapa es más chico que la pantalla, lo centra).
@@ -319,6 +344,7 @@ Scenes.town = {
 
   facePlayer() {
     this.player.el.classList.toggle('flip', this.p.face === 'left');
+    if (this.r3) this.r3.face();
   },
 
   entityAt(x, y) {
@@ -377,6 +403,7 @@ Scenes.town = {
       Sfx.warp();
       this.mode = 'busy';
       this.player.el.classList.add('sink');
+      if (this.r3) this.r3.sink(this.player);
       // Mundos con zonas explorables entran caminando; los demás, a su mapa de paradas.
       this.later = setTimeout(() => (w.entry
         ? Game.go('town', { map: w.entry.map, spawn: w.entry.spawn })
@@ -417,7 +444,7 @@ Scenes.town = {
     this.mode = 'busy';
     this.held = null;
     const pipe = t && t.s === 'pipe';
-    if (pipe) { Sfx.warp(); this.player.el.classList.add('sink'); } else { Sfx.confirm(); $('.town').classList.add('fade'); }
+    if (pipe) { Sfx.warp(); this.player.el.classList.add('sink'); if (this.r3) this.r3.sink(this.player); } else { Sfx.confirm(); $('.town').classList.add('fade'); }
     this.later = setTimeout(() => (ex.pueblo
       ? Game.go('town', { map: 'pueblo', from: `pipe:${ex.pueblo}` })
       : Game.go('town', { map: ex.map, spawn: ex.spawn })), pipe ? 450 : 300);
@@ -502,9 +529,16 @@ Scenes.town = {
     const b = document.createElement('div');
     b.className = 'tbubble';
     b.textContent = '¡Oye! ¡Escucha!';
-    b.style.left = `${this.bit.x * TILE + 16}px`;
-    b.style.top = `${this.bit.y * TILE - 30}px`;
-    $('.tworld').appendChild(b);
+    if (this.r3) {
+      const [bx, by] = this.r3.screenPos(this.bit);
+      b.style.left = `${bx}px`;
+      b.style.top = `${by - 30}px`;
+      $('.town').appendChild(b);
+    } else {
+      b.style.left = `${this.bit.x * TILE + 16}px`;
+      b.style.top = `${this.bit.y * TILE - 30}px`;
+      $('.tworld').appendChild(b);
+    }
     Sfx.text();
     setTimeout(() => b.remove(), 3000);
   },
