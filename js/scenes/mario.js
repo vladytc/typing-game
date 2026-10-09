@@ -4,10 +4,7 @@
 //   bloque ? -> golpéalo (moneda o súper hongo)    bandera -> fin del nivel
 // Las palabras con mayúscula (Mario, Goomba...) se escriben con SHIFT.
 
-const NES = {
-  R: '#d82800', B: '#887000', S: '#fca044', K: '#000000', W: '#fcfcfc', O: '#c84c0c',
-  Y: '#f8b800', G: '#00a800', L: '#b8f818', T: '#fcbcb0', D: '#7c7c7c', U: '#5c94fc',
-};
+// La paleta NES y paintNes() viven en js/nes-kit.js (las comparte todo el Mundo 2).
 const MT = 32; // tamaño de casilla en pantalla (16 px x 2)
 
 const MARIO_SPR = {
@@ -201,23 +198,8 @@ function buildBeats() {
   return out;
 }
 
-// Las mayúsculas sí importan aquí (para practicar SHIFT); los acentos no.
-function nesMatch(expected, typed) {
-  if (expected !== expected.toLowerCase()) return typed === expected || norm(typed) === norm(expected) && typed !== typed.toLowerCase();
-  return keyMatches(expected, typed);
-}
-
-function paintNes(g, rows, x, y, scale = 2, flip = false) {
-  rows.forEach((row, r) => {
-    for (let c = 0; c < row.length; c++) {
-      const ch = row[c];
-      if (ch === '.' || !NES[ch]) continue;
-      g.fillStyle = NES[ch];
-      const cx = flip ? row.length - 1 - c : c;
-      g.fillRect(Math.round(x + cx * scale), Math.round(y + r * scale), scale, scale);
-    }
-  });
-}
+// Las mayúsculas sí importan aquí (para practicar SHIFT); los acentos no. Ver capsMatch() en js/typing.js.
+const nesMatch = (expected, typed) => capsMatch(expected, typed);
 
 Scenes.mario = {
   enter({ back = 'map' }) {

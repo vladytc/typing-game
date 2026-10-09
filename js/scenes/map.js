@@ -56,6 +56,13 @@ Scenes.map = {
       s.onclick = () => this.onKey({ key: s.dataset.k });
     });
     this.renderInfo();
+    // Si el camino no cabe (mundos con muchos niveles), se desliza para mostrar el nodo elegido.
+    const path = $('.path');
+    if (this.world.nodes.length * 116 - 20 > path.clientWidth) { // nodo de 96 px + enlace de 20 px
+      path.classList.add('long');
+      const sel = $('.node.sel');
+      path.scrollLeft = sel.offsetLeft - path.offsetLeft - path.clientWidth / 2 + sel.offsetWidth / 2;
+    }
   },
 
   renderInfo() {

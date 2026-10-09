@@ -278,6 +278,9 @@ const SPRITES = {
 };
 
 const SPRITE_TONES = { a: '--c3', b: '--c2', c: '--c1', d: '--c0' };
+// Colores propios de un sprite (opcional): { a, b, c, d } en hex. Ganan sobre la paleta del mundo.
+// El Mundo 2 los usa para que cada sprite tenga sus 3 colores, como en la NES.
+const SPRITE_PALETTES = {};
 
 function paletteColors() {
   const css = getComputedStyle(document.body);
@@ -308,7 +311,7 @@ function drawSprite(canvas, name, { scale = 4, silhouette = false } = {}) {
   canvas.height = 16 * scale;
   const g = canvas.getContext('2d');
   g.clearRect(0, 0, canvas.width, canvas.height);
-  paintSprite(g, name, 0, 0, scale, paletteColors(), silhouette);
+  paintSprite(g, name, 0, 0, scale, { ...paletteColors(), ...SPRITE_PALETTES[name] }, silhouette);
 }
 
 // ---------- Pueblo: personajes ----------
