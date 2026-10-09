@@ -1,6 +1,7 @@
 // Mundo 1 en el Pueblo Vitrina: los amigos nuevos del Valle Game Boy y la misión "La moneda perdida".
 // Se carga después de js/town-data.js y solo agrega personajes a TOWN.npcs.
 // Los amigos platican con friendTalk (js/curiosidades.js): datos y curiosidades de la Game Boy.
+// Su casa en el Barrio Game Boy la decide BARRIOS (js/town-data.js); x, y de aquí son de respaldo.
 
 const MONEDIN_FACTS = ['* Dato: Super Mario Land salió junto con la Game Boy en Japón, en 1989.\n* ¡Y estaba lleno de monedas! Primos lejanos, creo.'];
 
