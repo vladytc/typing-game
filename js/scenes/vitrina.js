@@ -41,7 +41,7 @@ Scenes.vitrina = {
       rows.push({ title: i ? '' : 'TESOROS', slots: treasures.slice(i, i + PER_ROW) });
     }
     if (w) {
-      const friends = Object.keys(w.enemies || {}).filter((eid) => !ENEMIES[eid].mode)
+      const friends = Object.keys(w.enemies || {}).filter((eid) => !ENEMIES[eid].mode || ENEMIES[eid].friend)
         .map((eid) => ({
           sprite: ENEMIES[eid].sprite, got: !!d.spared[eid], name: ENEMIES[eid].name,
           desc: 'Lo perdonaste en vez de pelear. ¡Qué buena onda!', colors: look(ENEMIES[eid].sprite),

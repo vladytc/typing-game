@@ -140,7 +140,9 @@ Scenes.town = {
       layer.appendChild(e.el);
       return e;
     };
-    this.npcs = TOWN.npcs.filter((n) => !n.when || n.when()).map((n) => mk({ ...n }));
+    // Los amigos rescatados (id 'f-<enemigo>') conservan la estética de su mundo.
+    this.npcs = TOWN.npcs.filter((n) => !n.when || n.when())
+      .map((n) => mk({ ...n, era: n.era || (n.id.startsWith('f-') && ENEMIES[n.id.slice(2)] ? eraOfEnemy(n.id.slice(2)) : undefined) }));
     // Amigos de otros mundos que llegan solos: enemigos perdonados con `home: [x, y]`.
     Object.entries(ENEMIES).forEach(([id, def]) => {
       if (!def.home || !Save.data.spared[id] || this.npcs.some((n) => n.id === `f-${id}`)) return;
