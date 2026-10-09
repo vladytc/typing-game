@@ -109,6 +109,40 @@ const ARROWS = {
 
 const SPARKLE = ['.x.', 'xxx', '.x.'];
 
+// Paletas de la Super Nintendo y la Nintendo 64 para sus curiosidades.
+const SNES16 = {
+  K: '#1a1a2e', D: '#4a4a5e', G: '#8c8c9c', L: '#c8c8d4', W: '#ffffff', R: '#e8393d', Y: '#ffd93d',
+  N: '#3fbf3f', B: '#2e5c9a', P: '#8e44ad', V: '#b48ad8', S: '#5fcde4', O: '#ff8c1a', E: '#1e7a2e',
+};
+const N64P = {
+  K: '#202030', D: '#4a4a5e', G: '#8c8c9c', L: '#c9d6e3', W: '#ffffff', R: '#d64545', Y: '#f7e463',
+  N: '#58b85c', B: '#3c8dd6', P: '#7e57c2', S: '#9fd3ff', O: '#f0a040',
+};
+
+// Letritas de 3 x 5 para escribir números y siglas en los dibujos (s = tamaño).
+const PIX_FONT = {
+  0: ['xxx', 'x.x', 'x.x', 'x.x', 'xxx'], 1: ['.x.', 'xx.', '.x.', '.x.', 'xxx'], 2: ['xxx', '..x', 'xxx', 'x..', 'xxx'],
+  3: ['xxx', '..x', 'xxx', '..x', 'xxx'], 6: ['xxx', 'x..', 'xxx', 'x.x', 'xxx'], 9: ['xxx', 'x.x', 'xxx', '..x', 'xxx'],
+  L: ['x..', 'x..', 'x..', 'x..', 'xxx'], R: ['xx.', 'x.x', 'xx.', 'x.x', 'x.x'], F: ['xxx', 'x..', 'xx.', 'x..', 'x..'],
+  X: ['x.x', 'x.x', '.x.', 'x.x', 'x.x'],
+};
+function pixText(p, x, y, text, c, s = 1) {
+  [...String(text)].forEach((ch, k) => (PIX_FONT[ch] || []).forEach((row, j) => [...row].forEach((v, i) => {
+    if (v === 'x') p.r(x + k * 4 * s + i * s, y + j * s, s, s, c);
+  })));
+}
+
+// Control de N64 (48 x 30), con sus tres agarraderas.
+function drawN64Pad(p, x, y, C, body = C.G) {
+  p.shape(x, y, 48, 30, body, C.K, (i, j) => (j < 13 && i >= 1 && i <= 46)
+    || (j >= 13 && ((i >= 1 && i <= 12 && j <= 27) || (i >= 18 && i <= 29 && j <= 29) || (i >= 35 && i <= 46 && j <= 27))));
+  p.r(x + 5, y + 5, 3, 9, C.K).r(x + 2, y + 8, 9, 3, C.K);              // cruceta
+  p.r(x + 22, y + 10, 4, 4, C.D).r(x + 23, y + 11, 2, 2, C.L);          // palanca
+  p.r(x + 23, y + 5, 2, 2, C.R);                                        // START
+  p.button(x + 36, y + 8, C.B).button(x + 32, y + 4, C.N);               // A y B
+  p.r(x + 41, y + 2, 2, 2, C.Y).r(x + 44, y + 4, 2, 2, C.Y).r(x + 38, y + 4, 2, 2, C.Y).r(x + 41, y + 6, 2, 2, C.Y); // botones C
+}
+
 // ---------- Las curiosidades ----------
 
 const CURIOSIDADES = {
@@ -337,6 +371,224 @@ const CURIOSIDADES = {
       p.r(16, 25, 3, 8, N.Z).r(14, 27, 7, 3, N.Z);                // cruceta
       p.r(25, 24, 13, 3, N.Z).r(26, 30, 4, 1, N.Z).r(32, 30, 4, 1, N.Z); // SELECT y START
       p.button(41, 27, N.F).button(46, 27, N.F);
+    },
+  },
+  // ===== Super Nintendo (16 bits) =====
+  snes_lr: {
+    console: 'snes',
+    title: 'Botones L y R',
+    caption: 'La Super Nintendo fue la primera consola de Nintendo con botones L y R en los hombros del control.',
+    draw(g, w, h) {
+      const C = SNES16;
+      const p = pixelArt(g, w, h, 64, 40, C.S);
+      p.rows(15, 2, ARROWS.down, { x: C.W }).rows(45, 2, ARROWS.down, { x: C.W });
+      p.round(9, 9, 16, 8, C.Y, C.K).round(39, 9, 16, 8, C.Y, C.K);     // los hombros, brillando
+      pixText(p, 15, 10, 'L', C.K);
+      pixText(p, 45, 10, 'R', C.K);
+      p.shape(4, 15, 56, 22, C.L, C.K, (i, j) => {
+        const x = i + 4;
+        const y = j + 15;
+        return (x - 15) ** 2 + (y - 26) ** 2 <= 110 || (x - 49) ** 2 + (y - 26) ** 2 <= 110 || (x >= 15 && x <= 49 && y >= 17 && y <= 35);
+      });
+      p.r(13, 21, 3, 11, C.D).r(9, 25, 11, 3, C.D);                     // cruceta
+      p.r(26, 27, 4, 2, C.D).r(33, 27, 4, 2, C.D);                      // SELECT y START
+      p.button(46, 19, C.B).button(41, 24, C.N).button(51, 24, C.R).button(46, 29, C.Y); // X Y A B
+      p.rows(3, 5, SPARKLE, { x: C.W }).rows(58, 5, SPARKLE, { x: C.W });
+    },
+  },
+  snes_modo7: {
+    console: 'snes',
+    title: 'El Modo 7',
+    caption: 'El Modo 7 giraba y agrandaba un fondo para fingir 3D. Así se hicieron las pistas de F-Zero y Super Mario Kart.',
+    draw(g, w, h) {
+      const C = SNES16;
+      const p = pixelArt(g, w, h, 64, 40, C.S);
+      for (let i = 0; i < 64; i++) {
+        const hh = 2 + Math.round(3 * Math.abs(Math.sin(i / 6)));
+        p.r(i, 14 - hh, 1, hh, C.P);                                    // montañas a lo lejos
+      }
+      // El piso en perspectiva: cada fila de más abajo se ve más grande (eso hacía el Modo 7).
+      for (let y = 14; y < 40; y++) {
+        const z = 40 / (y - 11);
+        const half = (y - 11) * 1.1;
+        for (let x = 0; x < 64; x++) {
+          const chk = (Math.floor(((x - 32) * z) / 8) + Math.floor(z * 1.2)) & 1;
+          const dx = Math.abs(x - 32);
+          let c = chk ? C.N : C.E;
+          if (dx < half) c = dx > half - 2 ? (chk ? C.R : C.W) : (chk ? C.G : C.L);
+          p.r(x, y, 1, 1, c);
+        }
+      }
+      p.rows(26, 33, ['....RRRR....', '...RSSSSR...', '..RRRRRRRR..', 'KKRRRRRRRRKK', 'KK.KKKKKK.KK'], { R: C.R, S: C.S, K: C.K });
+      p.rows(4, 3, SPARKLE, { x: C.W });
+    },
+  },
+  snes_superfx: {
+    console: 'snes',
+    title: 'Un chip en el cartucho',
+    caption: 'Star Fox (1993) traía el chip Super FX dentro del cartucho: una ayuda extra para dibujar polígonos.',
+    draw(g, w, h) {
+      const C = SNES16;
+      const p = pixelArt(g, w, h, 64, 40, C.K);
+      p.round(4, 4, 26, 32, C.G, C.L);                                  // el cartucho, abierto
+      p.r(6, 7, 22, 22, C.E);                                           // la tarjeta de adentro
+      p.r(8, 10, 6, 5, C.K).r(8, 17, 6, 5, C.K);                        // otros chips
+      p.r(16, 11, 10, 10, C.K);                                         // el Super FX
+      for (let k = 0; k < 4; k++) {
+        p.r(17 + 2 * k, 10, 1, 1, C.L).r(17 + 2 * k, 21, 1, 1, C.L).r(15, 12 + 2 * k, 1, 1, C.L).r(26, 12 + 2 * k, 1, 1, C.L);
+      }
+      pixText(p, 17, 14, 'FX', C.Y);
+      for (let k = 0; k < 10; k++) p.r(7 + 2 * k, 31, 1, 4, C.Y);      // contactos dorados
+      p.rows(32, 17, ARROWS.right, { x: C.W });
+      // La nave hecha de triángulos.
+      const nose = (i, j) => Math.abs(i - 11) <= j / 2 && !(j > 15 && Math.abs(i - 11) < (j - 15));
+      p.shape(40, 8, 23, 24, C.L, C.K, (i, j) => nose(i, j) && i >= 11);
+      p.shape(40, 8, 23, 24, C.G, C.K, (i, j) => nose(i, j) && i <= 11);
+      p.r(49, 18, 5, 2, C.B).r(39, 30, 3, 1, C.O).r(60, 30, 3, 1, C.O);
+      p.rows(56, 6, SPARKLE, { x: C.Y });
+    },
+  },
+  snes_yoshi: {
+    console: 'snes',
+    title: 'Llega Yoshi',
+    caption: 'Yoshi apareció por primera vez en Super Mario World, el juego que venía con la Super Nintendo.',
+    draw(g, w, h) {
+      const C = SNES16;
+      const p = pixelArt(g, w, h, 64, 40, C.S);
+      p.r(0, 34, 64, 6, C.E).r(0, 34, 64, 1, C.N);
+      p.rows(8, 12, [
+        '......gggggg........',
+        '....gggggggggg......',
+        '...gggggggggwwww....',
+        '..gggggggggwwkww....',
+        '..ggggggggggwwww....',
+        '.ggggggggggggggggg..',
+        '.gggggggggggggggggg.',
+        '..ggwwwwwwwwwwggg...',
+        '...gwwwwwwwwwwgg....',
+        '....gggggggggg......',
+        '.....rrrgggg........',
+        '....rrrrrgggg.......',
+        '....wwwwwgggg.......',
+        '.....ggggggggg......',
+        '.....gg.....gg......',
+        '....oooo...oooo.....',
+      ], { g: C.N, k: C.K, w: C.W, r: C.R, o: C.O });
+      p.shape(38, 16, 14, 18, C.W, C.K, (i, j) => ((i - 6.5) / 7) ** 2 + ((j - 10) / (j < 10 ? 10 : 8)) ** 2 <= 1);
+      p.r(41, 20, 3, 3, C.N).r(46, 25, 3, 3, C.N).r(42, 28, 2, 2, C.N).r(47, 19, 2, 2, C.N);   // manchitas del huevo
+      p.rows(53, 10, SPARKLE, { x: C.W }).rows(32, 6, SPARKLE, { x: C.Y });
+    },
+  },
+  snes_morada: {
+    console: 'snes',
+    title: 'Redondita o cuadrada',
+    caption: 'En Japón y Europa era redondita, con botones de colores. En Estados Unidos era más cuadrada, gris con botones morados.',
+    draw(g, w, h) {
+      const C = SNES16;
+      const p = pixelArt(g, w, h, 64, 40, C.B);
+      // Japón y Europa: curvita.
+      p.shape(3, 10, 27, 17, C.L, C.K, (i, j) => ((i - 13) / 13.6) ** 4 + ((j - 8) / 8.6) ** 4 <= 1);
+      p.r(9, 12, 15, 2, C.D);                                           // ranura del cartucho
+      p.r(8, 17, 2, 2, C.R).r(11, 17, 2, 2, C.Y).r(14, 17, 2, 2, C.N).r(17, 17, 2, 2, C.B);
+      p.r(7, 21, 4, 2, C.G).r(22, 21, 4, 2, C.G);
+      // Estados Unidos: cuadrada y morada.
+      p.shape(34, 9, 27, 19, C.L, C.K);
+      p.r(36, 12, 23, 1, C.G).r(41, 14, 13, 2, C.D);
+      p.r(37, 20, 5, 3, C.P).r(53, 20, 5, 3, C.P).r(45, 21, 5, 2, C.V);  // POWER, RESET y expulsar
+      // Banderitas.
+      p.r(10, 30, 13, 8, C.W).r(14, 32, 5, 4, C.R);
+      p.r(41, 30, 13, 8, C.W);
+      for (let k = 0; k < 4; k++) p.r(41, 30 + 2 * k, 13, 1, C.R);
+      p.r(41, 30, 6, 4, C.B);
+    },
+  },
+
+  // ===== Nintendo 64 =====
+  n64_palanca: {
+    console: 'n64',
+    title: 'La palanca analogica',
+    caption: 'El control de la N64 trajo palanca analógica: si la movías poquito caminabas despacio, y si la movías mucho, ¡corrías!',
+    draw(g, w, h) {
+      const C = N64P;
+      const p = pixelArt(g, w, h, 64, 40, C.S);
+      drawN64Pad(p, 8, 6, C);
+      p.r(29, 15, 6, 6, C.Y).r(30, 16, 4, 4, C.L);                      // la palanca, iluminada
+      p.rows(30, 11, ['.x.', 'xxx'], { x: C.R }).rows(30, 22, ['xxx', '.x.'], { x: C.R });
+      p.rows(26, 17, ['.x', 'xx', '.x'], { x: C.R }).rows(36, 17, ['x.', 'xx', 'x.'], { x: C.R });
+      p.rows(2, 2, SPARKLE, { x: C.W }).rows(58, 34, SPARKLE, { x: C.W });
+    },
+  },
+  n64_mario64: {
+    console: 'n64',
+    title: 'El mismo dia',
+    caption: 'En Japón, Super Mario 64 salió el mismo día que la Nintendo 64: el 23 de junio de 1996.',
+    draw(g, w, h) {
+      const C = N64P;
+      const p = pixelArt(g, w, h, 64, 40, C.S);
+      p.round(13, 5, 12, 11, C.G, C.K).r(15, 7, 8, 6, C.R).r(18, 8, 2, 4, C.Y).r(17, 9, 4, 2, C.Y); // el cartucho
+      p.shape(3, 15, 32, 17, C.D, C.K, (i, j) => !(j < 2 && (i < 3 || i > 28)));
+      p.r(11, 15, 16, 2, C.K);                                          // ranura
+      p.r(7, 19, 3, 2, C.G).r(28, 19, 3, 2, C.G);                       // POWER y RESET
+      for (let k = 0; k < 4; k++) p.r(7 + 7 * k, 28, 3, 2, C.K);        // los 4 puertos
+      p.shape(38, 6, 22, 29, C.W, C.K);                                 // el calendario
+      p.r(39, 7, 20, 5, C.R).r(42, 4, 2, 4, C.K).r(54, 4, 2, 4, C.K);
+      pixText(p, 42, 14, '23', C.K, 2);
+      pixText(p, 42, 27, '1996', C.B);
+      p.rows(29, 4, SPARKLE, { x: C.Y });
+    },
+  },
+  n64_rumble: {
+    console: 'n64',
+    title: 'El Rumble Pak',
+    caption: 'El Rumble Pak se conectaba al control y lo hacía vibrar. Debutó con Star Fox 64 (1997), que lo traía en la caja.',
+    draw(g, w, h) {
+      const C = N64P;
+      const p = pixelArt(g, w, h, 64, 40, C.B);
+      drawN64Pad(p, 8, 1, C);
+      p.round(27, 27, 10, 12, C.K, C.D).r(29, 30, 6, 3, C.R);          // el Rumble Pak, puesto abajo
+      const zig = ['x.', '.x', 'x.', '.x', 'x.', '.x'];
+      p.rows(3, 8, zig, { x: C.Y }).rows(59, 8, zig, { x: C.Y }).rows(22, 31, zig, { x: C.Y }).rows(40, 31, zig, { x: C.Y });
+    },
+  },
+  n64_cuatro: {
+    console: 'n64',
+    title: 'Cuatro puertos',
+    caption: 'La Nintendo 64 traía 4 puertos para controles: ¡cuatro amigos jugando, sin comprar nada extra!',
+    draw(g, w, h) {
+      const C = N64P;
+      const p = pixelArt(g, w, h, 64, 40, C.S);
+      const pad = (i, j) => j < 4 || i < 3 || (i >= 4 && i <= 6) || i >= 8;
+      [C.G, C.R, C.B, C.N].forEach((c, k) => {
+        const px = 2 + k * 16;
+        const port = 19 + 8 * k;
+        p.r(px + 5, 11, 1, 9, c).r(Math.min(px + 5, port + 1), 20, Math.abs(px + 5 - port - 1) + 1, 1, c).r(port + 1, 20, 1, 13, c); // el cable
+        p.shape(px, 3, 11, 8, c, C.K, pad);
+        p.r(px + 5, 4, 1, 1, C.K);
+      });
+      p.shape(14, 24, 36, 13, C.D, C.K, (i, j) => !(j < 2 && (i < 3 || i > 32)));
+      for (let k = 0; k < 4; k++) p.r(19 + 8 * k, 33, 4, 2, C.K);
+    },
+  },
+  n64_expansion: {
+    console: 'n64',
+    title: 'El Expansion Pak',
+    caption: 'The Legend of Zelda: Majora\'s Mask (2000) necesitaba el Expansion Pak, que le daba más memoria a la consola.',
+    draw(g, w, h) {
+      const C = N64P;
+      const p = pixelArt(g, w, h, 64, 40, C.K);
+      p.shape(3, 16, 34, 20, C.D, C.G);                                 // la consola vista desde arriba
+      p.r(7, 18, 10, 4, C.K).r(13, 26, 16, 3, C.K);                     // tapita de la memoria y ranura
+      p.r(9, 6, 6, 6, C.G).round(8, 1, 8, 6, C.R, C.W);                 // el Expansion Pak (tapa roja)
+      p.rows(10, 12, ['xxxx', '.xx.'], { x: C.Y });
+      // Una máscara con forma de corazón.
+      p.shape(41, 9, 20, 19, C.P, C.Y, (i, j) => {
+        const x = (i - 9.5) / 8.5;
+        const y = (9 - j) / 8;
+        return (x * x + y * y - 1) ** 3 - x * x * y ** 3 <= 0;
+      });
+      p.r(45, 15, 4, 3, C.Y).r(53, 15, 4, 3, C.Y).r(46, 16, 2, 1, C.N).r(54, 16, 2, 1, C.N);
+      [[40, 10], [62, 10], [42, 6], [60, 6], [51, 29]].forEach(([x, y]) => p.r(x, y, 1, 2, C.O));
+      p.rows(28, 4, SPARKLE, { x: C.W });
     },
   },
 };

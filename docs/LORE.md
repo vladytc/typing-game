@@ -1534,6 +1534,12 @@ capas, récord de capa correcta).
 El mapa actual (20×15) se conserva; se agregan "salidas" nuevas al este (Roncatón) y al
 norte (cueva) y los edificios cerrados se abren.
 
+**Barrios por era** (implementado, ver `docs/MUNDOS.md` §3e): con 3 / 8 / 13 / 18 amigos (y su
+mundo abierto) el pueblo crece hacia la derecha y hacia abajo con el Barrio Game Boy, el
+Barrio 8 Bits (tienda de Doña Tecla), el Barrio 16 Bits (Sala de Arcade de la Maestra Modo) y
+el Barrio Polígono (quiosco de Ocarín). Cada barrio conserva la paleta de su era: el pueblo se
+ve como capas del tiempo.
+
 | Después de | Cambio en el pueblo |
 |-----------|---------------------|
 | Inicio | Lo que existe hoy. Se agrega el **Laboratorio de la Profesora Letra** (casa cerrada `d` en la esquina superior derecha: ahora abre). Dani Turbo pasea. |

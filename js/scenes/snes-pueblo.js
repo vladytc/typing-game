@@ -1,29 +1,19 @@
 // Lo que el Reino 16-Bit agrega al Pueblo Vitrina (sin tocar js/town-data.js):
 //   MAESTRA MODO: sala de arcade (Pista Cero, Escuadrón Zorrino) y el interruptor de acentos.
-//   Los amigos perdonados del Reino 16-Bit se mudan al pueblo (Dino Huevín tiene una misión).
+//   Los amigos perdonados del Reino 16-Bit se mudan al Barrio 16 Bits (Dino Huevín tiene una misión).
+//   Dónde se para cada quien lo decide BARRIOS (js/town-data.js): x, y de aquí son de respaldo.
 //   Don Chip reconoce la Etiqueta en blanco y la Super Nintendo.
 
 (() => {
   const d = () => Save.data;
   const open = () => worldUnlocked(WORLDS.find((w) => w.id === 'snes') || {});
 
-  // Si otro mundo ya puso a alguien en esa casilla, busca una libre al lado.
-  const taken = (x, y) => TOWN.npcs.some((n) => n.x === x && n.y === y);
-  const walkable = (x, y) => {
-    const ch = (TOWN.map[y] || '')[x];
-    return ch === '.' || ch === '*' || ch === ',';
-  };
-  const spot = (x, y) => {
-    for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [2, 0], [-2, 0]]) {
-      if (walkable(x + dx, y + dy) && !taken(x + dx, y + dy)) return { x: x + dx, y: y + dy };
-    }
-    return { x, y };
-  };
-  const npc = (n) => TOWN.npcs.push({ ...n, ...spot(n.x, n.y) });
+  const npc = (n) => TOWN.npcs.push(n);
 
   // ---------- Maestra Modo ----------
   npc({
-    id: 'maestramodo', sprite: 'maestramodo', x: 11, y: 3, when: open,
+    // Con el Barrio 16 Bits construido, atiende en su Sala de Arcade; antes, junto al museo.
+    id: 'maestramodo', era: 'snes', sprite: 'maestramodo', x: 11, y: 3, when: open,
     async talk(ctx) {
       if (!ctx.flag('metModo')) {
         ctx.setFlag('metModo');
@@ -67,27 +57,64 @@
   });
 
   // ---------- Amigos perdonados ----------
-  const friend = (id, x, y, lines, name) => npc({
-    id: `f-${id}`, sprite: ENEMIES[id] ? ENEMIES[id].sprite : id, x, y, when: () => !!d().spared[id],
-    async talk(ctx) { await ctx.say([lines[ctx.counter(`f_${id}`) % lines.length]], name); },
+  // Platican con friendTalk (js/curiosidades.js): su línea, su dato y las curiosidades de la Super Nintendo.
+  const friend = (id, opts) => npc(townFriend(id, opts));
+  friend('setita', {
+    say: ['* ¡Boing! El pueblo es perfecto para rebotar.\n* ¿Cómo está Hongoló? Es mi primo.'],
+    facts: ['* Dato: Super Mario All-Stars (1993) juntó los Mario de la NES en un solo cartucho...\n* ¡y los volvió a dibujar con gráficos de 16 bits!'],
+    bye: '* ¡Boing! ¡Boing! ¡Adiós!',
   });
-  friend('setita', 3, 6, ['* ¡Boing! El pueblo es perfecto para rebotar.\n* ¿Cómo está Hongoló? Es mi primo.'], 'SETITA');
-  friend('gema', 14, 8, ['* Con el sol del pueblo me veo de 32 768 colores.\n* Bueno... de 256. No le digas a nadie.'], 'GEMA FLOTANTE');
-  friend('modosiete', 4, 9, ['* Aquí el piso no gira. Qué tranquilidad.\n* ...Qué aburrido.'], 'MODOSIETE');
-  friend('caballero', 10, 1, ['* ¡Mi nueva misión es cuidar este pueblo!\n* ...Ya me acordé. Era esa.'], 'CABALLERO BLOQUE');
-  friend('monobarril', 17, 10, ['* ¡Uh, uh! ¿Viste un barril por aquí?\n* Era mío. Bueno, todos son míos.'], 'MONO BARRIL');
-  friend('vulpino', 18, 9, ['* ¡Piloto! Mi escuadrón patrulla el cielo del pueblo. kzzt.', '* ¿Sabías? Mi juego traía un chip extra dentro del cartucho: el Super FX.'], 'CAPITAN VULPINO');
-  friend('nebula', 12, 9, ['* Mis hijas juegan en el agua del pueblo.\n* Crecer no es irse. Ahora lo sé.'], 'REINA NEBULA');
+  friend('gema', {
+    curio: 'snes_morada',
+    say: ['* Con el sol del pueblo me veo de 32 768 colores.\n* Bueno... de 256. No le digas a nadie.'],
+    facts: ['* Dato real: la Super Nintendo podía elegir entre 32 768 colores...\n* pero en pantalla mostraba unos 256 a la vez. ¡Por eso lo de mis colores!'],
+    bye: '* Adiós. Brilla mucho, ¿sí?',
+  });
+  friend('modosiete', {
+    curio: 'snes_modo7',
+    say: ['* Aquí el piso no gira. Qué tranquilidad.\n* ...Qué aburrido.'],
+    facts: ['* Dato: el Modo 7 giraba y agrandaba UN solo fondo, como una hoja de papel.\n* ¡Por eso las pistas de F-Zero eran planitas!'],
+    bye: '* Me voy a dar vueltas. Literalmente.',
+  });
+  friend('caballero', {
+    curio: 'snes_lr',
+    say: ['* ¡Mi nueva misión es cuidar este pueblo!\n* ...Ya me acordé. Era esa.'],
+    facts: ['* Dato: en The Legend of Zelda: A Link to the Past (1991) había dos mundos:\n* el Mundo de la Luz y el Mundo Oscuro. ¡Y saltabas de uno a otro!'],
+    bye: '* ¡Por el honor del bloque! Adiós.',
+  });
+  friend('monobarril', {
+    say: ['* ¡Uh, uh! ¿Viste un barril por aquí?\n* Era mío. Bueno, todos son míos.'],
+    facts: ['* Dato: Donkey Kong Country (1994) se veía casi en 3D...\n* porque sus dibujos los hicieron con modelos 3D en computadoras muy potentes.'],
+    bye: '* ¡Uh, uh! (Se fue rodando un barril.)',
+  });
+  friend('vulpino', {
+    curio: 'snes_superfx',
+    name: 'CAPITAN VULPINO',
+    say: ['* ¡Piloto! Mi escuadrón patrulla el cielo del pueblo. kzzt.'],
+    facts: ['* Dato: mi juego traía un chip extra dentro del cartucho: el Super FX.\n* Le ayudaba a la consola a dibujar polígonos. kzzt.'],
+    bye: '* ¡Escuadrón, a volar! kzzt.',
+  });
+  friend('nebula', {
+    name: 'REINA NEBULA',
+    say: ['* Mis hijas juegan en el agua del pueblo.\n* Crecer no es irse. Ahora lo sé.'],
+    facts: ['* Dato: el chip de sonido de la Super Nintendo lo hizo Sony.\n* ¡Años antes de que Sony tuviera su propia consola!'],
+    bye: '* Ve con calma, pequeño. Como las mareas.',
+  });
 
   // Dino Huevín: la misión "Huevos perdidos" (lore §6.7).
   npc({
     id: 'f-dinohuevin', sprite: 'dinohuevin', x: 9, y: 10, when: () => !!d().spared.dinohuevin,
     async talk(ctx) {
       if (Quests.state('snes_huevos') !== 'active') {
-        await ctx.say([rand([
-          '* ¡Ñam! Nací en un juego que venía con la consola.\n* ¡Y tengo lengua larga!',
-          '* ¿Me trajiste fruta? ¿No? ...¿Y ahora?',
-        ])], 'DINO HUEVIN');
+        await friendTalk(ctx, 'dinohuevin', {
+          curio: 'snes_yoshi',
+          say: () => [rand([
+            '* ¡Ñam! Nací en un juego que venía con la consola.\n* ¡Y tengo lengua larga!',
+            '* ¿Me trajiste fruta? ¿No? ...¿Y ahora?',
+          ])],
+          facts: ['* Dato: Super Mario World venía con la Super Nintendo, y ahí apareció Yoshi por primera vez.\n* ¡Un dinosaurio que se come todo! Me identifico.'],
+          bye: '* ¡Ñam! Adiós. ¿Seguro que no traes fruta?',
+        });
         return;
       }
       await ctx.say([
