@@ -684,7 +684,7 @@ addWorld({
           `* ???: ${wiiGlitch('Si quieres saber quién soy... entra. Te espero en el canal que nunca existió.')}`,
           '* BIT: ...',
           '* BIT: Oye. Antes de entrar, vamos al pueblo.\n* Todos los amigos que hiciste... van a querer decirte algo.',
-          '* (Se abrió EL CANAL VACIO. Muy pronto...)',
+          '* (Se abrió EL CANAL VACIO. En la plaza del pueblo apareció una tele vieja...)',
         );
         Quests.start('wii_canal_vacio');
       },
@@ -729,7 +729,7 @@ addWorld({
     },
     wii_canal_vacio: {
       name: 'El Canal Vacío',
-      desc: 'Un canal sin nombre se prendió en la pantalla gigante de la Ciudad Sensor. Alguien te espera adentro... (PROXIMAMENTE)',
+      desc: 'Un canal sin nombre se prendió en la pantalla gigante de la Ciudad Sensor. Vuelve al pueblo: en la Plaza de las Tuberías apareció una tele vieja con estática magenta. Alguien te espera adentro.',
     },
   },
 });

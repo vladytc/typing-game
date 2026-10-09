@@ -449,3 +449,33 @@ Game.go('map', { world: 'snes' });                           // ir directo al ma
 Game.go('battle', { enemyId: 'nebula' });                    // ir directo a un nodo
 localStorage.removeItem('teclaquest_v1'); location.reload(); // empezar de cero
 ```
+
+## 8. El final y el post-juego (dónde vive cada cosa)
+
+Diseño en `docs/LORE.md` §10–§12. Todo es aditivo; los nombres globales llevan prefijo `fin`/`FIN_` o `vb`/`VB_`.
+
+| Qué | Dónde |
+|---|---|
+| Datos: el Glitch (`ENEMIES.glitch`), frases de los amigos (`FIN_FRASES`, `FIN_PUEBLO`), chistes por día, sprites, música (`fin_*`), misiones (`fin_nombre`, `cueva_roja`, `eco_rojo`), tesoros `fin_cartucho` y `foto_vitrina` | `js/fin-data.js` |
+| La tele del Canal Vacío en la plaza (12, 10), el Glitch con nombre en la banca (4, 5), el epílogo, la reja del camino del este, Don Chip / Anciano / Roncatón del post-juego, estantes extra de la vitrina | `js/fin-pueblo.js` (envuelve `Scenes.town.enter/exit`, `Scenes.vitrina.build` y algunos `talk`) |
+| Entrada: todos los amigos te dan su frase (`Save.data.finalPhrases`) | `js/scenes/fin-canal.js` (`Scenes.fincanal`) |
+| Batalla final: 3 fases + NOMBRAR (`Save.data.glitchName`) o final neutral | `js/scenes/fin-glitch.js` (`Scenes.fin`, hereda de la batalla) |
+| Créditos (desfile con saludo opcional), vitrina, estadísticas y FIN | `js/scenes/fin-creditos.js` (`Scenes.fincreditos`) |
+| La Cueva Roja: era `vb` en `HUB_ERAS` (solo paletas), consola `virtualboy`, enemigos, mapas `vb-claro` y `vb-cueva` | `js/worlds/vb-cueva.js` |
+| Visorio (capas adelante/atrás) y el minijuego Eco Rojo | `js/scenes/vb-visorio.js` (`Scenes.visorio`, `Scenes.ecorojo`) |
+| Estilos (Canal Vacío, créditos, rojo y negro con "profundidad") | `css/fin.css` |
+
+Banderas: `flags.finalAbierto` (lo pone el jefe del Wii) → `flags.finFase` (fase para reintentar) →
+`flags.finBueno` / `flags.finNeutral` y `flags.finJugado` (abre la Cueva Roja) → `flags.finEpilogo` (epílogo pendiente).
+
+Para probar (consola del navegador):
+
+```js
+Save.data.seenIntro = true; Save.data.flags.metBit = true;
+Object.assign(Save.data.consoles, { gameboy: true, nes: true, snes: true, n64: true, gamecube: true, wii: true });
+Save.data.flags.finalAbierto = true; Save.data.flags.roncatonAwake = true;
+Game.go('fincanal');                                  // las frases y luego la batalla
+Game.go('fin', { fase: 3 });                          // directo a la fase 3
+Save.data.flags.finJugado = true; Game.go('town', { map: 'vb-cueva', spawn: [2, 2, 'down'] });   // la Cueva Roja
+Game.go('visorio', { enemyId: 'visorio', back: 'town' }); Game.go('ecorojo', { back: 'town' });
+```
