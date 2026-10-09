@@ -51,7 +51,8 @@ Con eso pasa todo solo:
 - Al rescatar la consola de `requires`, en el pueblo **brota la tubería** del mundo, Bit la
   anuncia y empieza la misión `mundo_<id>`. Antes de eso no se ve nada (sin spoilers).
 - La tubería lleva al mapa del mundo con los `nodes` en orden. Cada uno se desbloquea al
-  terminar el anterior.
+  terminar el anterior. Si el mundo tiene **zonas explorables** (sección 3c), la tubería
+  lleva a caminar por ellas.
 - Para abrir el mundo y probarlo sin jugar todo, en la consola del navegador:
   `Save.data.consoles.nes = true; Game.go('town')`.
 
@@ -193,6 +194,77 @@ Usa los colores de tu consola, y **solo datos reales y verificables**.
   `enséñame algo` (las curiosidades de su consola). No repite hasta agotarlos.
 - `showCuriosity(ctx, id)`: abre el visor desde cualquier guion del pueblo (promesa; ENTER cierra).
 - Atajo para probar en la consola del navegador: `showCuriosity(null, 'gb_tetris')`.
+
+## 3d. Zonas explorables (caminar por el mundo, como en Deltarune)
+
+El pueblo y las zonas de los mundos usan el **mismo motor** (`Scenes.town`, en
+`js/scenes/town.js`). Un mundo con zonas entra caminando por su tubería; un mundo sin zonas
+sigue usando el mapa de paradas (`js/scenes/map.js`). Ejemplo completo: `js/worlds/gb-mapa.js`.
+
+Crea `js/worlds/<id>-mapa.js` (cárgalo en `index.html` **después** de `js/worlds/<id>.js`):
+
+```js
+addMaps('snes', {
+  entry: { map: 'snes-jardin', spawn: [3, 12, 'up'] },   // dónde apareces al entrar por la tubería
+  maps: {
+    'snes-jardin': {
+      name: 'Jardín del Reino',         // sale en el letrero al entrar
+      theme: 'snes',                    // paleta (opcional; por defecto la del mundo)
+      music: 'snes_jardin',             // pista de TRACKS (por defecto 'title')
+      ground: 'grass',                  // casilla que se pinta debajo de todo (opcional)
+      map: [                            // filas del mismo largo, mínimo 20×15 (casillas de 32 px)
+        'TTTTTTTTTTTTTTTTTTTT',
+        // ...
+      ],
+      tiles: {                          // leyenda extra; se mezcla con TILES (js/town-data.js)
+        B: { s: 'bloque', solid: true, look: 'muro' },  // s = sprite; solid = no se pasa
+        '=': { s: 'puente' },                            // tall: true = pasto alto
+        // también: under (sprite de abajo), colors ({ a, b, c, d } propios)
+      },
+      spawns: { start: [3, 12, 'up'] },              // lugar por defecto si no se da spawn
+      signs: { '5,10': '* Texto del letrero' },      // por casilla 'x,y' (texto o lista de páginas)
+      looks: { muro: '* Un muro muy alto.' },        // lo que se ve al revisar casillas con `look`
+      npcs: [{ id: 'jardinero', sprite: 'viejo', x: 7, y: 9, when: () => true, async talk(ctx) { /* ... */ } }],
+      encounters: [{ enemy: 'setita', x: 10, y: 6, say: ['* ¡Alto!'] }],   // say es opcional
+      chests: [{ id: 'snes_mapa', x: 2, y: 2, treasure: 'mapa_reino', word: 'castillo' }],
+      exits: {
+        '3,13': { pueblo: 'snes' },                           // al pueblo, junto a la tubería del mundo
+        '19,6': { map: 'snes-castillo', spawn: [1, 6, 'right'] },   // a otro mapa
+      },
+      wild: ['setita', 'modosiete'],    // salen en el pasto alto, solo si ya los venciste
+      wildRate: 0.07,                   // probabilidad por paso en pasto alto (opcional)
+      bitTips: ['* Lo que dice Bit en esta zona.'],
+      variants: [                       // el mapa cambia con el progreso (la última que se cumpla)
+        { when: () => !!Save.data.done.setita, map: [/* filas */], npcs: [/* se agregan */] },
+      ],
+    },
+  },
+});
+```
+
+Cómo funciona:
+- **Encuentros**: el enemigo se ve parado en el mapa con su sprite (más grande si es `boss`).
+  Chocar con él o darle ENTER parpadea la pantalla y abre `ENEMIES[id].mode || 'battle'` con
+  `back: 'town'`. Al ganar (o perdonar) regresas al mismo lugar y ya no está
+  (`Save.data.done[id]`). **Ponlos en pasos angostos**: así el orden del mundo sale del mapa.
+- **Cofres**: sprite `cofre`. Al abrirlo hay que escribir su `word` (respeta la dificultad);
+  da su `treasure` y queda abierto para siempre (flag `chest_<id>`, sprite `cofre_abierto`).
+  Usa tesoros nuevos de tu mundo (en `treasures` de `addWorld`).
+- **Salidas**: al pisar la casilla. Si la casilla es una tubería (`P`), el jugador se hunde.
+- **Variantes**: sirven para abrir caminos (p. ej. quitar rocas después del jefe). Sus `npcs`
+  se **suman** a los del mapa base; no cambies coordenadas de lo que ya existe.
+- **ESC** en un mundo abre "Seguir explorando / Volver al pueblo". En el pueblo va al título.
+- Se guarda el mapa y la casilla en `Save.data.pos`: "Continuar" regresa ahí.
+- Lo exclusivo del pueblo (tuberías, eras, museo, intro de Bit) solo pasa en el mapa `pueblo`.
+- **Valida tu mapa**: haz un BFS en Node que, venciendo a los enemigos en orden, compruebe que
+  cada uno es alcanzable y el siguiente todavía no (como se hizo para el Valle Game Boy).
+
+Para probar desde la consola del navegador:
+
+```js
+Game.go('town', { map: 'gb-valle', spawn: [3, 26, 'up'] });   // ir directo a una zona
+Save.data.done.tetrorey = true; Game.go('town');               // ver una variante
+```
 
 ## 4. Sprites
 
