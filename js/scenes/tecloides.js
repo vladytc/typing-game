@@ -16,7 +16,7 @@ Scenes.tecloides = {
       st: { chars: 0, errors: 0, ms: 0, perfect: 0 },
       items: 3 + (Save.data.konami ? 3 : 0),
     });
-    Music.play('tecloides');
+    Music.play(tr.music || 'tecloides');
     Game.root.innerHTML = `
       <div class="mon intro-flash">
         <div class="info foe-info hidden">
@@ -76,7 +76,7 @@ Scenes.tecloides = {
     $('.me-info .bar i').style.width = `${(m.hp / m.max) * 100}%`;
     $('.hpnum').textContent = `${m.hp}/${m.max}`;
     // "¡Casi!": cuando al rival le queda poca vida, la música cambia a mayor.
-    if (f.hp > 0 && f.hp / f.max < 0.3 && this.foe.filter((x) => x.hp > 0).length === 1) Music.play('tecloides_casi');
+    if (f.hp > 0 && f.hp / f.max < 0.3 && this.foe.filter((x) => x.hp > 0).length === 1) Music.play(this.tr.musicCasi || 'tecloides_casi');
   },
 
   pulse(sel, cls) {
@@ -291,6 +291,13 @@ Scenes.tecloides = {
       return;
     }
     this.justStunned = false;
+    // Algunos Tecloides (como "???") a veces no obedecen: TECLOIDES[id].flaky = probabilidad.
+    const flaky = TECLOIDES[foe.id].flaky;
+    if (flaky && Math.random() < flaky) {
+      await this.talk([`* ${tecName(foe)} se quedó congelado.\n* ...No hizo nada.`]);
+      this.toMenu();
+      return;
+    }
     const moves = TECLOIDES[foe.id].moves;
     const myType = TECLOIDES[me.id].type;
     // La mitad de las veces escoge el ataque que más te duele.
@@ -352,7 +359,7 @@ Scenes.tecloides = {
     this.phase = 'sub';
     this.ui = new ListMenu($('.mtext'), [{ label: 'Revancha' }, { label: 'Volver al mapa' }], {
       cols: 2,
-      onPick: (i) => (i === 0 ? Game.go('tecloides', { enemyId: this.id, back: this.back }) : Game.go(this.back)),
+      onPick: (i) => (i === 0 ? Game.go((this.def && this.def.mode) || 'tecloides', { enemyId: this.id, back: this.back }) : Game.go(this.back)),
     });
   },
 

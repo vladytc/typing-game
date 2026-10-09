@@ -6,15 +6,18 @@ const COMMANDS = ['LUCHAR', 'ACTUAR', 'OBJETO', 'PERDONAR'];
 Scenes.battle = {
   enter({ enemyId, back = 'map' }) {
     const def = ENEMIES[enemyId];
+    // Opcionales por enemigo: theme (paleta), music (pista), strictAccents (acentos obligatorios),
+    // onEnter(scene, pages) / onExit(scene) / onWin(scene, { spared, first, pages }).
+    if (def.theme) document.body.className = `theme-${def.theme}`;
     Object.assign(this, {
       id: enemyId, def, back,
       e: { hp: def.hp, mercy: 0 },
       p: { hp: playerMaxHp(), max: playerMaxHp() },
       items: (def.boss ? 3 : 2) + (Save.data.konami ? 3 : 0),
       st: { chars: 0, errors: 0, ms: 0, perfect: 0 },
-      cmd: 0, phase: 'intro', timers: [],
+      cmd: 0, phase: 'intro', timers: [], strict: !!def.strictAccents,
     });
-    Music.play(def.boss ? 'boss' : 'battle');
+    Music.play(def.music || (def.boss ? 'boss' : 'battle'));
     const NAME = upper(def.name);
     Game.root.innerHTML = `
       <div class="battle ${def.boss ? 'boss' : ''}">
@@ -51,10 +54,14 @@ Scenes.battle = {
       Save.data.tutorialDone = true;
       Save.write();
     }
+    if (def.onEnter) def.onEnter(this, pages);
     this.say(pages, () => this.toMenu());
   },
 
-  exit() { this.cleanup(); },
+  exit() {
+    this.cleanup();
+    if (this.def.onExit) this.def.onExit(this);
+  },
 
   cleanup() {
     this.timers.forEach(clearTimeout);
@@ -135,6 +142,7 @@ Scenes.battle = {
     this.renderCmds();
     const onDone = opts.onDone;
     this.task = new TypingTask(this.box, {
+      strict: this.strict,
       ...opts,
       onDone: (res) => {
         this.st.chars += res.chars;
@@ -257,7 +265,7 @@ Scenes.battle = {
 
   startDodge() {
     this.phase = 'dodge';
-    this.dodge = new Dodge(this.box, this.def.bullets, {
+    this.dodge = new Dodge(this.box, { strict: this.strict, ...this.def.bullets }, {
       onHit: () => {
         this.p.hp = Math.max(0, this.p.hp - scaledDmg(this.def.atk));
         this.updateBars();
@@ -265,7 +273,7 @@ Scenes.battle = {
         if (this.p.hp <= 0) {
           this.dodge.stop();
           this.phase = 'busy';
-          this.later(() => { Sfx.lose(); Game.go('gameover', { enemyId: this.id, back: this.back }); }, 600);
+          this.later(() => { Sfx.lose(); Game.go('gameover', { enemyId: this.id, back: this.back, scene: this.def.mode || 'battle' }); }, 600);
         }
       },
       onDone: (res) => {
@@ -303,6 +311,7 @@ Scenes.battle = {
       this.later(() => Sfx.levelup(), 400);
     }
     if (spared) d.spared[this.id] = true;
+    const first = !d.done[this.id];
     if (!d.done[this.id]) {
       d.done[this.id] = true;
       if (def.drop && !d.treasures[def.drop]) {
@@ -318,6 +327,7 @@ Scenes.battle = {
         pages.push('* (Pssst... Don Chip, en el pueblo, querrá verla.)');
       }
     }
+    if (def.onWin) def.onWin(this, { spared, first, pages });
     Save.write();
     this.say(pages, () => Game.go(this.back));
   },
