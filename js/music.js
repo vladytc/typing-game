@@ -179,25 +179,37 @@ const TRACKS = {
     ],
   },
 
-  // Batalla de monstruos contra un entrenador: rápida, con bajo que empuja (Mi menor).
-  // Original, inspirada en el estilo de las batallas de RPG portátiles de los 90.
-  monster: {
+  // Reto de Tecloides (la pista "de batalla de monstruos"): La menor, urgente, 160 BPM.
+  // Abre con 4 golpes y una subida cromática como sirena; bajo de tónica-octava-séptima.
+  tecloides: {
+    bpm: 160,
+    voices: [
+      {
+        wave: 'square', vol: 0.032,
+        intro: '-/4 E5 F5 F#5 G5 G#5 A5 A#5 B5 C6/4',
+        notes: 'A5/2 E5 A5 C6/2 B5/2 A5 G5 E5/2 G5/2 A5/2 B5/2 C6/2 D6/2 B5/2 A5/8 ' +
+          'C6/2 B5 A5 G5/2 E5/2 F5 G5 A5/2 F5/2 E5/2 D5/2 E5/2 F5/2 G#5/2 A5/8',
+      },
+      {
+        wave: 'triangle', vol: 0.11,
+        intro: '-/8 E2/8',
+        notes: rep('A2 A3 G3 A3', 4) + ' ' + rep('F2 F3 E3 F3', 4) + ' ' + rep('C3 C4 B3 C4', 4) + ' ' + rep('D2 D3 C3 D3', 2) + ' ' + rep('E2 E3 D3 E3', 2),
+      },
+      { wave: 'noise', vol: 0.028, intro: 'x x x x -/12', notes: rep('x - x x', 16) },
+    ],
+  },
+
+  // "¡Casi!": puente a Do mayor cuando al rival le queda poca vida.
+  tecloides_casi: {
     bpm: 168,
     voices: [
       {
         wave: 'square', vol: 0.032,
-        intro: 'B5 A#5 A5 G#5 G5 F#5 F5 E5 D#5/2 E5/2 -/4',
-        notes: 'E5/2 G5 E5 B5/2 A5/2 G5 F#5 G5/2 E5/2 D5/2 ' +
-          'E5/2 G5 E5 B5/2 D6/2 C6 B5 A5/2 B5/4 ' +
-          'C6/2 B5 A5 G5/2 A5/2 B5 A5 G5/2 F#5/2 D5/2 ' +
-          'E5/2 F#5 G5 A5/2 G5/2 F#5/2 D#5/2 E5/4',
+        notes: 'C6/2 G5 C6 E6/2 D6/2 C6 B5 G5/2 B5/2 C6/2 D6/2 E6/2 F6/2 D6/2 C6/8 ' +
+          'E6/2 D6 C6 B5/2 G5/2 A5 B5 C6/2 A5/2 G5/2 F5/2 G5/2 A5/2 B5/2 C6/8',
       },
-      {
-        wave: 'triangle', vol: 0.11,
-        intro: 'E2/16',
-        notes: rep('E2 E3', 16) + ' ' + rep('C2 C3', 4) + ' ' + rep('D2 D3', 4) + ' ' + rep('C2 C3', 4) + ' ' + rep('B1 B2', 4),
-      },
-      { wave: 'noise', vol: 0.028, intro: '-/16', notes: rep('x - x x', 16) },
+      { wave: 'triangle', vol: 0.11, notes: rep('C3 C4 B3 C4', 4) + ' ' + rep('A2 A3 G3 A3', 4) + ' ' + rep('F2 F3 E3 F3', 4) + ' ' + rep('G2 G3 F3 G3', 4) },
+      { wave: 'noise', vol: 0.03, notes: rep('x x x x', 16) },
     ],
   },
 
