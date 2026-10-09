@@ -73,7 +73,7 @@ Scenes.battle = {
   },
 
   cleanup() {
-    this.timers.forEach(clearTimeout);
+    (this.timers || []).forEach(clearTimeout); // por si la escena falló al arrancar
     this.timers = [];
     if (this.dialog) this.dialog.stop();
     if (this.task) this.task.stop();
