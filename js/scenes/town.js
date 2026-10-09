@@ -20,6 +20,18 @@ function mapVariant(m) {
   return (m.variants || []).filter((v) => v.when()).pop() || null;
 }
 
+// Lo que un mapa y su variante juntan: regiones, letreros y casas de los personajes.
+//   regions: [{ x0, y0, x1, y1, era, name }]  pedazos del mapa pintados con la paleta de otra era
+//   homes:   { idPersonaje: [x, y] } (o una función (variante) => {...}): dónde se para cada quien
+function mapExtras(m, v) {
+  const val = (x) => (typeof x === 'function' ? x(v) : x);
+  return {
+    regions: [...(val(m.regions) || []), ...((v && val(v.regions)) || [])],
+    signs: { ...(val(m.signs) || {}), ...((v && val(v.signs)) || {}) },
+    homes: { ...(val(m.homes) || {}), ...((v && val(v.homes)) || {}) },
+  };
+}
+
 Scenes.town = {
   music: 'town',
   mapId: null,
@@ -46,6 +58,8 @@ Scenes.town = {
     const variant = mapVariant(m);
     this.rows = variant ? variant.map : m.map;
     this.variant = variant;
+    Object.assign(this, mapExtras(m, variant));
+    this.regionNow = this.regionAt(this.p.x, this.p.y);
     this.tiles = { ...TILES, ...(m.tiles || {}) };
     this.W = Math.max(...this.rows.map((r) => r.length));
     this.H = this.rows.length;
@@ -94,15 +108,21 @@ Scenes.town = {
       this.later = setTimeout(() => this.run(async (ctx) => { await bitIntro(ctx); ctx.setFlag('metBit'); }), 500);
       return;
     }
-    // ¿Se abrió un mundo nuevo desde la última visita?
+    // ¿Se abrió un mundo nuevo desde la última visita? ¿Creció el pueblo (variante con `announce`)?
     const fresh = WORLDS.find((w) => w.requires && worldUnlocked(w) && !Save.data.flags[`pipe_${w.id}`]);
-    if (!warp && !fresh) return;
+    const news = variant && variant.id && variant.announce && !Save.data.flags[`variant_${variant.id}`] ? variant : null;
+    if (!warp && !fresh && !news) return;
     this.later = setTimeout(() => this.run(async (ctx) => {
       if (warp) await this.timeWarp(ctx, era);
       if (fresh) {
         ctx.setFlag(`pipe_${fresh.id}`);
         await announcePipe(ctx, fresh);
         if (QUESTS[`mundo_${fresh.id}`]) Quests.start(`mundo_${fresh.id}`);
+      }
+      if (news) {
+        ctx.setFlag(`variant_${news.id}`);
+        Sfx.secret();
+        await ctx.say([].concat(typeof news.announce === 'function' ? news.announce() : news.announce), 'BIT');
       }
     }), 600);
   },
@@ -152,21 +172,35 @@ Scenes.town = {
     return this.tiles[row[x]] || null;
   },
 
+  // Región (barrio) en una casilla: la última de la lista que la contiene.
+  regionAt(x, y) {
+    return (this.regions || []).filter((r) => x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1).pop() || null;
+  },
+
+  regionEra(x, y) {
+    const r = this.regionAt(x, y);
+    return r && eraDef(r.era) ? r.era : null;
+  },
+
   // Colores de una casilla: los de la era (como las paletas por zona de la NES) o los del tema del mundo.
-  tileCols(sprite, t) {
+  // `era` = la de su región, si está en un barrio de otra era.
+  tileCols(sprite, t, era) {
     if (t && t.colors) return t.colors;
+    if (era) return tileColors(era, sprite);
     return HUB_ERAS[this.era] ? tileColors(this.era, sprite) : this.css;
   },
 
   paintMap() {
     const g = $('.tmap').getContext('2d');
-    const shadows = HUB_ERAS[this.era] && HUB_ERAS[this.era].shadows;
     const ground = this.m.ground || 'grass';
     for (let y = 0; y < this.H; y++) {
       for (let x = 0; x < this.W; x++) {
         const t = this.tileAt(x, y);
+        const era = this.regionEra(x, y);
+        const def = eraDef(era || this.era);
+        const shadows = def && def.shadows;
         const under = (t && t.under) || ground;
-        paintSprite(g, under, x * TILE, y * TILE, 2, this.tileCols(under));
+        paintSprite(g, under, x * TILE, y * TILE, 2, this.tileCols(under, null, era));
         if (!t || t.s === under) continue;
         if (shadows && (t.s === 'tree' || t.s === 'sign')) {
           g.fillStyle = 'rgba(26, 26, 46, 0.28)';
@@ -174,14 +208,16 @@ Scenes.town = {
           g.ellipse(x * TILE + 18, y * TILE + 29, 13, 4, 0, 0, Math.PI * 2);
           g.fill();
         }
-        paintSprite(g, t.s, x * TILE, y * TILE, 2, this.tileCols(t.s, t));
+        paintSprite(g, t.s, x * TILE, y * TILE, 2, this.tileCols(t.s, t, era));
       }
     }
   },
 
   // Personajes del pueblo viajan en el tiempo; los amigos rescatados y los enemigos se quedan en su era.
+  // Quien no tiene era propia toma la de la región donde está parado (los barrios de cada era).
   entityCanvas(e) {
-    const era = e.era || this.era;
+    const era = e.era || this.regionEra(e.x, e.y) || this.era;
+    e.shownEra = era;
     const colors = !HUB_ERAS[era] && era === this.era ? null : charColors(e.sprite, era);
     return spriteCanvas(e.sprite, e.big ? 3 : 2, false, '', colors);
   },
@@ -210,14 +246,18 @@ Scenes.town = {
       return e;
     };
     // Los amigos rescatados (id 'f-<enemigo>') conservan la estética de su mundo.
+    // `homes` (del mapa o la variante) cambia dónde se para cada quien: así los amigos viven en su casa.
     const npcs = [...(this.m.npcs || []), ...((this.variant && this.variant.npcs) || [])];
+    const at = (n) => (this.homes[n.id] ? { x: this.homes[n.id][0], y: this.homes[n.id][1] } : {});
     this.npcs = npcs.filter((n) => !n.when || n.when())
-      .map((n) => mk({ ...n, era: n.era || (n.id.startsWith('f-') && ENEMIES[n.id.slice(2)] ? eraOfEnemy(n.id.slice(2)) : undefined) }));
-    // Amigos de otros mundos que llegan solos al pueblo: enemigos perdonados con `home: [x, y]`.
+      .map((n) => mk({ ...n, ...at(n), era: n.era || (n.id.startsWith('f-') && ENEMIES[n.id.slice(2)] ? eraOfEnemy(n.id.slice(2)) : undefined) }));
+    // Amigos de otros mundos que llegan solos al pueblo: enemigos perdonados con casa en su barrio
+    // (BARRIOS, js/town-data.js) o con `home: [x, y]`.
     if (this.pueblo) {
       Object.entries(ENEMIES).forEach(([id, def]) => {
-        if (!def.home || !d.spared[id] || this.npcs.some((n) => n.id === `f-${id}`)) return;
-        const [x, y] = def.home;
+        const home = this.homes[`f-${id}`] || def.home;
+        if (!home || !d.spared[id] || this.npcs.some((n) => n.id === `f-${id}`)) return;
+        const [x, y] = home;
         const line = def.townLine || '* ¡Hola! Ahora vivo en el pueblo.';
         this.npcs.push(mk({
           id: `f-${id}`, sprite: def.sprite, x, y, era: eraOfEnemy(id),
@@ -302,6 +342,7 @@ Scenes.town = {
     Object.assign(this.bit, { x: this.p.x, y: this.p.y });
     Object.assign(this.p, { x: nx, y: ny });
     Object.assign(this.player, { x: nx, y: ny });
+    [this.player, this.bit].forEach((e) => { if ((this.regionEra(e.x, e.y) || this.era) !== e.shownEra) this.repaint(e); });
     this.place(this.player);
     this.place(this.bit);
     this.camera();
@@ -318,6 +359,7 @@ Scenes.town = {
     const { x, y } = this.p;
     const t = this.tileAt(x, y);
     if (this.grace > 0) this.grace--;
+    this.regionCheck(x, y);
     const ex = this.exitAt(x, y);
     if (ex) { this.useExit(ex, t); return; }
     if (this.pueblo && t.warp === 'world') {
@@ -343,6 +385,21 @@ Scenes.town = {
     const rate = this.m.wildRate || (this.pueblo ? 0.1 : 0.07);
     if (t.tall && !this.grace && Math.random() < rate && this.wildPool().length) { this.wildEncounter(); return; }
     if (this.held) this.step(this.held);
+  },
+
+  // Al entrar a una región con nombre (un barrio), sale su cartel.
+  regionCheck(x, y) {
+    const r = this.regionAt(x, y);
+    if (r === this.regionNow) return;
+    this.regionNow = r;
+    if (!r || !r.name) return;
+    const old = $('.region-name');
+    if (old) old.remove();
+    const b = document.createElement('div');
+    b.className = `region-name region-${r.era}`;
+    b.textContent = upper(r.name);
+    $('.town').appendChild(b);
+    setTimeout(() => b.remove(), 2600);
   },
 
   // Salida a otro mapa ({ map, spawn }) o al pueblo, junto a la tubería de un mundo ({ pueblo: 'gb' }).
@@ -422,7 +479,8 @@ Scenes.town = {
     const t = this.tileAt(x, y);
     if (!t) return;
     const looks = this.m.looks || {};
-    const text = (this.m.signs || {})[`${x},${y}`] || (t.look && (looks[t.look] || TOWN.looks[t.look]));
+    let text = this.signs[`${x},${y}`] || (t.look && (looks[t.look] || TOWN.looks[t.look]));
+    if (typeof text === 'function') text = text();
     if (text) this.run((ctx) => ctx.say([].concat(text)));
   },
 

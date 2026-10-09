@@ -12,6 +12,26 @@
 
 .area-name span { display: block; font-size: 8px; text-align: center; margin-top: 6px; opacity: 0.8; }
 
+/* Cartel al entrar a un barrio (cada uno con los colores de su era). */
+.region-name {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 14px;
+  font-size: 11px;
+  z-index: 50;
+  white-space: nowrap;
+  background: var(--c0);
+  color: var(--c3);
+  border: 3px solid var(--c3);
+  animation: fadeOut 0.6s 1.8s forwards;
+}
+.region-gb { background: #0f380f; color: #9bbc0f; border-color: #8bac0f; }
+.region-nes { background: #000000; color: #fcfcfc; border-color: #f83800; }
+.region-snes { background: #1a1a2e; color: #ffd93d; border-color: #8e44ad; border-radius: 6px; }
+.region-n64 { background: #202030; color: #f7e463; border-color: #3c8dd6; border-radius: 10px; }
+
 /* 16 bits: sombras suaves bajo los personajes. */
 .town.era-snes .ent::before {
   content: '';

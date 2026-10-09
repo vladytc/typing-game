@@ -157,10 +157,14 @@ mueve, multiplica su velocidad por `diff().speed`. Si algo hace daño, pásalo p
 - **Eras del pueblo** (`js/town-eras.js`): el pueblo toma la estética del mundo más avanzado
   abierto. Si tu mundo trae una era nueva, agrega su entrada en `HUB_ERAS` (paleta por casilla
   y por personaje). Si no, el pueblo se queda en la era anterior.
-- **Amigos perdonados**: dale a tu enemigo `home: [x, y]` (casilla libre del pueblo),
-  `townLine: '* ...'` y, si quieres, `townFacts: ['* Dato: ...']` (datos "propios" del
-  personaje); al perdonarlo aparece en el pueblo con la estética de tu mundo. Los amigos ya no
-  salen en la vitrina: viven en el pueblo y platican con `friendTalk` (ver "Curiosidades").
+- **Amigos perdonados**: viven en el **barrio de su era**, cada uno en su casa (ver §3e).
+  Agrega su id a la lista `friends` del barrio de tu mundo en `BARRIOS` y dale
+  `townLine: '* ...'` y `townFacts: ['* Dato: ...']` (un dato real "propio" del personaje); al
+  perdonarlo aparece frente a su casa con la estética de tu mundo y platica con `friendTalk`
+  (ver "Curiosidades"). Si quieres una plática especial, agrega su NPC con
+  `townFriend(id, { say, facts, curio, extra, bye })` (js/town-data.js). Sin barrio todavía,
+  `home: [x, y]` en el enemigo sigue sirviendo como lugar de respaldo. Los amigos ya no salen
+  en la vitrina.
 - **Museo**: solo consolas y tesoros. Tus `treasures` salen solos en la sala de tu mundo; la consola sale si tu mundo
   tiene `console` y existe en `CONSOLES`.
 
@@ -189,7 +193,10 @@ curiosities: {
 (Si tu archivo se carga después de `js/curiosidades.js`, también sirve `addCuriosities({...})`.)
 Usa los colores de tu consola, y **solo datos reales y verificables**.
 
-- `friendTalk(ctx, enemyId, { say, facts, extra, bye })`: plática de un amigo. Dice su línea y
+- **Mínimo 5 curiosidades por consola** (hoy: Game Boy 6, NES 6, Super Nintendo 5, N64 5).
+  Para dibujar hay ayudas: `pixText(p, x, y, '1996', color, tamaño)` (números y algunas
+  letras de 3×5), `drawGameBoy`, `drawN64Pad`, `ARROWS`, `SPARKLE`.
+- `friendTalk(ctx, enemyId, { say, facts, curio, extra, bye })`: plática de un amigo. Dice su línea y
   ofrece `cuéntame un dato` (sus `facts` + los `facts` de su consola en `CONSOLES`) y
   `enséñame algo` (las curiosidades de su consola). No repite hasta agotarlos.
 - `showCuriosity(ctx, id)`: abre el visor desde cualquier guion del pueblo (promesa; ENTER cierra).
@@ -236,7 +243,10 @@ addMaps('snes', {
       bitTips: ['* Lo que dice Bit en esta zona.'],
       variants: [                       // el mapa cambia con el progreso (la última que se cumpla)
         { when: () => !!Save.data.done.setita, map: [/* filas */], npcs: [/* se agregan */] },
+        // opcionales en la variante: id + announce (Bit lo dice una vez), regions, signs, homes
       ],
+      regions: [{ x0: 20, y0: 0, x1: 31, y1: 14, era: 'gb', name: 'Barrio Game Boy' }], // otra paleta
+      homes: { donchip: [7, 5] },       // dónde se para cada NPC (o función (variante) => {...})
     },
   },
 });
@@ -252,7 +262,15 @@ Cómo funciona:
   Usa tesoros nuevos de tu mundo (en `treasures` de `addWorld`).
 - **Salidas**: al pisar la casilla. Si la casilla es una tubería (`P`), el jugador se hunde.
 - **Variantes**: sirven para abrir caminos (p. ej. quitar rocas después del jefe). Sus `npcs`
-  se **suman** a los del mapa base; no cambies coordenadas de lo que ya existe.
+  se **suman** a los del mapa base; no cambies coordenadas de lo que ya existe. Sus `regions`
+  y `signs` se suman a las del mapa; con `id` y `announce: ['* ...']`, Bit lo anuncia una vez.
+- **Regiones** (`regions`): rectángulos que se pintan con la paleta de otra era (`HUB_ERAS` o
+  `BARRIO_ERAS` de js/town-eras.js). Los personajes sin `era` propia, el jugador y Bit
+  también toman la paleta de la región donde están. Si tiene `name`, sale un cartel al entrar.
+- **Casas** (`homes`): `{ idNpc: [x, y] }` gana sobre el `x, y` del NPC. El pueblo lo usa para
+  mandar a cada amigo a su casa.
+- **Letreros** (`signs`): el texto también puede ser una función (por ejemplo, la puerta de una
+  casa dice de quién es solo si ese amigo ya llegó).
 - **ESC** en un mundo abre "Seguir explorando / Volver al pueblo". En el pueblo va al título.
 - Se guarda el mapa y la casilla en `Save.data.pos`: "Continuar" regresa ahí.
 - Lo exclusivo del pueblo (tuberías, eras, museo, intro de Bit) solo pasa en el mapa `pueblo`.
@@ -264,6 +282,53 @@ Para probar desde la consola del navegador:
 ```js
 Game.go('town', { map: 'gb-valle', spawn: [3, 26, 'up'] });   // ir directo a una zona
 Save.data.done.tetrorey = true; Game.go('town');               // ver una variante
+```
+
+## 3e. El pueblo crece: barrios por era
+
+El Pueblo Vitrina crece con los amigos que haces (`BARRIOS` en `js/town-data.js`). Cada barrio
+es un pedazo de mapa que se pega a la derecha o abajo del pueblo (lo que ya existe no se mueve)
+y se construye cuando hay `min` amigos en total **y** su mundo (`world`) está abierto. Cada
+etapa es una variante del pueblo con sus `regions` (el barrio se pinta con la paleta de su era,
+aunque el resto del pueblo esté en otra), letreros y anuncio de Bit.
+
+| Etapa | Cuándo | Mapa |
+|---|---|---|
+| Pueblo de siempre | 0-2 amigos | 20×15 |
+| + Barrio Game Boy (este) | 3 amigos | 32×15 |
+| + Barrio 8 Bits (sur) y tienda de Doña Tecla | 8 amigos + Castillo 8-Bit abierto | 32×27 |
+| + Barrio 16 Bits (sureste) y Sala de Arcade de la Maestra Modo | 13 amigos + Reino 16-Bit | 32×27 |
+| + Barrio Polígono (más al este) y quiosco de Ocarín | 18 amigos + Isla Polígono | 44×27 |
+
+Agregar el barrio de un mundo nuevo:
+
+```js
+// En BARRIOS (js/town-data.js), al final (el orden es el orden de construcción):
+{
+  id: 'gc', era: 'gc', name: 'Barrio Cubo', x: 44, y: 0, min: 24, world: 'gc',
+  friends: ['enemigo1', 'enemigo2'],        // una casa por amigo, en orden de lectura
+  sign: [44, 5, '* BARRIO CUBO\n* ...'],     // letrero de la entrada (casilla S del pedazo)
+  places: { idNpc: [x, y, 'TITULO', '* texto de la puerta'] },  // lugares con dueño (opcional)
+  map: [ /* filas del mismo largo; h = puerta de una casa, el amigo se para justo abajo */ ],
+},
+```
+
+- Agrega en `TOWN_GATES` las casillas de paso entre tu pedazo y los vecinos (son árbol
+  mientras tu barrio no exista) y una frase en `BARRIO_NEWS`.
+- Si la era todavía no es de todo el pueblo, pon su paleta en `BARRIO_ERAS` (js/town-eras.js).
+- Si un amigo llega antes que su barrio, espera en el pueblo viejo (`TOWN_CAMP`); los lugares
+  sin barrio usan `PLACE_CAMP`.
+- **Valida** con un BFS en Node, en cada etapa y con muchas combinaciones de amigos: filas del
+  mismo ancho, cada NPC en casilla caminable y distinta, y que se llegue a cada amigo, letrero,
+  tubería y a la puerta del museo.
+
+Para probar desde la consola del navegador:
+
+```js
+Object.assign(Save.data.consoles, { gameboy: true, nes: true, snes: true });   // abrir mundos
+BARRIOS.flatMap((b) => b.friends).slice(0, 13).forEach((id) => { Save.data.spared[id] = true; });
+Game.go('town');                       // el pueblo con los barrios que tocan
+townStage();                           // cuántos barrios hay (0-4)
 ```
 
 ## 4. Sprites
