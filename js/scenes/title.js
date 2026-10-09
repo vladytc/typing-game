@@ -119,7 +119,7 @@ Scenes.gameover = {
       </div>`;
     const items = [
       { label: 'Reintentar', go: () => Game.go(scene, { enemyId, back }) },
-      { label: back === 'town' ? 'Volver al pueblo' : 'Volver al mapa', go: () => Game.go(back, back === 'town' ? {} : undefined) },
+      { label: back === 'town' ? 'Volver a explorar' : 'Volver al mapa', go: () => Game.go(back, back === 'town' ? {} : undefined) },
     ];
     this.menu = new ListMenu($('.go-menu'), items, { onPick: (i) => items[i].go() });
   },
