@@ -806,3 +806,23 @@ canvas.starter:nth-of-type(2) { animation-delay: 0.3s; }
 @keyframes pop { to { opacity: 0; scale: 1.8; } }
 @keyframes spare { to { opacity: 0.25; filter: blur(1px); transform: scale(0.9); } }
 @keyframes flee { to { opacity: 0; transform: translateX(240px); } }
+
+/* ---------- Mapas explorables (js/scenes/town.js) ---------- */
+/* El mapa y sus personajes van en una capa que la cámara mueve con cada paso. */
+.tworld { position: absolute; left: 0; top: 0; }
+.tworld .tmap { inset: auto; left: 0; top: 0; }
+.ent.foe canvas { animation: foeIdle 1.4s ease-in-out infinite; }
+.ent.foe.boss canvas { animation-duration: 2.2s; }
+.town.fade::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--c0);
+  z-index: 55;
+  opacity: 0;
+  animation: fadeDark 0.3s forwards;
+}
+.tmenu { position: absolute; top: 40px; right: 24px; width: 300px; z-index: 65; }
+.tmenu-t { font-size: 9px; color: var(--c1); margin-bottom: 6px; }
+@keyframes foeIdle { 0%, 100% { transform: translateY(0) scaleY(1); } 50% { transform: translateY(-3px) scaleY(1.05); } }
+@keyframes fadeDark { to { opacity: 1; } }

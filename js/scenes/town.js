@@ -1,49 +1,94 @@
-// El pueblo que se explora: caminar con flechas, hablar con ENTER y contestar escribiendo.
+// Motor de mapas que se exploran caminando: el Pueblo Vitrina y las zonas de cada mundo.
+// Caminar con flechas, hablar con ENTER y contestar escribiendo.
+// Los mapas viven en MAPS (js/data.js); el esquema está en docs/MUNDOS.md, "Zonas explorables".
+//
+//   Game.go('town')                                       se queda en el mapa y lugar de siempre
+//   Game.go('town', { map: 'gb-valle', spawn: [x, y, 'up'] })   va a otro mapa
+//   Game.go('town', { from: 'pipe:gb' })                  al pueblo, junto a la tubería de un mundo
 
 const TILE = 32;
 const STEP_MS = 150;
+const VIEW_W = 640;
+const VIEW_H = 480;
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const KEY_DIRS = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
 const OPPOSITE = { up: 'down', down: 'up', left: 'right', right: 'left' };
+const townWait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Variante activa de un mapa: la última cuyo `when()` se cumple (o ninguna).
+function mapVariant(m) {
+  return (m.variants || []).filter((v) => v.when()).pop() || null;
+}
 
 Scenes.town = {
   music: 'town',
-  p: null, // posición del jugador; se recuerda al volver de batallas o del museo
+  mapId: null,
+  p: null, // posición del jugador; es la misma que se guarda en Save.data.pos
 
-  enter({ from } = {}) {
-    const m = TOWN;
-    const pipe = from && from.startsWith('pipe:') && WORLDS.find((w) => `pipe:${w.id}` === from);
-    if (pipe) {
-      const [px, py] = PIPE_SLOTS[pipe.order - 1];
-      this.p = { x: px, y: py + 1, face: 'down' };
-    } else if (from && m.spawns[from]) {
-      const [x, y, face] = m.spawns[from];
-      this.p = { x, y, face };
-    } else if (!this.p) {
-      const [x, y, face] = m.spawns.start;
-      this.p = { x, y, face };
+  enter({ map, spawn, from } = {}) {
+    // ¿En qué mapa? El que piden, o el pueblo si vienes de una tubería, o donde te quedaste.
+    const pos = Save.data.pos;
+    const toPipe = from && from.startsWith('pipe:');
+    const id = (map && MAPS[map] && map) || (toPipe && 'pueblo') || (pos && MAPS[pos.map] && pos.map) || 'pueblo';
+    const m = MAPS[id];
+    const pueblo = id === 'pueblo';
+    const pipe = pueblo && toPipe && WORLDS.find((w) => `pipe:${w.id}` === from);
+    const spawns = m.spawns || {};
+    let p;
+    if (spawn) p = spawn;
+    else if (pipe) { const [px, py] = PIPE_SLOTS[pipe.order - 1]; p = [px, py + 1, 'down']; }
+    else if (from && spawns[from]) p = spawns[from];
+    else if (pos && pos.map === id) p = [pos.x, pos.y, pos.face];
+    else p = spawns.start || [1, 1, 'down'];
+    this.p = { x: p[0], y: p[1], face: p[2] || 'down' };
+
+    Object.assign(this, { mapId: id, m, pueblo, mode: 'walk', moving: false, held: null, ui: null, idleAt: performance.now(), heyShown: false, grace: 3 });
+    const variant = mapVariant(m);
+    this.rows = variant ? variant.map : m.map;
+    this.variant = variant;
+    this.tiles = { ...TILES, ...(m.tiles || {}) };
+    this.W = Math.max(...this.rows.map((r) => r.length));
+    this.H = this.rows.length;
+    this.music = m.music || (pueblo ? 'town' : 'title');
+    this.savePos();
+    Save.write();
+
+    // Era / paleta. En el pueblo: si cambió desde la última visita, primero se ve la anterior y luego viaja en el tiempo.
+    let era;
+    let warp = false;
+    let label;
+    const world = WORLDS.find((w) => w.id === m.world);
+    if (pueblo) {
+      era = hubEra();
+      const lastEra = Save.data.flags.hubEra || 'gb';
+      warp = era !== lastEra && Save.data.flags.metBit;
+      this.era = warp ? lastEra : era;
+      document.body.className = HUB_ERAS[this.era].theme;
+      label = HUB_ERAS[era].label;
+    } else {
+      this.era = m.theme || (world && world.theme) || 'gb';
+      document.body.className = `theme-${this.era}`;
+      label = world ? `MUNDO ${world.order} · ${upper(world.name)}` : '';
     }
-    Object.assign(this, { mode: 'walk', moving: false, held: null, ui: null, idleAt: performance.now(), heyShown: false, grace: 3 });
-    // Era del pueblo: si cambió desde la última visita, primero se ve la anterior y luego viaja en el tiempo.
-    const era = hubEra();
-    const lastEra = Save.data.flags.hubEra || 'gb';
-    const warp = era !== lastEra && Save.data.flags.metBit;
-    this.era = warp ? lastEra : era;
-    document.body.className = HUB_ERAS[this.era].theme;
+    this.css = paletteColors();
 
     Game.root.innerHTML = `
       <div class="town era-${this.era}">
-        <canvas class="tmap" width="640" height="480"></canvas>
-        <div class="ents"></div>
-        <div class="area-name">${esc(upper(m.name))}<span>${HUB_ERAS[era].label}</span></div>
-        <div class="town-keys">ENTER hablar · M misiones · V vitrina · E estadísticas · ESC título</div>
+        <div class="tworld" style="width:${this.W * TILE}px;height:${this.H * TILE}px">
+          <canvas class="tmap" width="${this.W * TILE}" height="${this.H * TILE}"></canvas>
+          <div class="ents"></div>
+        </div>
+        <div class="area-name">${esc(upper(m.name))}<span>${esc(label)}</span></div>
+        <div class="town-keys">ENTER hablar · M misiones · V vitrina · E estadísticas · ESC ${pueblo ? 'título' : 'menú'}</div>
         <div class="tbox hidden"><div class="speaker hidden"></div><div class="tbody"></div></div>
       </div>`;
     this.paintMap();
     this.makeEntities();
+    this.camera(true);
     this.idleIv = setInterval(() => this.idleCheck(), 1000);
     window.onblur = () => { this.held = null; };
 
+    if (!pueblo) return;
     if (!Save.data.flags.metBit) {
       Save.data.flags.hubEra = era;
       this.later = setTimeout(() => this.run(async (ctx) => { await bitIntro(ctx); ctx.setFlag('metBit'); }), 500);
@@ -67,16 +112,17 @@ Scenes.town = {
     const town = $('.town');
     Sfx.warp();
     town.classList.add('warp-out');
-    await new Promise((r) => setTimeout(r, 900));
+    await townWait(900);
     this.era = era;
     Save.data.flags.hubEra = era;
     Save.write();
     document.body.className = HUB_ERAS[era].theme;
+    this.css = paletteColors();
     town.className = `town era-${era} warp-in`;
     this.paintMap();
     this.repaintEntities();
     Sfx.secret();
-    await new Promise((r) => setTimeout(r, 900));
+    await townWait(900);
     town.classList.remove('warp-in');
     const lines = [...(ERA_CHANGE_LINES[era] || ['* ¡El pueblo viajó en el tiempo!'])];
     await ctx.say(lines, 'BIT');
@@ -89,49 +135,72 @@ Scenes.town = {
     clearTimeout(this.later);
     window.onblur = null;
     if (this.ui && this.ui.stop) this.ui.stop();
+    Save.write();
+  },
+
+  savePos() {
+    Save.data.pos = { map: this.mapId, x: this.p.x, y: this.p.y, face: this.p.face };
   },
 
   // ---------- Mapa y personajes ----------
 
   tileAt(x, y) {
-    const row = TOWN.map[y];
+    const row = this.rows[y];
     if (!row || !row[x]) return null;
-    if (row[x] === 'P') return pipeWorldAt(x, y) ? TILES.P : TILES['.'];
-    return TILES[row[x]];
+    // Plaza de las Tuberías: sin mundo abierto, ahí solo hay pasto (¡nada de spoilers!).
+    if (this.pueblo && row[x] === 'P') return pipeWorldAt(x, y) ? TILES.P : TILES['.'];
+    return this.tiles[row[x]] || null;
   },
 
-  // Cada casilla con la paleta de la era actual (como las paletas por zona de la NES).
+  // Colores de una casilla: los de la era (como las paletas por zona de la NES) o los del tema del mundo.
+  tileCols(sprite, t) {
+    if (t && t.colors) return t.colors;
+    return HUB_ERAS[this.era] ? tileColors(this.era, sprite) : this.css;
+  },
+
   paintMap() {
     const g = $('.tmap').getContext('2d');
-    const era = this.era;
-    const shadows = HUB_ERAS[era].shadows;
-    TOWN.map.forEach((row, y) => [...row].forEach((ch, x) => {
-      paintSprite(g, 'grass', x * TILE, y * TILE, 2, tileColors(era, 'grass'));
-      const t = this.tileAt(x, y);
-      if (!t || t.s === 'grass') return;
-      if (shadows && (t.s === 'tree' || t.s === 'sign')) {
-        g.fillStyle = 'rgba(26, 26, 46, 0.28)';
-        g.beginPath();
-        g.ellipse(x * TILE + 18, y * TILE + 29, 13, 4, 0, 0, Math.PI * 2);
-        g.fill();
+    const shadows = HUB_ERAS[this.era] && HUB_ERAS[this.era].shadows;
+    const ground = this.m.ground || 'grass';
+    for (let y = 0; y < this.H; y++) {
+      for (let x = 0; x < this.W; x++) {
+        const t = this.tileAt(x, y);
+        const under = (t && t.under) || ground;
+        paintSprite(g, under, x * TILE, y * TILE, 2, this.tileCols(under));
+        if (!t || t.s === under) continue;
+        if (shadows && (t.s === 'tree' || t.s === 'sign')) {
+          g.fillStyle = 'rgba(26, 26, 46, 0.28)';
+          g.beginPath();
+          g.ellipse(x * TILE + 18, y * TILE + 29, 13, 4, 0, 0, Math.PI * 2);
+          g.fill();
+        }
+        paintSprite(g, t.s, x * TILE, y * TILE, 2, this.tileCols(t.s, t));
       }
-      paintSprite(g, t.s, x * TILE, y * TILE, 2, tileColors(era, t.s));
-    }));
+    }
   },
 
-  // Personajes del pueblo viajan en el tiempo; los amigos rescatados se quedan en su era.
+  // Personajes del pueblo viajan en el tiempo; los amigos rescatados y los enemigos se quedan en su era.
   entityCanvas(e) {
-    return spriteCanvas(e.sprite, e.big ? 3 : 2, false, '', charColors(e.sprite, e.era || this.era));
+    const era = e.era || this.era;
+    const colors = !HUB_ERAS[era] && era === this.era ? null : charColors(e.sprite, era);
+    return spriteCanvas(e.sprite, e.big ? 3 : 2, false, '', colors);
+  },
+
+  allEnts() {
+    return [...this.solids, this.player, this.bit];
+  },
+
+  repaint(e) {
+    e.el.replaceChild(this.entityCanvas(e), e.el.querySelector('canvas'));
   },
 
   repaintEntities() {
-    [...this.npcs, this.player, this.bit].forEach((e) => {
-      e.el.replaceChild(this.entityCanvas(e), e.el.querySelector('canvas'));
-    });
+    this.allEnts().forEach((e) => this.repaint(e));
   },
 
   makeEntities() {
     const layer = $('.ents');
+    const d = Save.data;
     const mk = (props) => {
       const e = { ...props };
       e.el = document.createElement('div');
@@ -141,25 +210,40 @@ Scenes.town = {
       return e;
     };
     // Los amigos rescatados (id 'f-<enemigo>') conservan la estética de su mundo.
-    this.npcs = TOWN.npcs.filter((n) => !n.when || n.when())
+    const npcs = [...(this.m.npcs || []), ...((this.variant && this.variant.npcs) || [])];
+    this.npcs = npcs.filter((n) => !n.when || n.when())
       .map((n) => mk({ ...n, era: n.era || (n.id.startsWith('f-') && ENEMIES[n.id.slice(2)] ? eraOfEnemy(n.id.slice(2)) : undefined) }));
-    // Amigos de otros mundos que llegan solos: enemigos perdonados con `home: [x, y]`.
-    Object.entries(ENEMIES).forEach(([id, def]) => {
-      if (!def.home || !Save.data.spared[id] || this.npcs.some((n) => n.id === `f-${id}`)) return;
-      const [x, y] = def.home;
-      const line = def.townLine || `* ¡Hola! Ahora vivo en el pueblo.`;
-      this.npcs.push(mk({
-        id: `f-${id}`, sprite: def.sprite, x, y, era: eraOfEnemy(id),
-        talk: (ctx) => ctx.say([line], upper(def.name)),
-      }));
+    // Amigos de otros mundos que llegan solos al pueblo: enemigos perdonados con `home: [x, y]`.
+    if (this.pueblo) {
+      Object.entries(ENEMIES).forEach(([id, def]) => {
+        if (!def.home || !d.spared[id] || this.npcs.some((n) => n.id === `f-${id}`)) return;
+        const [x, y] = def.home;
+        const line = def.townLine || '* ¡Hola! Ahora vivo en el pueblo.';
+        this.npcs.push(mk({
+          id: `f-${id}`, sprite: def.sprite, x, y, era: eraOfEnemy(id),
+          talk: (ctx) => (typeof friendTalk === 'function' ? friendTalk(ctx, id) : ctx.say([line], upper(def.name))),
+        }));
+      });
+    }
+    // Enemigos parados en el mapa (los que ya venciste o perdonaste ya no están).
+    this.foes = (this.m.encounters || []).filter((en) => ENEMIES[en.enemy] && !d.done[en.enemy]).map((en) => {
+      const def = ENEMIES[en.enemy];
+      return mk({ kind: 'foe', id: `foe-${en.enemy}`, enemy: en.enemy, say: en.say, sprite: def.sprite, big: !!def.boss, era: eraOfEnemy(en.enemy), cls: `foe ${def.boss ? 'boss' : ''}`, x: en.x, y: en.y });
     });
+    this.chests = (this.m.chests || []).map((c) => mk({
+      kind: 'chest', id: `chest-${c.id}`, chest: c, cls: 'chest', x: c.x, y: c.y,
+      sprite: d.flags[`chest_${c.id}`] ? 'cofre_abierto' : 'cofre',
+    }));
+    this.solids = [...this.npcs, ...this.foes, ...this.chests];
     this.player = mk({ id: 'player', sprite: 'heroe', cls: 'player', x: this.p.x, y: this.p.y });
     // Bit aparece detrás del jugador (o en cualquier lado libre).
     const order = [OPPOSITE[this.p.face], 'down', 'up', 'left', 'right'];
-    const spot = order.map((d) => [this.p.x + DIRS[d][0], this.p.y + DIRS[d][1]]).find(([x, y]) => this.free(x, y) && !this.tileAt(x, y).warp);
+    const spot = order.map((dir) => [this.p.x + DIRS[dir][0], this.p.y + DIRS[dir][1]])
+      .find(([x, y]) => this.free(x, y) && !this.tileAt(x, y).warp && !this.exitAt(x, y));
     const [bx, by] = spot || [this.p.x, this.p.y];
-    this.bit = mk({ id: 'bit', sprite: 'bit', cls: 'bit', x: bx, y: by, talk: bitTalk });
-    [...this.npcs, this.player, this.bit].forEach((e) => this.place(e, true));
+    const tips = this.m.bitTips;
+    this.bit = mk({ id: 'bit', sprite: 'bit', cls: 'bit', x: bx, y: by, talk: tips && tips.length ? (ctx) => ctx.say([rand(tips)], 'BIT') : bitTalk });
+    this.allEnts().forEach((e) => this.place(e, true));
     this.facePlayer();
   },
 
@@ -170,17 +254,34 @@ Scenes.town = {
     e.el.style.zIndex = 10 + e.y;
   },
 
+  // La cámara sigue al jugador sin salirse del mapa (si el mapa es más chico que la pantalla, lo centra).
+  cameraAt(x, y) {
+    const axis = (size, view, at) => (size <= view ? (size - view) / 2 : Math.max(0, Math.min(size - view, at * TILE + TILE / 2 - view / 2)));
+    return [axis(this.W * TILE, VIEW_W, x), axis(this.H * TILE, VIEW_H, y)];
+  },
+
+  camera(instant = false) {
+    const [cx, cy] = this.cameraAt(this.p.x, this.p.y);
+    const el = $('.tworld');
+    el.style.transition = instant ? 'none' : `transform ${STEP_MS}ms linear`;
+    el.style.transform = `translate(${-cx}px, ${-cy}px)`;
+  },
+
   facePlayer() {
     this.player.el.classList.toggle('flip', this.p.face === 'left');
   },
 
   entityAt(x, y) {
-    return [...this.npcs, this.bit].find((e) => e.x === x && e.y === y);
+    return [...this.solids, this.bit].find((e) => e.x === x && e.y === y);
+  },
+
+  exitAt(x, y) {
+    return (this.m.exits || {})[`${x},${y}`];
   },
 
   free(x, y) {
     const t = this.tileAt(x, y);
-    return !!t && !t.solid && !this.npcs.some((n) => n.x === x && n.y === y);
+    return !!t && !t.solid && !this.solids.some((n) => n.x === x && n.y === y);
   },
 
   // ---------- Caminar ----------
@@ -191,13 +292,19 @@ Scenes.town = {
     this.facePlayer();
     const nx = this.p.x + DIRS[dir][0];
     const ny = this.p.y + DIRS[dir][1];
-    if (!this.free(nx, ny)) return;
+    if (!this.free(nx, ny)) {
+      // Chocar con un enemigo empieza el combate.
+      const foe = this.foes.find((f) => f.x === nx && f.y === ny);
+      if (foe) this.fight(foe);
+      return;
+    }
     // Bit sigue al jugador ocupando su casilla anterior (y si estorba, cambian de lugar).
     Object.assign(this.bit, { x: this.p.x, y: this.p.y });
     Object.assign(this.p, { x: nx, y: ny });
     Object.assign(this.player, { x: nx, y: ny });
     this.place(this.player);
     this.place(this.bit);
+    this.camera();
     this.player.el.classList.add('walking');
     this.moving = true;
     this.stepT = setTimeout(() => {
@@ -208,38 +315,100 @@ Scenes.town = {
   },
 
   arrive() {
-    const t = this.tileAt(this.p.x, this.p.y);
+    const { x, y } = this.p;
+    const t = this.tileAt(x, y);
     if (this.grace > 0) this.grace--;
-    if (t.warp === 'world') {
-      const w = pipeWorldAt(this.p.x, this.p.y);
+    const ex = this.exitAt(x, y);
+    if (ex) { this.useExit(ex, t); return; }
+    if (this.pueblo && t.warp === 'world') {
+      const w = pipeWorldAt(x, y);
       Sfx.warp();
       this.mode = 'busy';
       this.player.el.classList.add('sink');
-      this.later = setTimeout(() => Game.go('map', { world: w.id }), 450);
+      // Mundos con zonas explorables entran caminando; los demás, a su mapa de paradas.
+      this.later = setTimeout(() => (w.entry
+        ? Game.go('town', { map: w.entry.map, spawn: w.entry.spawn })
+        : Game.go('map', { world: w.id })), 450);
       return;
     }
-    if (t.warp === 'vitrina') {
+    if (this.pueblo && t.warp === 'vitrina') {
       Sfx.confirm();
-      const [x, y, face] = TOWN.spawns.vitrina;
-      this.p = { x, y, face };
+      const [vx, vy, face] = this.m.spawns.vitrina;
+      this.p = { x: vx, y: vy, face };
+      this.savePos();
       Game.go('vitrina', { back: 'town' });
       return;
     }
-    if (t.tall && !this.grace && Math.random() < 0.1) { this.wildEncounter(); return; }
+    this.savePos();
+    const rate = this.m.wildRate || (this.pueblo ? 0.1 : 0.07);
+    if (t.tall && !this.grace && Math.random() < rate && this.wildPool().length) { this.wildEncounter(); return; }
     if (this.held) this.step(this.held);
   },
 
+  // Salida a otro mapa ({ map, spawn }) o al pueblo, junto a la tubería de un mundo ({ pueblo: 'gb' }).
+  useExit(ex, t) {
+    this.mode = 'busy';
+    this.held = null;
+    const pipe = t && t.s === 'pipe';
+    if (pipe) { Sfx.warp(); this.player.el.classList.add('sink'); } else { Sfx.confirm(); $('.town').classList.add('fade'); }
+    this.later = setTimeout(() => (ex.pueblo
+      ? Game.go('town', { map: 'pueblo', from: `pipe:${ex.pueblo}` })
+      : Game.go('town', { map: ex.map, spawn: ex.spawn })), pipe ? 450 : 300);
+  },
+
   // Guiño a Pokémon: en el pasto alto aparecen enemigos salvajes para practicar.
-  wildEncounter() {
+  // En los mundos salen los de `wild` que ya venciste; en el pueblo, Pixelito y los normales vencidos.
+  wildPool() {
     const d = Save.data;
-    const pool = ['pixelito', ...Object.keys(ENEMIES).filter((id) => d.done[id] && !ENEMIES[id].boss && !ENEMIES[id].mode)];
-    const id = rand(pool);
+    if (this.m.wild) return this.m.wild.filter((id) => ENEMIES[id] && d.done[id]);
+    if (!this.pueblo) return [];
+    return ['pixelito', ...Object.keys(ENEMIES).filter((id) => d.done[id] && !ENEMIES[id].boss && !ENEMIES[id].mode)];
+  },
+
+  wildEncounter() {
+    const id = rand(this.wildPool());
     this.grace = 4;
     $('.town').classList.add('flash');
     this.run(async (ctx) => {
       await ctx.say([`* ¡Un ${upper(ENEMIES[id].name)} salvaje apareció!`]);
-      Game.go('battle', { enemyId: id, back: 'town' });
+      Game.go(ENEMIES[id].mode || 'battle', { enemyId: id, back: 'town' });
     });
+  },
+
+  // Encuentro con un enemigo del mapa: (lo que dice), parpadeo y a su escena.
+  fight(foe) {
+    if (this.mode !== 'walk') return;
+    const def = ENEMIES[foe.enemy];
+    this.run(async (ctx) => {
+      if (foe.say) await ctx.say(foe.say, upper(def.name));
+      this.hideBox();
+      Sfx.hit();
+      $('.town').classList.add('flash');
+      await townWait(850);
+      if (Game.scene === this) Game.go(def.mode || 'battle', { enemyId: foe.enemy, back: 'town' });
+    });
+  },
+
+  // Cofre con candado de letras: escribe su palabra y te da su tesoro.
+  async openChest(ctx, e) {
+    const c = e.chest;
+    if (ctx.flag(`chest_${c.id}`)) {
+      await ctx.say(['* El cofre está vacío.\n* Bueno, tiene un poquito de polvo de 1989.']);
+      return;
+    }
+    await ctx.say(['* ¡Un cofre! Tiene un candado de letras.\n* Se abre con la palabra correcta.']);
+    // Tiempo como en docs/LORE.md §13 (15 PPM) ; TypingTask ya lo ajusta a la dificultad.
+    const res = await ctx.challenge({ label: 'Escribe para abrir el cofre:', texts: [c.word], timeLimit: c.timeLimit || c.word.length * 1120 + 1500 });
+    if (!res.completed) {
+      await ctx.say(['* El candado hizo "clic"... pero al revés.\n* ¡Inténtalo otra vez!']);
+      return;
+    }
+    ctx.setFlag(`chest_${c.id}`);
+    e.sprite = 'cofre_abierto';
+    this.repaint(e);
+    Sfx.coin();
+    if (c.say) await ctx.say([].concat(c.say));
+    if (TREASURES[c.treasure]) await ctx.give(c.treasure);
   },
 
   interact() {
@@ -247,11 +416,14 @@ Scenes.town = {
     const x = this.p.x + dx;
     const y = this.p.y + dy;
     const ent = this.entityAt(x, y);
+    if (ent && ent.kind === 'foe') { this.fight(ent); return; }
+    if (ent && ent.kind === 'chest') { this.run((ctx) => this.openChest(ctx, ent)); return; }
     if (ent && ent.talk) { this.run((ctx) => ent.talk(ctx)); return; }
     const t = this.tileAt(x, y);
     if (!t) return;
-    const text = t.s === 'sign' ? TOWN.signs[`${x},${y}`] : t.look && TOWN.looks[t.look];
-    if (text) this.run((ctx) => ctx.say([text]));
+    const looks = this.m.looks || {};
+    const text = (this.m.signs || {})[`${x},${y}`] || (t.look && (looks[t.look] || TOWN.looks[t.look]));
+    if (text) this.run((ctx) => ctx.say([].concat(text)));
   },
 
   idleCheck() {
@@ -264,9 +436,33 @@ Scenes.town = {
     b.textContent = '¡Oye! ¡Escucha!';
     b.style.left = `${this.bit.x * TILE + 16}px`;
     b.style.top = `${this.bit.y * TILE - 30}px`;
-    $('.town').appendChild(b);
+    $('.tworld').appendChild(b);
     Sfx.text();
     setTimeout(() => b.remove(), 3000);
+  },
+
+  // Menú corto de los mundos (ESC).
+  openMenu() {
+    this.mode = 'menu';
+    this.held = null;
+    const box = document.createElement('div');
+    box.className = 'box tmenu';
+    box.innerHTML = `<div class="tmenu-t">${esc(upper(this.m.name))}</div><div class="tmenu-l"></div>`;
+    $('.town').appendChild(box);
+    const close = () => {
+      box.remove();
+      this.ui = null;
+      this.mode = 'walk';
+      this.idleAt = performance.now();
+    };
+    this.ui = new ListMenu($('.tmenu-l', box), [{ label: 'Seguir explorando' }, { label: 'Volver al pueblo' }], {
+      onPick: (i) => {
+        if (i === 0) { close(); return; }
+        Sfx.warp();
+        Game.go('town', { map: 'pueblo', from: `pipe:${this.m.world}` });
+      },
+      onCancel: close,
+    });
   },
 
   // ---------- Guiones de diálogo ----------
@@ -331,7 +527,7 @@ Scenes.town = {
 
   onKey(e) {
     this.idleAt = performance.now();
-    if (this.mode === 'script') { if (this.ui) this.ui.key(e); return; }
+    if (this.mode === 'script' || this.mode === 'menu') { if (this.ui) this.ui.key(e); return; }
     if (this.mode !== 'walk') return;
     const dir = KEY_DIRS[e.key];
     if (dir) {
@@ -343,7 +539,7 @@ Scenes.town = {
     else if (e.key === 'v' || e.key === 'V') Game.go('vitrina', { back: 'town' });
     else if (e.key === 'e' || e.key === 'E') Game.go('stats', { back: 'town' });
     else if (e.key === 'm' || e.key === 'M') Game.go('diario', { back: 'town' });
-    else if (e.key === 'Escape') Game.go('title');
+    else if (e.key === 'Escape') { if (this.pueblo) Game.go('title'); else this.openMenu(); }
   },
 
   onKeyUp(e) {
