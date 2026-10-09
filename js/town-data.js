@@ -181,9 +181,22 @@ const TOWN = {
       },
     },
     {
-      id: 'roncaton', sprite: 'roncaton', x: 18, y: 6, big: true,
+      id: 'roncaton', sprite: 'roncaton', x: 18, y: 6, big: true, when: () => !Save.data.flags.roncatonAwake,
       async talk(ctx) {
         await ctx.say(['* Una criatura ENORME duerme en medio del camino.', '* Zzz... Zzzz...']);
+        // Con la Flauta Polígono (Mundo 4) se puede tocar la Canción de Despertar (js/scenes/ocarin.js).
+        if (Save.data.treasures.flauta_poligono && typeof n64PlayFlute === 'function') {
+          if (await ctx.choose(['tocar la flauta', 'dejarlo dormir']) === 1) { await ctx.say(['* Lo dejas dormir. Se ve muy cómodo.']); return; }
+          const res = await n64PlayFlute();
+          if (res.cancelled) { await ctx.say(['* Guardas la flauta. El Roncatón sigue roncando.']); return; }
+          await ctx.say(['* ¡La Canción de Despertar suena por todo el pueblo!', '* ...', '* ¡El Roncatón abre un ojo! Luego el otro. Bosteza ENORME.', '* RONCATON: Mmmh... ¿Quién me despertó? Llevo dormido desde 1995.\n* Antes de moverme... ¿me ayudas a escribir mi sueño? Se me olvida rápido.'], 'RONCATON');
+          await ctx.challenge({ label: 'Escribe el sueño del Roncatón:', texts: ['soñé con una montaña de galletas', 'luego todo se puso rojo', 'y alguien me tocaba una flauta'], timeLimit: 40000 });
+          await ctx.say(['* RONCATON: Soñé que todo era rojo. ...Ah, no. Eso está allá atrás.', '* RONCATON: Gracias por despertarme. Me hago a un lado.'], 'RONCATON');
+          ctx.setFlag('roncatonAwake');
+          Quests.complete('flauta');
+          Game.go('town');
+          return;
+        }
         if (await ctx.choose(['despierta', 'dejarlo dormir']) === 0) {
           await ctx.say(['* ¡¡DESPIERTA!!', '* ...', '* Zzz. Ni se movió.']);
           await ctx.say(['* Creo que necesitamos algo especial para despertarlo...\n* ¿Una flauta, tal vez?'], 'BIT');
@@ -192,6 +205,15 @@ const TOWN = {
           await ctx.say(['* Lo dejas dormir. Se ve muy cómodo.']);
         }
       },
+    },
+    // Ya despierto, el Roncatón se hace a un lado y el camino del este queda libre.
+    {
+      id: 'roncaton-despierto', sprite: 'roncaton', x: 18, y: 7, big: true, when: () => Save.data.flags.roncatonAwake,
+      async talk(ctx) { await ctx.say(['* Zzz... todavía no. Primero lo morado.', '* ...Ah, perdón. Hablo dormido aunque esté despierto.'], 'RONCATON'); },
+    },
+    {
+      id: 'camino-este', sprite: 'sign', x: 19, y: 6, when: () => Save.data.flags.roncatonAwake,
+      async talk(ctx) { await ctx.say(['* CAMINO DEL ESTE\n* Al fondo, entre los árboles, brilla algo ROJO y enorme...', '* Pero una reja lo cierra con candado.\n* (Todavía no se puede pasar.)']); },
     },
 
     {
