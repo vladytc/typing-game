@@ -336,7 +336,7 @@ Scenes.ocarin = {
   // Después de vencer a Marco: la Canción de Despertar y la Flauta Polígono.
   async finale() {
     const d = Save.data;
-    if (!d.done.marco) { this.later(() => Game.go('map'), 0); return; }
+    if (!d.done.marco) { this.later(() => Game.go(this.back), 0); return; }
     if (d.treasures.flauta_poligono) { this.menu(); return; }
     await this.talk([
       '* ¡La isla terminó de cargar! ¡Mira el cielo, completito!',
@@ -356,7 +356,7 @@ Scenes.ocarin = {
       '* Dicen que en tu pueblo algo ENORME duerme en medio del camino...\n* Con esta flauta, despierta seguro.',
     ]);
     this.checkConcert();
-    Game.go('map');
+    Game.go(this.back);
   },
 
   menu() {
@@ -452,6 +452,9 @@ Scenes.ocarin = {
 };
 
 // Después de vencer a Marco, la batalla regresa aquí: Ocarín enseña la Canción de Despertar.
+// Regresa a donde estaba el castillo (el mapa de paradas o la isla explorable).
 Scenes.despertar = Object.assign(Object.create(Scenes.ocarin), {
-  enter() { Scenes.ocarin.enter.call(this, { final: true }); },
+  enter({ back } = {}) {
+    Scenes.ocarin.enter.call(this, { final: true, back: back || (Scenes.castillo && Scenes.castillo.back) || 'map' });
+  },
 });

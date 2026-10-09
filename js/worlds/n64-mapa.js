@@ -486,23 +486,3 @@ addMaps('n64', {
     },
   },
 });
-
-// Al final del mundo, Ocarín enseña la Canción de Despertar (Scenes.despertar) y luego manda al
-// mapa de paradas. Ahora que la isla se camina, se regresa caminando al castillo.
-if (Scenes.despertar && Scenes.map) {
-  const n64MapEnter = Scenes.map.enter;
-  const n64DespertarExit = Scenes.despertar.exit;
-  Scenes.despertar.exit = function () {
-    if (n64DespertarExit) n64DespertarExit.call(this);
-    Scenes.map.toIsla = true;
-  };
-  Scenes.map.enter = function (params = {}) {
-    if (this.toIsla && !params.world) {
-      this.toIsla = false;
-      Game.go('town', { map: 'n64-castillo', spawn: [22, 12, 'down'] });
-      return;
-    }
-    this.toIsla = false;
-    n64MapEnter.call(this, params);
-  };
-}
