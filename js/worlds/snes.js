@@ -464,10 +464,6 @@ const SNES_SPRITES = {
 // ---------- Tecloides nuevos (lore §3.1) ----------
 TTYPES.estatica = 'ESTATICA';
 // Los de otros mundos se definen solo si nadie los definió antes.
-const addTecloide = (id, t, sprite) => {
-  if (!TECLOIDES[id]) TECLOIDES[id] = t;
-  if (sprite && !SPRITES[t.sprite]) SPRITES[t.sprite] = sprite;
-};
 // Las evoluciones: el mismo dibujo, con más colores.
 addTecloide('volton', {
   name: 'Voltón', type: 'chispa', sprite: 'volton', hp: 56,

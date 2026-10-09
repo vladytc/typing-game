@@ -38,6 +38,13 @@ const TECLOIDES = {
   },
 };
 
+// Para que los mundos agreguen Tecloides sin pisar los que otro mundo ya definió.
+// sprite (opcional): el dibujo, si todavía no existe.
+function addTecloide(id, t, sprite) {
+  if (!TECLOIDES[id]) TECLOIDES[id] = t;
+  if (sprite && !SPRITES[t.sprite]) SPRITES[t.sprite] = sprite;
+}
+
 const STARTERS = ['voltin', 'gotin', 'brotin'];
 // El inicial que le gana a cada uno: el rival siempre escoge ese, como todo buen rival.
 const COUNTER = { voltin: 'brotin', gotin: 'voltin', brotin: 'gotin' };
