@@ -1,12 +1,20 @@
 // Las dos mecánicas de tecleo del combate:
 //   TypingTask: escribir palabras o frases contra el reloj (LUCHAR, ACTUAR, OBJETO).
 //   Dodge: el turno del enemigo; caen letras/palabras y hay que escribirlas antes de que toquen el suelo.
+// Las dos aceptan `caps: true` para exigir las mayúsculas (practicar SHIFT); los acentos siguen sin importar.
+
+// Como keyMatches, pero si la letra esperada es mayúscula hay que escribirla en mayúscula.
+function capsMatch(expected, typed) {
+  if (expected !== expected.toLowerCase()) return typed === expected || (norm(typed) === norm(expected) && typed !== typed.toLowerCase());
+  return keyMatches(expected, typed);
+}
 
 class TypingTask {
   // texts: lista de palabras/frases. onUnit(unit) se llama al terminar cada una;
   // si devuelve false, la tarea se detiene (por ejemplo, porque el enemigo ya cayó).
-  constructor(box, { label, texts, timeLimit, onUnit, onDone }) {
+  constructor(box, { label, texts, timeLimit, onUnit, onDone, caps = false }) {
     Object.assign(this, { box, label, texts, timeLimit: timeLimit * diff().time, onUnit, onDone });
+    this.match = caps ? capsMatch : keyMatches;
     this.totalChars = texts.join('').length;
   }
 
@@ -44,7 +52,7 @@ class TypingTask {
     if (!this.active || e.repeat || e.key.length !== 1) return;
     const text = this.texts[this.i];
     const expected = text[this.pos];
-    if (!keyMatches(expected, e.key)) {
+    if (!this.match(expected, e.key)) {
       Stats.record(expected, false);
       this.errors++;
       this.unitErrors++;
@@ -116,6 +124,7 @@ class TypingTask {
 class Dodge {
   constructor(box, cfg, { onHit, onDone }) {
     Object.assign(this, { box, cfg, onHit, onDone });
+    this.match = cfg.caps ? capsMatch : keyMatches;
   }
 
   start() {
@@ -200,7 +209,7 @@ class Dodge {
     let b = this.target;
     if (b) {
       const expected = b.text[b.pos];
-      if (!keyMatches(expected, k)) {
+      if (!this.match(expected, k)) {
         Stats.record(expected, false);
         this.errors++;
         Sfx.error();
@@ -209,7 +218,7 @@ class Dodge {
       Stats.record(expected, true);
     } else {
       // Sin objetivo: apunta a lo que va más abajo y empieza con esa letra.
-      const options = this.bullets.filter((x) => keyMatches(x.text[0], k));
+      const options = this.bullets.filter((x) => this.match(x.text[0], k));
       if (!options.length) { this.errors++; Sfx.error(); return; }
       b = options.reduce((a, x) => (x.y > a.y ? x : a));
       Stats.record(b.text[0], true);

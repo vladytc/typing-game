@@ -102,6 +102,14 @@ const TOWN = {
           ], 'DON CHIP');
           await ctx.give('bloques');
         }
+        if (d.consoles.nes && !ctx.flag('chipNES')) {
+          ctx.setFlag('chipNES');
+          await ctx.say([
+            '* ¡LA NES! ¡Con su control de dos botones!\n* Eso, mi joven amigo, es HISTORIA.',
+            '* ¿Una sombra morada, dices?\n* ...Hubo un apagón de verdad en 1989 en mi cuadra.',
+            '* Pero este no fue de la luz. Fue de... otra cosa.',
+          ], 'DON CHIP');
+        }
         const i = await ctx.choose(['cuéntame un dato', 'adiós'], 'DON CHIP');
         if (i === 1) { await ctx.say(['* ¡Vuelve pronto! Y no soples los cartuchos.'], 'DON CHIP'); return; }
         // Datos de la Game Boy siempre; los de otras consolas cuando ya las rescató.
@@ -125,6 +133,12 @@ const TOWN = {
     {
       id: 'viejo', sprite: 'viejo', x: 13, y: 1,
       async talk(ctx) {
+        if (Quests.state('tres_llaves') === 'active' && [1, 2, 3].every((n) => Save.data.flags[`nesKey${n}`])) {
+          await ctx.say(['* ...Esas llaves... son de la mazmorra del castillo.', '* Las encontraste todas. Hace años que nadie lo lograba.\n* Toma. Así nunca te perderás allá abajo.'], 'ANCIANO');
+          await ctx.give('mapa_mazmorra');
+          Quests.complete('tres_llaves');
+          return;
+        }
         if (Save.data.treasures.espada) {
           await ctx.say(['* ¿Sabías que en aquel juego de 1986, si escribías ZELDA como tu nombre, empezabas una misión secreta más difícil?'], 'ANCIANO');
           return;
@@ -205,22 +219,24 @@ const TOWN = {
     {
       id: 'arcade', sprite: 'arcade', x: 14, y: 4,
       async talk(ctx) {
-        const best = (Save.data.arcade || {}).bloques || 0;
-        // Minijuegos que ya se desbloquearon, además de BLOQUES.
-        const extra = [
-          { scene: 'chupaletras', opt: 'chupa letras', name: 'CHUPA-LETRAS', best: (Save.data.arcade || {}).chupaletras || 0, when: Save.data.flags.chupaletras },
-        ].filter((g) => g.when);
+        const a = Save.data.arcade || {};
+        const best = a.bloques || 0;
+        // Minijuegos que ya se desbloquearon en los mundos, además de BLOQUES.
+        const extra = [];
+        if (Save.data.flags.chupaletras) extra.push({ name: 'chupa letras', label: `CHUPA-LETRAS (récord: ${a.chupaletras || 0})`, go: () => Game.go('chupaletras', { back: 'town' }) });
+        if (Save.data.done.patos) extra.push({ name: 'patos', label: `PATOS DE LETRAS (récord: ${a.patos || 0} patos)`, go: () => Game.go('patos', { back: 'town', arcade: true }) });
+        if (Save.data.done.kongo) extra.push({ name: 'barriles', label: `BARRILES (récord: ${a.barriles || 0} vigas)`, go: () => Game.go('kongo', { back: 'town', endless: true }) });
         if (!extra.length) {
           await ctx.say([`* Una máquina arcade: BLOQUES.\n* Récord: ${best} puntos.`]);
           Quests.start('arcade');
           if (await ctx.choose(['jugar', 'ahora no']) === 0) Game.go('bloques', { back: 'town' });
           return;
         }
-        await ctx.say([`* Una máquina arcade con varios juegos.\n* BLOQUES · Récord: ${best}\n${extra.map((g) => `* ${g.name} · Récord: ${g.best}`).join('\n')}`]);
+        await ctx.say([`* Una máquina arcade con varios juegos:\n* BLOQUES (récord: ${best} puntos)\n* ${extra.map((x) => x.label).join('\n* ')}`]);
         Quests.start('arcade');
-        const i = await ctx.choose(['bloques', ...extra.map((g) => g.opt), 'ahora no']);
+        const i = await ctx.choose(['bloques', ...extra.map((x) => x.name), 'ahora no']);
         if (i === 0) Game.go('bloques', { back: 'town' });
-        else if (i <= extra.length) Game.go(extra[i - 1].scene, { back: 'town' });
+        else if (i <= extra.length) extra[i - 1].go();
       },
     },
 
@@ -251,6 +267,31 @@ const TOWN = {
         if (i === 0) await ctx.say(['* Algo morado me puso a girar y girar...\n* Todavía me da vueltas la corona.'], 'TETRO REY');
         if (i === 1) await ctx.say(['* ¡No digas esa palabra! Me da vértigo.'], 'TETRO REY');
       },
+    },
+    // Amigos del Castillo 8-Bit (Mundo 2).
+    {
+      id: 'f-ladrillin', sprite: 'ladrillin', x: 3, y: 7, when: () => Save.data.spared.ladrillin,
+      async talk(ctx) { await ctx.say(['* ¡Ting! Aquí nadie me salta encima.\n* Por fin puedo relajar las cejas.'], 'LADRILLIN'); },
+    },
+    {
+      id: 'f-caparacho', sprite: 'caparacho', x: 12, y: 9, when: () => Save.data.spared.caparacho,
+      async talk(ctx) { await ctx.say(['* ¡Vuuum! El camino del pueblo es perfecto para patinar.', '* ...Pero ya no me escondo tanto. Aquí todos me saludan.'], 'CAPARACHO'); },
+    },
+    {
+      id: 'f-bombita', sprite: 'bombita', x: 4, y: 1, when: () => Save.data.spared.bombita,
+      async talk(ctx) { await ctx.say(['* Inhala... exhala...\n* Ya no tengo prisa. Bueno, solo un poquito.'], 'BOMBITA MECHA'); },
+    },
+    {
+      id: 'f-patoloco', sprite: 'patoloco', x: 8, y: 7, when: () => Save.data.spared.patoloco,
+      async talk(ctx) { await ctx.say(['* ¡Cuac! Toby y yo ya somos amigos.\n* Ahora nos reímos juntos de las nubes.'], 'PATOLOCO'); },
+    },
+    {
+      id: 'f-tragabombas', sprite: 'tragabombas', x: 2, y: 5, when: () => Save.data.spared.tragabombas,
+      async talk(ctx) { await ctx.say(['* Bit dice que las bombas no son comida.\n* Ahora como zanahorias. Explotan menos.'], 'TRAGABOMBAS'); },
+    },
+    {
+      id: 'f-caparazon', sprite: 'caparazon', x: 16, y: 1, when: () => Save.data.spared.caparazon,
+      async talk(ctx) { await ctx.say(['* ¡BIENVENIDO A TU PUEBLO!\n* ...Ya no me trabo. Solo lo digo porque me gusta.'], 'LORD CAPARAZON'); },
     },
   ],
 };
