@@ -532,12 +532,38 @@ const BARRIOS = [
       'TTTTTTTTTTTT',
     ],
   },
+  // Mundo 6 (Ciudad Sensor): abajo del Barrio 8 Bits y del Barrio 16 Bits. Gimnasio del Entrenador Mi,
+  // Observatorio del Capitán Cometa y el Canal Tienda (cerrado). Lo demás vive en js/worlds/wii-pueblo.js.
+  {
+    id: 'wii', era: 'wii', name: 'Barrio Sensor', x: 0, y: 27, min: 26, world: 'wii',
+    friends: ['zumbito', 'munequito', 'canalclima', 'correita', 'nunchuquin', 'sensorin'],
+    sign: [2, 31, '* BARRIO SENSOR\n* Todo blanco, todo limpio, todo redondito.\n* (El nombre secreto de este barrio era "Revolution".)'],
+    places: {
+      entrenadormi: [14, 30, 'GIMNASIO SENSOR', '* Se oyen pinos cayendo y alguien gritando "¡RITMO!".'],
+      cometa: [20, 30, 'OBSERVATORIO', '* Un telescopio enorme asoma por el techo.'],
+      canaltienda: [14, 35, 'CANAL TIENDA', '* Está cerrado. Un letrero dice:\n* "Aquí se compraban juegos viejitos para jugarlos en la nueva.\n* Se llamaba Consola Virtual."'],
+    },
+    map: [
+      'TTTTTTTTTT:TTTTTTTTTTTTT:TTTTTTT',
+      'T.RRR.RRR.:.RRRRR.RRRRR.:.RRR..T',
+      'T.WhW.WhW.:.WWkWW.WWkWW.:.WhW..T',
+      'T.........:.............:......T',
+      'T.S::::::::::::::::::::::::::..T',
+      'T.......:.....*...*.....:......T',
+      'T.RRR.RRR:..RRRRR..~~~..:.RRR..T',
+      'T.WhW.WhW:..WWkWW..~~~..:.WhW..T',
+      'T........:.............*:......T',
+      'T*.*..*..::::::::::::::::..*.*.T',
+      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
+    ],
+  },
 ];
 
 // Pasos entre pedazos: árbol mientras el barrio del otro lado (`opens`) no exista.
 const TOWN_GATES = [
   { x: 19, y: 10, opens: 'gb' }, { x: 5, y: 14, opens: 'nes' }, { x: 27, y: 14, opens: 'snes' },
   { x: 19, y: 20, opens: 'snes' }, { x: 31, y: 4, opens: 'n64' }, { x: 31, y: 20, opens: 'n64' },
+  { x: 10, y: 26, opens: 'wii' },
 ];
 
 // Donde esperan los amigos que llegaron antes que su barrio, y los lugares sin barrio todavía.
@@ -621,6 +647,7 @@ const BARRIO_NEWS = {
   nes: () => ['* ¡Otra vez! Ahora hay calles nuevas al sur del pueblo.', `* Es el BARRIO 8 BITS.${Save.data.consoles.nes ? ' ¡Y Doña Tecla abrió una tienda!' : ''}\n* Fíjate: allá todo sigue con colores de la NES.`],
   snes: () => ['* ¡El pueblo sigue creciendo! Al sureste hay un barrio con sombras y brillos.', '* El BARRIO 16 BITS. La Maestra Modo se mudó ahí con su Sala de Arcade.'],
   n64: () => ['* ¡Whoa! ¡El pueblo llegó hasta el otro lado del bosque!', `* El BARRIO POLIGONO.${Save.data.done.ocarin ? ' Ocarín puso un quiosco de música.' : ''}\n* Ahora el pueblo parece un museo del tiempo... ¡caminando!`],
+  wii: () => ['* ¡El pueblo creció hacia el sur! Todo allá abajo es blanco y brilla.', `* El BARRIO SENSOR.${Save.data.done.entrenadormi ? ' ¡El Entrenador Mi abrió su gimnasio!' : ''}\n* Hasta los árboles se ven recién lavados.`],
 };
 
 // Una variante del pueblo por barrio construido (la última que se cumple es la que se ve).
