@@ -13,7 +13,7 @@ function defaultSave() {
     tutorialDone: false,
     muted: false,
     konami: false,
-    starter: null, // monstruo inicial elegido contra el Entrenador Max
+    team: [],      // Tecloides: [{ id, lv, xp }]
     flags: {},
     quests: {},    // id -> 'active' | 'done'
     arcade: {},    // récords de minijuegos     // cosas que pasaron en el pueblo (diálogos, quests)

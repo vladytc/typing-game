@@ -173,6 +173,28 @@ const TOWN = {
     },
 
     {
+      id: 'profesora', sprite: 'profesora', x: 6, y: 12,
+      async talk(ctx) {
+        const team = Save.data.team || [];
+        if (!team.length) {
+          await ctx.say([
+            '* ¡Hola! Soy la PROFESORA LETRA.\n* Estudio a los TECLOIDES: criaturas que viven en las teclas.',
+            '* Tengo mi laboratorio de campo en el Pasto Alto Grande del Valle Game Boy.\n* ¡Búscame ahí y te regalo tu primer Tecloide!',
+          ], 'PROFESORA LETRA');
+          Quests.start('primer_tecloide');
+          return;
+        }
+        await ctx.say([
+          `* ¿Cómo está tu ${upper(TECLOIDES[team[0].id].name)}? Nivel ${team[0].lv}, ¡qué bien!`,
+          rand([
+            '* CHISPA le gana a GOTA, GOTA a BROTE y BROTE a CHISPA.\n* BYTE no le gana a nadie... pero nadie le gana a él.',
+            '* Si escribes el ataque sin errores, pega más fuerte.\n* Un Tecloide bien escrito nunca falla.',
+            '* En el turno rival, escribe la palabra de su ataque para esquivar.\n* ¡Recibes la mitad del daño!',
+          ]),
+        ], 'PROFESORA LETRA');
+      },
+    },
+    {
       id: 'arcade', sprite: 'arcade', x: 14, y: 4,
       async talk(ctx) {
         const best = (Save.data.arcade || {}).bloques || 0;

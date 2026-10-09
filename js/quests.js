@@ -17,6 +17,10 @@ const QUESTS = {
       return `${got}/${total}`;
     },
   },
+  primer_tecloide: {
+    name: 'Mi primer Tecloide',
+    desc: 'Ve al Pasto Alto Grande del Valle Game Boy, escoge tu Tecloide con la Profesora Letra y vence a Dani Turbo.',
+  },
   pato: {
     name: 'El reto de Toby',
     desc: 'Escribe "pato" tres veces seguidas sin ningún error.',
