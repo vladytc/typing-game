@@ -487,6 +487,7 @@ addMaps('nes', {
   maps: {
     'nes-patio': {
       name: 'Patio de Ladrillos',
+      intro: ['* ¡Ladrillos, bloques con signo de pregunta, tuberías!\n* Esto es el CASTILLO 8-BIT.', '* Aquí todos tienen solo tres colores. Y las MAYÚSCULAS importan:\n* usa SHIFT cuando un nombre empiece con mayúscula.'],
       music: 'nes_patio',
       ground: 'nes_negro',
       map: NES_PATIO_MAP,

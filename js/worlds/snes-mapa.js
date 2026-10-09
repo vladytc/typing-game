@@ -595,6 +595,7 @@ addMaps('snes', {
   maps: {
     'snes-colinas': {
       name: 'Colinas Dinosaurio',
+      intro: ['* ¡¡COLORES!! ¡Mira cuántos colores!', '* Pasto de dos verdes, flores rosas, cielo azul...\n* Bienvenido al REINO 16-BIT. Aquí los acentos sí cuentan, ¿eh?'],
       music: 'snes_map',
       ground: 's16_pasto',
       map: SNES_COLINAS_MAP,

@@ -102,7 +102,17 @@ Scenes.town = {
     this.idleIv = setInterval(() => this.idleCheck(), 1000);
     window.onblur = () => { this.held = null; };
 
-    if (!pueblo) return;
+    if (!pueblo) {
+      // Zona de un mundo: `intro` (páginas o función async (ctx)) se dice la primera vez que entras.
+      if (m.intro && !Save.data.flags[`intro_${id}`]) {
+        this.later = setTimeout(() => this.run(async (ctx) => {
+          ctx.setFlag(`intro_${id}`);
+          if (typeof m.intro === 'function') await m.intro(ctx);
+          else await ctx.say([].concat(m.intro), 'BIT');
+        }), 600);
+      }
+      return;
+    }
     if (!Save.data.flags.metBit) {
       Save.data.flags.hubEra = era;
       this.later = setTimeout(() => this.run(async (ctx) => { await bitIntro(ctx); ctx.setFlag('metBit'); }), 500);
