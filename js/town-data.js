@@ -429,6 +429,7 @@ TOWN.tiles = {
   t: { s: 'door', solid: true, look: 'casa' },        // tienda de Doña Tecla
   a: { s: 'door', solid: true, look: 'casa' },        // Sala de Arcade
   k: { s: 'door', solid: true, look: 'casa' },        // quiosco de Ocarín
+  b: { s: 'door', solid: true, look: 'casa' },        // alcaldía de Bellota (Barrio Cubo)
 };
 TOWN.looks.casaAmigo = '* Una casa nueva. Huele a píxeles recién horneados.';
 
@@ -532,12 +533,37 @@ const BARRIOS = [
       'TTTTTTTTTTTT',
     ],
   },
+  {
+    // Mundo 5 (js/worlds/gc.js). Su paleta (BARRIO_ERAS.gc) y sus guiños están en js/worlds/gc-pueblo.js.
+    id: 'gc', era: 'gc', name: 'Barrio Cubo', x: 44, y: 0, min: 24, world: 'gc',
+    friends: ['cubito', 'disquin', 'brotitos', 'delfinito', 'fantasmita', 'sombracel', 'capbrotes', 'casco', 'guante'],
+    sign: [45, 5, '* BARRIO CUBO\n* Todo brilla como plástico recién sacado de la caja.\n* (Las casas traen manija. Por si acaso.)'],
+    places: { bellota: [48, 14, 'ALCALDIA DE BELLOTA', '* Un buzón rojo junto a la puerta.\n* Huele a cartas recién escritas.'] },
+    map: [
+      'TTTTTTTTTTTTTTTT',
+      'TRRR.RRR.RRR.RRR',
+      'TWhW.WhW.WhW.WhW',
+      ':..............T',
+      'T::::::::::::::T',
+      'TS.*.:....:.*..T',
+      'T....:.~~.:....T',
+      'T*...:.~~.:...*T',
+      'T....::::::....T',
+      'TRRR.RRR.RRR.RRR',
+      'TWhW.WhW.WhW.WhW',
+      'T..............T',
+      'T.RRRRR.RRR.*..T',
+      'T.WWbWW.WhW....T',
+      'T..............T',
+    ],
+  },
 ];
 
 // Pasos entre pedazos: árbol mientras el barrio del otro lado (`opens`) no exista.
 const TOWN_GATES = [
   { x: 19, y: 10, opens: 'gb' }, { x: 5, y: 14, opens: 'nes' }, { x: 27, y: 14, opens: 'snes' },
   { x: 19, y: 20, opens: 'snes' }, { x: 31, y: 4, opens: 'n64' }, { x: 31, y: 20, opens: 'n64' },
+  { x: 43, y: 3, opens: 'gc' },
 ];
 
 // Donde esperan los amigos que llegaron antes que su barrio, y los lugares sin barrio todavía.
@@ -621,6 +647,7 @@ const BARRIO_NEWS = {
   nes: () => ['* ¡Otra vez! Ahora hay calles nuevas al sur del pueblo.', `* Es el BARRIO 8 BITS.${Save.data.consoles.nes ? ' ¡Y Doña Tecla abrió una tienda!' : ''}\n* Fíjate: allá todo sigue con colores de la NES.`],
   snes: () => ['* ¡El pueblo sigue creciendo! Al sureste hay un barrio con sombras y brillos.', '* El BARRIO 16 BITS. La Maestra Modo se mudó ahí con su Sala de Arcade.'],
   n64: () => ['* ¡Whoa! ¡El pueblo llegó hasta el otro lado del bosque!', `* El BARRIO POLIGONO.${Save.data.done.ocarin ? ' Ocarín puso un quiosco de música.' : ''}\n* Ahora el pueblo parece un museo del tiempo... ¡caminando!`],
+  gc: () => ['* ¡El pueblo creció otra vez! Más allá del Barrio Polígono todo brilla...', '* ¡El BARRIO CUBO! Casas índigo, una fuente con un botón verde gigante...\n* ¡y la alcaldía de Bellota!'],
 };
 
 // Una variante del pueblo por barrio construido (la última que se cumple es la que se ve).
