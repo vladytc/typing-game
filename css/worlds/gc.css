@@ -1,0 +1,346 @@
+/* MUNDO 5 — Cubo Galáctico (GameCube, 2001). Paleta del lore §8.1: índigo y brillos "plásticos".
+   Todo lo de aquí cuelga de .theme-gc o de clases propias del mundo (gc-*, br-*, sb-*, co-*, g-*). */
+
+.theme-gc {
+  --c0: #17162B; /* negro */
+  --c1: #4B3F9E; /* índigo */
+  --c2: #8E86D9; /* lila */
+  --c3: #ECEBF9; /* plata clarita */
+  --gc-indigo-d: #2D2566;
+  --gc-sky: #7EC8FF;
+  --gc-green: #3BB54A;
+  --gc-orange: #F28C28;
+  --gc-yellow: #F5D547;
+  --gc-silver: #C8CBD6;
+  --gc-red: #E04B4B;
+  --gc-water: #2B9EDB;
+  --gc-magenta: #FF00FF;
+}
+
+/* ---------- Piezas comunes con brillo de plástico ---------- */
+
+.theme-gc .box {
+  border-color: var(--c1);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #FFFFFF 0%, var(--c3) 45%, #DCD8F5 100%);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.9), 0 4px 0 var(--gc-indigo-d);
+}
+.theme-gc .bar { border-radius: 6px; overflow: hidden; border-color: var(--c0); }
+.theme-gc .bar i { background: linear-gradient(180deg, var(--c2), var(--c1)); }
+.theme-gc .emercy i { background: linear-gradient(180deg, #FFF3A6, var(--gc-yellow)); }
+.theme-gc .cmd {
+  border-radius: 8px;
+  border-color: var(--c1);
+  background: linear-gradient(180deg, #FFFFFF, #DCD8F5);
+}
+/* El cursor es el botón A verde de la GameCube. */
+.theme-gc .cmd.sel {
+  border-color: var(--c0);
+  background: linear-gradient(180deg, #7FE08B 0%, var(--gc-green) 60%, #2E9A3C 100%);
+  color: #FFFFFF;
+  text-shadow: 1px 1px 0 var(--c0);
+}
+.theme-gc .bullet {
+  border-radius: 8px;
+  background: linear-gradient(180deg, #FFFFFF, #E4E1F7);
+  box-shadow: inset 0 2px 0 #FFFFFF, 2px 3px 0 rgba(23, 22, 43, 0.25); /* sombra proyectada */
+}
+.theme-gc .bullet.target { background: linear-gradient(180deg, #C9C4F2, var(--c2)); }
+.gc-pause { z-index: 60; }
+
+/* ---------- Mapa: isla-cubo en el espacio, 14 paradas en 3 filas ---------- */
+
+.theme-gc .map {
+  color: #FFFFFF;
+  background:
+    radial-gradient(1px 1px at 12% 18%, #FFF 99%, transparent), radial-gradient(1px 1px at 82% 12%, #FFF 99%, transparent),
+    radial-gradient(2px 2px at 64% 30%, #FFF 99%, transparent), radial-gradient(1px 1px at 30% 70%, #FFF 99%, transparent),
+    radial-gradient(1px 1px at 92% 64%, #FFF 99%, transparent), radial-gradient(2px 2px at 6% 52%, #F5D547 99%, transparent),
+    radial-gradient(circle at 50% 35%, #4B3F9E 0, #2D2566 55%, #17162B 100%);
+}
+.theme-gc .map h2 { margin: 2px 0 6px; text-shadow: 2px 2px 0 #17162B, 0 0 8px #8E86D9; }
+.theme-gc .path { flex-wrap: wrap; row-gap: 0; }
+.theme-gc .path > .link:nth-child(10), .theme-gc .path > .link:nth-child(20) { display: none; } /* filas de 5 */
+.theme-gc .node { width: 92px; }
+.theme-gc .link { width: 18px; margin-top: 40px; border-color: #8E86D9; }
+.theme-gc .ncursor { height: 14px; font-size: 11px; color: var(--gc-yellow); }
+.theme-gc .nsprite {
+  height: 44px;
+  background: radial-gradient(ellipse 40% 18% at 50% 92%, rgba(255, 255, 255, 0.28), transparent 70%);
+}
+.theme-gc .nsprite canvas { width: 40px; height: 40px; }
+.theme-gc .node:last-child .nsprite canvas { width: 44px; height: 44px; }
+.theme-gc .nname { font-size: 7px; line-height: 1.4; margin-top: 2px; min-height: 20px; }
+.theme-gc .nstate { margin-top: 1px; color: var(--gc-silver); }
+.theme-gc .node.open .nstate { color: var(--gc-yellow); }
+.theme-gc .map .box { color: var(--c0); }
+.theme-gc .map-info { margin-top: 4px; height: 82px; line-height: 1.8; font-size: 8px; padding: 8px 12px; }
+.theme-gc .map-foot { margin-top: 4px; font-size: 8px; color: var(--c3); }
+.theme-gc .map-keys { color: var(--c3); }
+
+/* ---------- Combate con escenario 3D (gc3d.js) ---------- */
+
+.battle.gc { background: linear-gradient(180deg, var(--gc-sky) 0, #B9B3F0 120px, var(--c3) 215px); }
+.battle.gc .enemy-wrap::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  width: 200px;
+  height: 22px;
+  margin-left: -100px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(23, 22, 43, 0.28), transparent 70%);
+  pointer-events: none;
+}
+.esprite.has3d canvas.idle { display: none; }
+.poly-cv.gc-cv { position: static; width: 300px; height: 180px; image-rendering: auto; }
+.battle.gc .tt-words { font-size: 16px; line-height: 1.8; word-spacing: 6px; }
+
+/* Disquín: letras en círculo, que se tambalean (mareo). */
+.gc-circ {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FFFFFF 0 18%, #E4E1F7 19% 60%, #C8CBD6 61% 70%, transparent 71%);
+  animation: gcWobble 2.6s ease-in-out infinite alternate;
+}
+.gc-circ .wg { display: contents; }
+.gc-circ .c { position: absolute; transform: translate(-50%, -50%); }
+@keyframes gcWobble { from { transform: rotate(-10deg); } to { transform: rotate(10deg); } }
+
+/* Sombra de Cel: frases en negativo, con contorno grueso. */
+.battle.fx-gc-neg .tt-words {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #17162B;
+  color: #FFFFFF;
+  border: 4px solid #000000;
+  outline: 3px solid #FFFFFF;
+  border-radius: 6px;
+}
+.battle.fx-gc-neg .w { color: #8E86D9; }
+.battle.fx-gc-neg .w.cur { color: #FFFFFF; }
+.battle.fx-gc-neg .w.done { color: #5A5578; }
+.battle.fx-gc-neg .c.ok { color: #7EC8FF; }
+.battle.fx-gc-neg .c.next { border-bottom-color: #F5D547; }
+.battle.fx-gc-neg .bullet { background: #17162B; color: #FFFFFF; border-color: #FFFFFF; box-shadow: 0 0 0 2px #000; }
+
+/* Fantasmita: la palabra está escondida hasta que escribes su primera letra. */
+.battle.fx-gc-ghost .tt-words .w:not(.cur):not(.done) { opacity: 0.06; }
+.battle.fx-gc-ghost .w.cur:not(:has(.c.ok)) .c:not(.next) { opacity: 0.04; }
+.battle.fx-gc-ghost .bullet { animation: gcGhost 2.4s ease-in-out infinite; }
+@keyframes gcGhost { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+/* ---------- Casco Escáner (escaner.js) ---------- */
+
+.gc-visor {
+  position: absolute;
+  top: 36px;
+  left: 16px;
+  z-index: 2;
+  font-size: 7px;
+  line-height: 1.8;
+  color: var(--c1);
+}
+.gc-visor b { display: block; font-weight: normal; font-size: 8px; }
+.battle.visor-scan { background: linear-gradient(180deg, #0B3A12 0, #1F6B2A 120px, #CFEFD3 215px); }
+.battle.visor-scan .gc-visor { color: #B8FFC2; }
+.battle.visor-scan .enemy-info { color: #FFFFFF; }
+.battle.visor-scan::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 215px;
+  background: repeating-linear-gradient(0deg, rgba(184, 255, 194, 0.12) 0 2px, transparent 2px 5px);
+  pointer-events: none;
+  z-index: 1;
+  animation: gcScan 2.2s linear infinite;
+}
+@keyframes gcScan { from { background-position: 0 0; } to { background-position: 0 40px; } }
+
+/* ---------- El Guante Crossover (guante.js) ---------- */
+
+.battle.guante { background: radial-gradient(circle at 50% 30%, #4B3F9E 0, #2D2566 60%, #17162B 100%); }
+.battle.guante .enemy-info, .battle.guante .pinfo { color: #FFFFFF; text-shadow: 2px 2px 0 #17162B; }
+.battle.guante .hud .cmd { color: var(--c1); text-shadow: none; }
+.battle.guante .hud .cmd.sel { color: #FFFFFF; }
+.g-arena { position: absolute; left: 0; right: 0; top: 0; height: 250px; pointer-events: none; }
+.poly-cv.g-cv { image-rendering: auto; }
+.battle.has-arena .esprite canvas.idle { opacity: 0; }
+.g-pct { font-size: 20px; color: #FFFFFF; min-width: 70px; text-align: right; }
+.g-pct.warm, .g-ppct.warm { color: var(--gc-orange); }
+.g-pct.hot, .g-ppct.hot { color: var(--gc-red); animation: blink 0.4s steps(1) infinite; }
+.g-stock { font-size: 12px; color: var(--gc-yellow); letter-spacing: 2px; margin-right: 10px; }
+.g-ppct { font-size: 14px; color: #FFFFFF; }
+.g-lives { color: var(--gc-red); font-size: 12px; letter-spacing: 2px; }
+.gc-punch .heart { top: 50%; bottom: auto; transform: translate(-50%, -50%); color: var(--gc-red); }
+.gc-punch.style-tetro .bullet { border-radius: 0; background: #3c8d3c; color: #FFFFFF; border-color: #17162B; }
+.gc-punch.style-caparazon .bullet { border-radius: 14px; background: linear-gradient(#F5D547, #F28C28); }
+.gc-punch.style-nebula .bullet { border-radius: 14px 14px 4px 4px; background: linear-gradient(#C9C4F2, #7EC8FF); }
+.gc-punch.style-marco .bullet { border: 5px solid #E8B830; border-radius: 0; background: #FFFFFF; }
+
+/* ---------- Capitán Brotes / Brotitos (brotes.js) ---------- */
+
+.brotes { position: absolute; inset: 0; background: var(--c3); }
+.br-cv { position: absolute; left: 0; top: 0; width: 640px; height: 250px; }
+.br-hud {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 9px;
+  color: #17162B;
+  text-shadow: 1px 1px 0 #FFFFFF;
+}
+.br-boss { display: flex; align-items: center; gap: 6px; }
+.br-boss .bar { width: 90px; background: #FFFFFF; }
+.br-panel { position: absolute; top: 256px; left: 16px; right: 16px; bottom: 12px; }
+.br-legend { display: flex; gap: 8px; justify-content: center; font-size: 8px; }
+.br-legend span { border: 2px solid var(--sq); border-radius: 8px; padding: 4px 6px; background: #FFFFFF; }
+.br-legend b { color: var(--sq); font-weight: normal; text-shadow: 1px 1px 0 #17162B; }
+.br-legend i { font-style: normal; margin-left: 4px; }
+.br-order {
+  position: relative;
+  margin-top: 10px;
+  height: 120px;
+  padding: 12px 16px;
+  border: 4px solid var(--c1);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #FFFFFF, #E4E1F7);
+  box-shadow: inset 0 3px 0 #FFFFFF, 0 4px 0 var(--gc-indigo-d);
+}
+.br-order.gold { border-color: var(--gc-yellow); background: linear-gradient(180deg, #FFF9D6, #F5E79A); }
+.br-task { font-size: 11px; color: var(--c1); margin-bottom: 16px; }
+.br-type { font-size: 22px; white-space: nowrap; }
+.br-type .ok { color: var(--gc-green); }
+.br-type .nx { border-bottom: 4px solid #17162B; }
+.br-type .nx.bad { color: var(--gc-red); animation: shake 0.2s; }
+.br-type .dim { color: var(--c2); }
+.br-timer { position: absolute; left: 16px; right: 16px; bottom: 12px; height: 12px; border: 2px solid #17162B; border-radius: 6px; overflow: hidden; }
+.br-timer i { display: block; height: 100%; background: var(--gc-green); }
+.br-timer i.low { background: var(--gc-red); }
+.br-msg {
+  position: absolute;
+  top: -190px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 12px;
+  color: #FFFFFF;
+  text-shadow: 2px 2px 0 #17162B;
+  opacity: 0;
+  pointer-events: none;
+}
+.br-msg.show { animation: gcMsg 1.6s forwards; }
+.br-msg.big { font-size: 40px; top: -170px; }
+.br-msg.gold { color: var(--gc-yellow); }
+.br-msg.bad { color: #FFB3B3; }
+@keyframes gcMsg { 0% { opacity: 0; transform: translateY(8px); } 12%, 75% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.br-box { position: absolute; left: 16px; right: 16px; bottom: 12px; height: 160px; z-index: 20; }
+.br-mtitle, .br-end { font-size: 10px; margin-bottom: 8px; }
+
+/* ---------- Copias de Sombra (sombra.js) ---------- */
+
+.sombra { position: absolute; inset: 0; color: #FFFFFF; background: radial-gradient(circle at 50% 40%, #3A0A4A, #17162B 70%); }
+.sombra.hurt { animation: shake 0.3s; }
+.sb-top { position: absolute; top: 10px; left: 16px; right: 16px; display: flex; align-items: center; gap: 8px; font-size: 10px; }
+.sb-name { flex: 1; text-shadow: 0 0 6px #FF00FF; }
+.sb-top .bar { width: 160px; border-color: #FFFFFF; background: #2A0030; }
+.sb-hp i { background: linear-gradient(180deg, #FFC2FF, #FF00FF) !important; }
+.sb-time { width: 44px; text-align: right; color: var(--gc-yellow); }
+.sb-field {
+  position: absolute;
+  top: 38px;
+  left: 16px;
+  right: 16px;
+  height: 330px;
+  overflow: hidden;
+  border: 3px solid #FF66FF;
+  border-radius: 10px;
+  background: repeating-linear-gradient(0deg, rgba(255, 0, 255, 0.07) 0 2px, transparent 2px 4px);
+}
+.kind-caparazon .sb-field { background-color: rgba(224, 75, 75, 0.12); }
+.kind-nebula .sb-field { background-color: rgba(43, 158, 219, 0.14); }
+.kind-marco .sb-field { background-color: rgba(232, 184, 48, 0.08); }
+.sb-ghost { position: absolute; left: 50%; top: 50%; margin: -96px 0 0 -96px; opacity: 0.5; filter: drop-shadow(0 0 8px #FF00FF); }
+.sb-sprite { width: 192px; height: 192px; }
+.sb-ghost.hit canvas { animation: gcGlitch 0.3s steps(3); }
+.sb-ghost.fade { animation: gcFade 1.6s forwards; }
+@keyframes gcGlitch { 0% { transform: translateX(-8px) skewX(10deg); } 50% { transform: translateX(6px) skewX(-8deg); } 100% { transform: none; } }
+@keyframes gcFade { to { opacity: 0; filter: blur(6px); } }
+.sb-label { position: absolute; bottom: 6px; left: 0; right: 0; text-align: center; font-size: 8px; color: #FFC2FF; }
+.sb-beat { position: absolute; top: 8px; right: 10px; width: 18px; height: 18px; border-radius: 50%; background: #FF66FF; }
+.sb-beat.tick { animation: gcBeat 0.3s ease-out; }
+@keyframes gcBeat { 0% { transform: scale(1.8); background: #FFFFFF; } 100% { transform: none; } }
+.sb-word {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 4px 8px;
+  font-size: 16px;
+  white-space: nowrap;
+  color: #FFFFFF;
+  background: #2A0030;
+  border: 3px solid #FF66FF;
+  border-radius: 8px;
+}
+.sb-word .t { color: #FF66FF; }
+.sb-word.target { background: #FF66FF; color: #17162B; }
+.sb-word.target .t { color: #FFFFFF; }
+.sb-word.pop { animation: pop 0.25s forwards; }
+.sb-word::after { content: ''; position: absolute; left: 0; bottom: -7px; height: 3px; width: calc(var(--life, 1) * 100%); background: var(--gc-yellow); }
+.w-tetro::after, .w-nebula::after { display: none; }
+.w-tetro { border-radius: 0; background: #4B3F9E; border-color: #F5D547; }
+.w-nebula { border-radius: 16px 16px 6px 6px; background: #3B2A6E; }
+.w-marco { border: 5px solid #E8B830; border-radius: 0; background: #ECEBF9; color: #17162B; }
+.w-marco .t { color: #B000B0; }
+.sb-bottom { position: absolute; left: 16px; right: 16px; bottom: 14px; }
+.sombra .pinfo { color: #FFFFFF; }
+.sombra .pbar { border-color: #FFFFFF; }
+.sb-box { position: absolute; left: 16px; right: 16px; bottom: 56px; height: 150px; z-index: 20; color: var(--c0); }
+
+/* ---------- Correo de Bellota (correo.js) ---------- */
+
+.correo { position: absolute; inset: 0; background: linear-gradient(180deg, var(--gc-sky) 0, var(--c3) 62%, #5CC96A 62%, #2F8A3C 100%); }
+.co-head { position: absolute; top: 4px; left: 16px; right: 16px; height: 64px; display: flex; align-items: center; gap: 12px; }
+.co-title { flex: 1; font-size: 14px; color: var(--c0); text-shadow: 2px 2px 0 #FFFFFF; }
+.co-count { font-size: 8px; color: var(--c0); }
+.co-paper {
+  position: absolute;
+  top: 70px;
+  left: 36px;
+  right: 36px;
+  height: 204px;
+  padding: 10px 14px;
+  background: repeating-linear-gradient(180deg, #FFFDF4 0 27px, #D6E6FF 27px 28px);
+  border: 4px solid #8B5E3C;
+  border-radius: 6px;
+  box-shadow: 0 6px 0 rgba(23, 22, 43, 0.25);
+}
+.co-to { font-size: 9px; color: #8B5E3C; height: 16px; }
+.co-body { position: relative; height: 170px; }
+.co-body .tt { padding: 0; }
+.co-body .tt-label { margin-bottom: 6px; font-size: 8px; }
+.co-body .tt-words { font-size: 14px; line-height: 2; word-spacing: 4px; }
+.co-body .tt-timer { left: 0; right: 0; bottom: 0; }
+.co-body .tt-ready { background: transparent; }
+.co-hint { padding-top: 64px; text-align: center; font-size: 11px; color: var(--c1); }
+.co-free { height: 128px; overflow: hidden; font-size: 12px; line-height: 1.9; word-break: break-word; }
+.co-caret { animation: blink 1s steps(1) infinite; }
+.co-rules span { margin-right: 12px; font-size: 8px; color: var(--gc-red); }
+.co-rules span.ok { color: var(--gc-green); }
+.co-err { margin-top: 4px; font-size: 8px; color: var(--gc-red); }
+.co-box { position: absolute; left: 16px; right: 16px; bottom: 12px; height: 186px; }
+.co-dict { font-size: 10px; line-height: 2; }
+
+/* ---------- Curiosidades de la GameCube ---------- */
+
+.curio-view.curio-gamecube canvas { border-color: #4B3F9E; border-radius: 6px; }
