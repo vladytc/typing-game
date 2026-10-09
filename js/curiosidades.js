@@ -710,6 +710,121 @@ const CURIOSIDADES = {
       p.rows(2, 2, SPARKLE, { x: C.W }).rows(58, 34, SPARKLE, { x: C.W });
     },
   },
+  // ===== Wii =====
+  wii_revolution: {
+    console: 'wii',
+    title: 'Su nombre secreto',
+    caption: 'Mientras la inventaban, su nombre secreto era "Revolution" (Revolución). En abril de 2006 Nintendo anunció su nombre de verdad: Wii.',
+    draw(g, w, h) {
+      const C = WIIP;
+      const p = pixelArt(g, w, h, 64, 40, C.L);
+      for (let y = 0; y < 40; y += 4) p.r(0, y, 64, 2, C.W);           // franjas del menú
+      p.round(8, 6, 12, 30, C.W, C.G).r(10, 9, 8, 1, C.S);               // la consola parada, con su luz azul
+      p.r(13, 13, 2, 18, C.L).r(11, 32, 6, 2, C.G);
+      p.rows(26, 17, ['..x..', '...x.', 'xxxxx', '...x.', '..x..'], { x: C.B }); // flecha
+      p.round(34, 10, 26, 18, C.W, C.G);                                 // la tarjeta con el nombre nuevo
+      p.rows(37, 14, ['x...x.x.x', 'x...x....', 'x.x.x.x.x', 'x.x.x.x.x', '.x.x..x.x'], { x: C.B });
+      pixText(p, 39, 21, '2006', C.N);
+      p.rows(2, 2, SPARKLE, { x: C.S }).rows(58, 33, SPARKLE, { x: C.Y });
+    },
+  },
+  wii_sports: {
+    console: 'wii',
+    title: 'Wii Sports',
+    caption: 'Wii Sports venía incluido con la consola (en casi todo el mundo, menos en Japón). Vendió más de 80 millones: ¡uno de los juegos más vendidos de la historia!',
+    draw(g, w, h) {
+      const C = WIIP;
+      const p = pixelArt(g, w, h, 64, 40, C.W);
+      p.r(0, 28, 64, 12, C.T);                                           // el carril
+      for (let x = 2; x < 64; x += 8) p.r(x, 28, 1, 12, C.O);
+      const pin = (x, y) => p.r(x, y, 3, 8, C.W).r(x, y + 2, 3, 1, C.R).r(x - 1, y + 4, 5, 3, C.W).r(x, y - 1, 3, 1, C.G);
+      [[44, 18], [49, 18], [54, 18], [46.5, 14], [51.5, 14]].forEach(([x, y]) => pin(Math.round(x), y));
+      p.shape(8, 20, 12, 12, C.B, C.N, (i, j) => (i - 5.5) ** 2 + (j - 5.5) ** 2 <= 33);  // la bola
+      p.r(11, 23, 2, 2, C.N).r(15, 23, 2, 2, C.N).r(13, 26, 2, 2, C.N);
+      p.shape(24, 3, 12, 14, C.W, C.G, (i, j) => (i - 5.5) ** 2 / 36 + (j - 6.5) ** 2 / 49 <= 1); // raqueta
+      for (let k = 0; k < 4; k++) { p.r(26, 6 + k * 3, 8, 1, C.L); p.r(27 + k * 2, 5, 1, 10, C.L); }
+      p.r(29, 17, 2, 8, C.N);
+      p.shape(38, 4, 6, 6, C.V, C.N, (i, j) => (i - 2.5) ** 2 + (j - 2.5) ** 2 <= 7);  // pelotita
+      p.rows(56, 3, SPARKLE, { x: C.Y });
+    },
+  },
+  wii_ventas: {
+    console: 'wii',
+    title: 'Cien millones',
+    caption: 'Se vendieron más de 100 millones de Wii en todo el mundo. ¡Fue una de las consolas más vendidas de Nintendo!',
+    draw(g, w, h) {
+      const C = WIIP;
+      const p = pixelArt(g, w, h, 64, 40, C.S);
+      // Una montaña de consolas blancas, cada vez más alta.
+      [[4, 8], [12, 14], [20, 20], [28, 26]].forEach(([x, n]) => {
+        for (let k = 0; k < n; k += 3) p.round(x, 36 - k - 3, 6, 3, C.W, C.G);
+      });
+      pixText(p, 38, 8, '100', C.W, 3);
+      p.r(38, 26, 22, 2, C.W);
+      p.rows(40, 30, ['x.x.x.x.x.x', 'xxxxxxxxxxx'], { x: C.N });          // "millones" de rayitas
+      p.rows(2, 2, SPARKLE, { x: C.W }).rows(58, 20, SPARKLE, { x: C.Y });
+    },
+  },
+  wii_gamecube: {
+    console: 'wii',
+    title: 'Familia es familia',
+    caption: 'Las primeras Wii leían los discos de GameCube y tenían, bajo una tapita, 4 puertos para sus controles y 2 ranuras para sus tarjetas de memoria.',
+    draw(g, w, h) {
+      const C = WIIP;
+      const p = pixelArt(g, w, h, 64, 40, C.L);
+      p.shape(4, 14, 34, 16, C.W, C.G);                                  // la Wii acostada, vista desde arriba
+      p.r(8, 17, 26, 3, C.G);                                            // la tapita abierta
+      for (let k = 0; k < 4; k++) p.r(8 + k * 7, 21, 5, 4, C.K).r(9 + k * 7, 22, 3, 2, C.M);   // 4 puertos
+      p.r(8, 26, 8, 2, C.K).r(20, 26, 8, 2, C.K);                        // 2 ranuras de memoria
+      p.shape(44, 10, 16, 16, C.M, C.K, (i, j) => (i - 7.5) ** 2 + (j - 7.5) ** 2 <= 60); // el disquito de 8 cm
+      p.shape(50, 16, 4, 4, C.L, C.K, (i, j) => (i - 1.5) ** 2 + (j - 1.5) ** 2 <= 3);
+      p.rows(39, 18, ['..x.', 'xxxx', '..x.'], { x: C.B });
+      p.rows(58, 31, SPARKLE, { x: C.S });
+    },
+  },
+  wii_mii: {
+    console: 'wii',
+    title: 'Los Mii',
+    caption: 'En la Wii nacieron los Mii: muñequitos que tú creabas en el Canal Mii para que se parecieran a ti. ¡Luego jugaban contigo en Wii Sports!',
+    draw(g, w, h) {
+      const C = WIIP;
+      const p = pixelArt(g, w, h, 64, 40, C.W);
+      for (let y = 0; y < 40; y += 4) p.r(0, y, 64, 2, C.L);
+      const face = (x, y, hair, extra) => {
+        p.shape(x, y, 14, 16, C.F, C.K, (i, j) => (i - 6.5) ** 2 / 49 + (j - 7.5) ** 2 / 64 <= 1);
+        p.shape(x, y, 14, 7, hair, C.K, (i, j) => (i - 6.5) ** 2 / 49 + (j - 7.5) ** 2 / 64 <= 1 && j < 6);
+        p.r(x + 4, y + 8, 1, 2, C.K).r(x + 9, y + 8, 1, 2, C.K);          // ojos de puntito
+        p.r(x + 5, y + 12, 4, 1, C.K);                                   // boquita
+        if (extra) extra(x, y);
+      };
+      face(4, 12, C.N);
+      face(25, 6, C.O, (x, y) => p.r(x + 2, y + 7, 4, 1, C.K).r(x + 8, y + 7, 4, 1, C.K)); // con lentes
+      face(46, 12, C.Y, (x, y) => p.r(x + 10, y + 1, 4, 3, C.P));        // con moño
+      p.r(4, 30, 14, 6, C.S).r(25, 24, 14, 6, C.V).r(46, 30, 14, 6, C.R); // camisetas
+      p.rows(20, 2, SPARKLE, { x: C.S }).rows(42, 36, SPARKLE, { x: C.Y });
+    },
+  },
+  wii_sensor: {
+    console: 'wii',
+    title: 'La barra que no siente',
+    caption: 'La barra sensora no "siente" nada: solo tiene luces infrarrojas. La cámara está en la punta del control, y así sabe a dónde apuntas.',
+    draw(g, w, h) {
+      const C = WIIP;
+      const p = pixelArt(g, w, h, 64, 40, C.N);
+      p.round(6, 4, 52, 22, C.K, C.G).r(9, 7, 46, 16, C.S);              // la tele
+      p.round(16, 1, 32, 4, C.W, C.G).r(19, 2, 4, 2, C.R).r(41, 2, 4, 2, C.R); // la barra con sus 2 luces
+      p.round(28, 28, 8, 12, C.W, C.G).r(31, 29, 2, 2, C.K).r(31, 33, 2, 1, C.B); // el control, apuntando
+      // Los rayos invisibles (aquí sí se ven) van de las luces a la cámara del control.
+      for (let k = 0; k < 6; k++) { p.r(21 + k * 2, 6 + k * 4, 1, 2, C.P); p.r(42 - k * 2, 6 + k * 4, 1, 2, C.P); }
+      p.rows(28, 12, ['..x..', '.xxx.', 'xxxxx', '.xxx.', '..x..'], { x: C.W }); // el cursor en la tele
+    },
+  },
+};
+
+// Paleta de la Wii (lore §9.1) para sus curiosidades.
+const WIIP = {
+  K: '#222222', W: '#FAFAFA', L: '#E6E9EE', G: '#AAB2BD', S: '#5BC0EB', B: '#1E88E5', N: '#0D47A1', V: '#43D17A',
+  Y: '#FFD54F', O: '#FF8A3D', R: '#F44336', P: '#F48FB1', M: '#9C6ADE', F: '#F6D2B0', T: '#F3D9A4',
 };
 
 // ---------- Ayudas de dibujo de la GameCube ----------
