@@ -134,7 +134,7 @@ const TOWN = {
       },
     },
     {
-      id: 'champi', sprite: 'champi', x: 17, y: 5,
+      id: 'champi', sprite: 'champi', x: 15, y: 5,
       async talk(ctx) {
         const n = ctx.counter('champi');
         const lines = [

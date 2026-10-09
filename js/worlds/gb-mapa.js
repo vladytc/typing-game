@@ -246,6 +246,7 @@ addMaps('gb', {
   maps: {
     'gb-valle': {
       name: 'Valle Game Boy',
+      intro: ['* ¡El Valle Game Boy! Todo es verde... como en la pantalla de la Game Boy.', '* Los enemigos cierran los caminos. Para pasar, tendrás que escribir.\n* (ESC abre el menú para volver al pueblo.)'],
       music: 'gb_valle',
       map: GB_VALLE_MAP,
       // Al vencer al Tetro Rey, las rocas se mueven y se abre la Cueva de los Sueños.
