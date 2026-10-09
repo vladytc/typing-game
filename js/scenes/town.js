@@ -24,12 +24,18 @@ Scenes.town = {
       this.p = { x, y, face };
     }
     Object.assign(this, { mode: 'walk', moving: false, held: null, ui: null, idleAt: performance.now(), heyShown: false, grace: 3 });
+    // Era del pueblo: si cambió desde la última visita, primero se ve la anterior y luego viaja en el tiempo.
+    const era = hubEra();
+    const lastEra = Save.data.flags.hubEra || 'gb';
+    const warp = era !== lastEra && Save.data.flags.metBit;
+    this.era = warp ? lastEra : era;
+    document.body.className = HUB_ERAS[this.era].theme;
 
     Game.root.innerHTML = `
-      <div class="town">
+      <div class="town era-${this.era}">
         <canvas class="tmap" width="640" height="480"></canvas>
         <div class="ents"></div>
-        <div class="area-name">${esc(upper(m.name))}</div>
+        <div class="area-name">${esc(upper(m.name))}<span>${HUB_ERAS[era].label}</span></div>
         <div class="town-keys">ENTER hablar · M misiones · V vitrina · E estadísticas · ESC título</div>
         <div class="tbox hidden"><div class="speaker hidden"></div><div class="tbody"></div></div>
       </div>`;
@@ -39,18 +45,42 @@ Scenes.town = {
     window.onblur = () => { this.held = null; };
 
     if (!Save.data.flags.metBit) {
+      Save.data.flags.hubEra = era;
       this.later = setTimeout(() => this.run(async (ctx) => { await bitIntro(ctx); ctx.setFlag('metBit'); }), 500);
-    } else {
-      // ¿Se abrió un mundo nuevo desde la última visita?
-      const fresh = WORLDS.find((w) => w.requires && worldUnlocked(w) && !Save.data.flags[`pipe_${w.id}`]);
-      if (fresh) {
-        this.later = setTimeout(() => this.run(async (ctx) => {
-          ctx.setFlag(`pipe_${fresh.id}`);
-          await announcePipe(ctx, fresh);
-          if (QUESTS[`mundo_${fresh.id}`]) Quests.start(`mundo_${fresh.id}`);
-        }), 500);
-      }
+      return;
     }
+    // ¿Se abrió un mundo nuevo desde la última visita?
+    const fresh = WORLDS.find((w) => w.requires && worldUnlocked(w) && !Save.data.flags[`pipe_${w.id}`]);
+    if (!warp && !fresh) return;
+    this.later = setTimeout(() => this.run(async (ctx) => {
+      if (warp) await this.timeWarp(ctx, era);
+      if (fresh) {
+        ctx.setFlag(`pipe_${fresh.id}`);
+        await announcePipe(ctx, fresh);
+        if (QUESTS[`mundo_${fresh.id}`]) Quests.start(`mundo_${fresh.id}`);
+      }
+    }), 600);
+  },
+
+  // Cinemática: la pantalla se distorsiona, el pueblo cambia a la nueva era y Bit lo comenta.
+  async timeWarp(ctx, era) {
+    const town = $('.town');
+    Sfx.warp();
+    town.classList.add('warp-out');
+    await new Promise((r) => setTimeout(r, 900));
+    this.era = era;
+    Save.data.flags.hubEra = era;
+    Save.write();
+    document.body.className = HUB_ERAS[era].theme;
+    town.className = `town era-${era} warp-in`;
+    this.paintMap();
+    this.repaintEntities();
+    Sfx.secret();
+    await new Promise((r) => setTimeout(r, 900));
+    town.classList.remove('warp-in');
+    const lines = [...(ERA_CHANGE_LINES[era] || ['* ¡El pueblo viajó en el tiempo!'])];
+    await ctx.say(lines, 'BIT');
+    if (this.npcs.some((n) => n.era && n.era !== era)) await ctx.say([NATIVE_LOOK_LINE]);
   },
 
   exit() {
@@ -70,14 +100,34 @@ Scenes.town = {
     return TILES[row[x]];
   },
 
+  // Cada casilla con la paleta de la era actual (como las paletas por zona de la NES).
   paintMap() {
     const g = $('.tmap').getContext('2d');
-    const colors = paletteColors();
+    const era = this.era;
+    const shadows = HUB_ERAS[era].shadows;
     TOWN.map.forEach((row, y) => [...row].forEach((ch, x) => {
-      paintSprite(g, 'grass', x * TILE, y * TILE, 2, colors);
+      paintSprite(g, 'grass', x * TILE, y * TILE, 2, tileColors(era, 'grass'));
       const t = this.tileAt(x, y);
-      if (t && t.s !== 'grass') paintSprite(g, t.s, x * TILE, y * TILE, 2, colors);
+      if (!t || t.s === 'grass') return;
+      if (shadows && (t.s === 'tree' || t.s === 'sign')) {
+        g.fillStyle = 'rgba(26, 26, 46, 0.28)';
+        g.beginPath();
+        g.ellipse(x * TILE + 18, y * TILE + 29, 13, 4, 0, 0, Math.PI * 2);
+        g.fill();
+      }
+      paintSprite(g, t.s, x * TILE, y * TILE, 2, tileColors(era, t.s));
     }));
+  },
+
+  // Personajes del pueblo viajan en el tiempo; los amigos rescatados se quedan en su era.
+  entityCanvas(e) {
+    return spriteCanvas(e.sprite, e.big ? 3 : 2, false, '', charColors(e.sprite, e.era || this.era));
+  },
+
+  repaintEntities() {
+    [...this.npcs, this.player, this.bit].forEach((e) => {
+      e.el.replaceChild(this.entityCanvas(e), e.el.querySelector('canvas'));
+    });
   },
 
   makeEntities() {
@@ -85,12 +135,22 @@ Scenes.town = {
     const mk = (props) => {
       const e = { ...props };
       e.el = document.createElement('div');
-      e.el.className = `ent ${props.cls || ''}`;
-      e.el.appendChild(spriteCanvas(props.sprite, props.big ? 3 : 2));
+      e.el.className = `ent ${props.cls || ''} ${props.era ? `native-${props.era}` : ''}`;
+      e.el.appendChild(this.entityCanvas(e));
       layer.appendChild(e.el);
       return e;
     };
     this.npcs = TOWN.npcs.filter((n) => !n.when || n.when()).map((n) => mk({ ...n }));
+    // Amigos de otros mundos que llegan solos: enemigos perdonados con `home: [x, y]`.
+    Object.entries(ENEMIES).forEach(([id, def]) => {
+      if (!def.home || !Save.data.spared[id] || this.npcs.some((n) => n.id === `f-${id}`)) return;
+      const [x, y] = def.home;
+      const line = def.townLine || `* ¡Hola! Ahora vivo en el pueblo.`;
+      this.npcs.push(mk({
+        id: `f-${id}`, sprite: def.sprite, x, y, era: eraOfEnemy(id),
+        talk: (ctx) => ctx.say([line], upper(def.name)),
+      }));
+    });
     this.player = mk({ id: 'player', sprite: 'heroe', cls: 'player', x: this.p.x, y: this.p.y });
     // Bit aparece detrás del jugador (o en cualquier lado libre).
     const order = [OPPOSITE[this.p.face], 'down', 'up', 'left', 'right'];

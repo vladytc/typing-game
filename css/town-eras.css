@@ -1,0 +1,61 @@
+/* El Pueblo Vitrina en cada era (ver js/town-eras.js). */
+
+/* Interfaz del pueblo en la era 16 bits (cuadros de texto, menús, vitrina...). */
+.theme-hub-snes {
+  --c0: #1a1a2e;
+  --c1: #2e5c9a;
+  --c2: #ffffff;
+  --c3: #5fcde4;
+}
+.theme-hub-snes .box,
+.theme-hub-snes .tbox { border-radius: 6px; box-shadow: 0 4px 0 rgba(26, 26, 46, 0.35); }
+
+.area-name span { display: block; font-size: 8px; text-align: center; margin-top: 6px; opacity: 0.8; }
+
+/* 16 bits: sombras suaves bajo los personajes. */
+.town.era-snes .ent::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  bottom: 0;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(26, 26, 46, 0.28);
+}
+.town.era-snes .ent canvas { position: relative; }
+
+/* Viaje en el tiempo: la imagen se tuerce, parpadea con líneas de TV y vuelve con la era nueva. */
+.town.warp-out .tmap,
+.town.warp-out .ents { animation: warpOut 0.9s ease-in forwards; }
+.town.warp-in .tmap,
+.town.warp-in .ents { animation: warpIn 0.9s ease-out; }
+.town.warp-out::after,
+.town.warp-in::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 58;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.35) 0 2px, transparent 2px 4px);
+  animation: blink 0.12s steps(1) infinite;
+}
+@keyframes warpOut {
+  0% { filter: none; transform: none; }
+  60% { filter: hue-rotate(180deg) saturate(3) blur(1px); transform: skewX(8deg) scaleY(0.96); }
+  100% { filter: brightness(3) blur(3px); transform: skewX(-12deg) scaleY(0.02); }
+}
+@keyframes warpIn {
+  0% { filter: brightness(3) blur(3px); transform: scaleY(0.02); }
+  50% { filter: hue-rotate(-90deg) saturate(2); transform: skewX(6deg) scaleY(1.03); }
+  100% { filter: none; transform: none; }
+}
+
+/* Museo por salas (js/scenes/vitrina.js). */
+.vtabs { display: flex; gap: 8px; align-items: center; margin: 6px 0 4px; padding: 4px; border: 3px solid transparent; }
+.vtabs.sel { border-color: var(--c0); }
+.vtab { font-size: 9px; padding: 5px 8px; border: 2px solid var(--c1); color: var(--c1); cursor: pointer; }
+.vtab.on { background: var(--c0); color: var(--c3); border-color: var(--c0); }
+.vtabs .count { margin-left: auto; }
+.vrows { height: 238px; overflow-y: auto; scrollbar-width: none; }
+.vrows .slot { width: 52px; height: 52px; }

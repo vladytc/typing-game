@@ -14,6 +14,7 @@ Scenes.battle = {
       st: { chars: 0, errors: 0, ms: 0, perfect: 0 },
       cmd: 0, phase: 'intro', timers: [],
     });
+    document.body.className = `theme-${eraOfEnemy(enemyId)}`; // la estética de su mundo
     Music.play(def.boss ? 'boss' : 'battle');
     const NAME = upper(def.name);
     Game.root.innerHTML = `
