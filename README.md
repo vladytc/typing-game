@@ -16,12 +16,21 @@ ese navegador.
 
 Los acentos y la Ñ son opcionales (escribir `a` vale por `á`).
 
-### Batalla de monstruos (Entrenador Max)
+### Tecloides (minijefe Dani Turbo)
 
-Minijefe del Valle Game Boy. Escoges a tu compañero escribiendo su nombre y luego cada
-ataque se usa **escribiendo su nombre**: más rápido = más daño. Fuego le gana a planta,
-planta a agua, agua a fuego y eléctrico a agua. En el turno rival hay que escribir una
-palabra corta a tiempo para recibir la mitad del daño.
+En el Valle Game Boy, la Profesora Letra te regala tu primer Tecloide (Voltín, Gotín o
+Brotín: se escoge escribiendo su nombre) y tu rival Dani Turbo te reta. Cada ataque se usa
+**escribiendo su palabra**: más rápido y sin errores = más daño. CHISPA le gana a GOTA,
+GOTA a BROTE y BROTE a CHISPA. En el turno rival, escribe la palabra de su ataque para
+esquivar.
+
+### Mundo 2: Castillo 8-Bit (NES) — Nivel 1-1
+
+Se abre al rescatar la Game Boy (en el mapa, ↑ ↓ cambia de mundo). Mario avanza mientras
+escribes; cada tubería, hoyo, Goomba o bloque ? tiene su palabra. Las palabras con
+mayúscula (Mario, Goomba...) se escriben con SHIFT. Hay súper hongo, monedas, reloj,
+3 vidas y bandera. Dato real: si el tiempo termina en 1, 3 o 6 al tocar la bandera, hay
+fuegos artificiales.
 
 ### Minijuego: BLOQUES
 
@@ -48,7 +57,8 @@ diario de misiones.
 - Los sprites son dibujos de 16×16 hechos con letras en `js/sprites.js`.
 - La música (`js/music.js`) son melodías originales escritas como notas (`E5/2` = mi de la
   quinta octava durante 2 pasos). Cada pantalla elige su pista.
-- Las misiones están en `js/quests.js`; los monstruos y entrenadores, en `js/monsters.js`.
+- Las misiones están en `js/quests.js`; los Tecloides y entrenadores, en `js/tecloides.js`.
+- La biblia de la historia (mundos, jefes, personajes) está en `docs/LORE.md`.
 
 ### Secretos (no se los cuentes 🤫)
 

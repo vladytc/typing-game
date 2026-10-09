@@ -6,6 +6,13 @@
   --c3: #9bbc0f; /* más claro */
 }
 
+.theme-nes {
+  --c0: #000000;
+  --c1: #c84c0c;
+  --c2: #fca044;
+  --c3: #5c94fc;
+}
+
 :root {
   --font: 'Press Start 2P', ui-monospace, Menlo, monospace;
 }
@@ -209,6 +216,7 @@ h1, h2 { margin: 0; font-weight: normal; }
 .wtab.on { background: var(--c0); color: var(--c3); }
 .wtab.soon { border-color: var(--c2); color: var(--c2); }
 .wtab.soon::after { content: ' ?'; }
+.wkeys { font-size: 7px; color: var(--c1); align-self: center; margin-left: 8px; }
 .map h2 { font-size: 15px; margin-bottom: 26px; text-align: center; }
 
 .path { display: flex; align-items: flex-start; justify-content: center; }
@@ -717,6 +725,58 @@ canvas.starter:nth-of-type(2) { animation-delay: 0.3s; }
 .bhelp { font-size: 8px; line-height: 1.8; color: var(--c1); }
 .bover { position: absolute; left: 60px; width: 300px; top: 150px; z-index: 50; text-align: center; font-size: 12px; }
 .bover-menu { margin-top: 14px; text-align: left; font-size: 11px; }
+
+/* ---------- Mundo 1-1 ---------- */
+
+.smb { position: absolute; inset: 0; background: #5c94fc; color: #fcfcfc; }
+.smb-cv { position: absolute; inset: 0; }
+.smb-hud {
+  position: absolute;
+  top: 12px;
+  left: 24px;
+  right: 24px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  line-height: 1.6;
+  text-shadow: 2px 2px 0 #000;
+}
+.coin-i { display: inline-block; width: 8px; height: 14px; background: #f8b800; border: 2px solid #000; vertical-align: -2px; margin-right: 4px; }
+.smb-type {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 64px;
+  background: rgba(0, 0, 0, 0.55);
+  text-align: center;
+  padding-top: 6px;
+}
+.st-hint { font-size: 9px; color: #f8b800; height: 14px; }
+.st-word { font-size: 24px; letter-spacing: 2px; }
+.st-word .ok { color: #7c7c7c; }
+.st-word .nx { border-bottom: 4px solid #f8b800; }
+.st-word .nx.bad { color: #f83800; animation: shake 0.2s; }
+.st-next { position: absolute; right: 12px; bottom: 8px; font-size: 9px; color: #b8f818; }
+.smb-card {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  font-size: 14px;
+  text-align: center;
+  line-height: 1.6;
+  padding: 20px;
+}
+.card-mario { display: flex; align-items: center; gap: 16px; }
+.card-mario canvas { width: 24px; height: 32px; }
+.smb-menu { width: 360px; text-align: left; font-size: 12px; }
+.smb-menu .opt { color: #7c7c7c; }
+.smb-menu .opt.sel { color: #fcfcfc; }
 
 /* ---------- Animaciones ---------- */
 

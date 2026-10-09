@@ -227,6 +227,22 @@ const TRACKS = {
     ],
   },
 
+  // Mundo 1-1: alegre y brincadora, Do mayor (original, al estilo de los plataformeros del NES).
+  nes11: {
+    bpm: 170,
+    voices: [
+      {
+        wave: 'square', vol: 0.032,
+        notes: 'G4 C5 E5/2 D5 C5 A4/2 C5 D5 E5/2 C5/4 ' +
+          'A4 C5 F5/2 E5 D5 C5/2 D5 E5 G5/2 E5/4 ' +
+          'F5 E5 D5/2 C5 D5 E5/2 G5 A5 G5/2 E5/4 ' +
+          'D5 E5 C5/2 A4 B4 C5/2 G4 B4 D5/2 C5/4',
+      },
+      { wave: 'triangle', vol: 0.11, notes: rep('C3 G3', 8) + ' ' + rep('F2 C3', 8) + ' ' + rep('C3 G3', 8) + ' ' + rep('G2 D3', 8) },
+      { wave: 'noise', vol: 0.022, notes: rep('x - x -', 16) },
+    ],
+  },
+
   // Jingle de victoria (no se repite).
   victory: {
     bpm: 150, loop: false,
@@ -236,3 +252,6 @@ const TRACKS = {
     ],
   },
 };
+
+// ¡Apúrate! La misma pista, más rápida, cuando el tiempo baja de 100.
+TRACKS.nes11_hurry = { ...TRACKS.nes11, bpm: 230 };

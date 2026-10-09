@@ -85,6 +85,14 @@ const ENEMIES = {
     blurb: '¡MINIJEFE! En el Pasto Alto Grande te esperan la Profesora Letra y tu rival, Dani Turbo.',
     keysHint: 'Palabras de ataque + esquivar escribiendo',
   },
+  mario11: {
+    name: 'Mundo 1-1',
+    sprite: 'mario',
+    mode: 'mario', // nivel de plataformas (js/scenes/mario.js)
+    xp: 30,
+    blurb: '¡El nivel más famoso de la historia! Mario avanza mientras escribes.',
+    keysHint: 'Mayúsculas con SHIFT (Mario, Goomba)',
+  },
   tetrorey: {
     name: 'Tetro Rey',
     sprite: 'tetrorey',
@@ -114,7 +122,7 @@ const ENEMIES = {
 
 const WORLDS = [
   { id: 'gb', name: 'Valle Game Boy', short: 'GB', nodes: ['pixelito', 'cartuchon', 'pilabat', 'dani', 'tetrorey'] },
-  { id: 'nes', name: 'Castillo 8-Bit', short: 'NES', soon: true },
+  { id: 'nes', name: 'Castillo 8-Bit', short: 'NES', theme: 'nes', requires: 'gameboy', nodes: ['mario11'] },
   { id: 'snes', name: 'Reino 16-Bit', short: 'SNES', soon: true },
   { id: 'n64', name: 'Isla Polígono', short: 'N64', soon: true },
   { id: 'gc', name: 'Cubo Galáctico', short: 'GC', soon: true },
@@ -193,6 +201,7 @@ const TREASURES = {
   bloques: { name: 'Cartucho de bloques', sprite: 'cartucho', desc: 'Regalo de Don Chip. Venía incluido con la Game Boy.' },
   espada: { name: 'Espada de madera', desc: 'Es peligroso ir solo. Un clásico de 1986.' },
   medalla: { name: 'Medalla Pixel', desc: 'Se la ganaste a Dani Turbo en tu primer combate de Tecloides.' },
+  superhongo: { name: 'Súper hongo', desc: 'Premio por terminar el Mundo 1-1. Te hace grande... en la vitrina.' },
   ficha: { name: 'Ficha dorada', desc: 'Premio por llegar a 40 puntos en BLOQUES.' },
   zapper: { name: 'Pistola de luz', desc: 'Premio de Toby. Las de verdad solo funcionaban en teles de tubo.' },
 };
