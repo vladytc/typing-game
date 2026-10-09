@@ -1,6 +1,6 @@
 // El museo de Don Chip: una sala por cada era ya abierta (sin spoilers de las que vienen)
-// y la Sala del Pueblo. Cada sala muestra su consola, sus tesoros y los amigos de esa era,
-// todo con la estética original de su consola.
+// y la Sala del Pueblo. Cada sala muestra su consola y sus tesoros, con la estética original
+// de su consola. Los amigos no están aquí: viven en el pueblo (y cuentan datos, ver js/curiosidades.js).
 
 const PER_ROW = 9;
 
@@ -40,17 +40,8 @@ Scenes.vitrina = {
     for (let i = 0; i < treasures.length; i += PER_ROW) {
       rows.push({ title: i ? '' : 'TESOROS', slots: treasures.slice(i, i + PER_ROW) });
     }
-    if (w) {
-      const friends = Object.keys(w.enemies || {}).filter((eid) => !ENEMIES[eid].mode || ENEMIES[eid].friend)
-        .map((eid) => ({
-          sprite: ENEMIES[eid].sprite, got: !!d.spared[eid], name: ENEMIES[eid].name,
-          desc: 'Lo perdonaste en vez de pelear. ¡Qué buena onda!', colors: look(ENEMIES[eid].sprite),
-        }));
-      for (let i = 0; i < friends.length; i += PER_ROW) {
-        rows.push({ title: i ? '' : 'AMIGOS', slots: friends.slice(i, i + PER_ROW) });
-      }
-    }
     this.rows = rows;
+    this.r = Math.min(this.r, rows.length - 1); // una sala puede quedar sin repisas
   },
 
   render() {

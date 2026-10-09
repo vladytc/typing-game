@@ -8,13 +8,20 @@ const QUESTS = {
   },
   coleccion: {
     name: 'El sueño de Don Chip',
-    desc: 'Llena la vitrina del museo con consolas, tesoros y amigos.',
+    desc: 'Llena la vitrina del museo con consolas y tesoros.',
     progress: () => {
       const d = Save.data;
-      const friends = Object.keys(ENEMIES).filter((id) => !ENEMIES[id].mode || ENEMIES[id].friend);
-      const total = CONSOLES.length + Object.keys(TREASURES).length + friends.length;
-      const got = Object.keys(d.consoles).length + Object.keys(d.treasures).length + friends.filter((id) => d.spared[id]).length;
+      const total = CONSOLES.length + Object.keys(TREASURES).length;
+      const got = Object.keys(d.consoles).length + Object.keys(d.treasures).length;
       return `${got}/${total}`;
+    },
+  },
+  amigos: {
+    name: 'Amigos del pueblo',
+    desc: 'Perdona a los monstruos en vez de vencerlos: se mudan al Pueblo Vitrina y te cuentan datos de su consola.',
+    progress: () => {
+      const all = Object.keys(ENEMIES).filter((id) => !ENEMIES[id].mode || ENEMIES[id].friend);
+      return `${all.filter((id) => Save.data.spared[id]).length}/${all.length}`;
     },
   },
   primer_tecloide: {
