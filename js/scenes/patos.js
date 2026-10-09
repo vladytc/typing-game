@@ -14,7 +14,7 @@ const PATOS_SYL = ['pa', 'to', 'me', 'lo', 'su', 'ra', 'ni', 'ca', 'de', 'fi', '
 
 Scenes.patos = nesScene({
   enter({ enemyId = 'patos', back = 'map', turbo = false, arcade = false } = {}) {
-    Object.assign(this, { id: enemyId, back, turbo, arcade: arcade || back !== 'map', backParams: undefined });
+    Object.assign(this, { id: enemyId, back, turbo, arcade: !!arcade, backParams: undefined });
     this.mount('patos-scene', '<div class="pt-hud"></div>');
     Object.assign(this, {
       round: 0, ducks: [], caught: 0, results: [], target: null, toby: null, mode: 'intro',
