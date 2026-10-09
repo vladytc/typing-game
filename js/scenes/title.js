@@ -95,7 +95,7 @@ Scenes.story = {
         <div class="box story-box"><div class="tb-text"></div></div>
       </div>`;
     const art = $('.story-art');
-    CONSOLES.forEach((c) => art.appendChild(spriteCanvas(c.id, 4, true)));
+    CONSOLES.filter((c) => !c.secret).forEach((c) => art.appendChild(spriteCanvas(c.id, 4, true)));
     this.dialog = new Dialog($('.story-box .tb-text'), INTRO_STORY, () => {
       Save.data.seenIntro = true;
       Save.write();
