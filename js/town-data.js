@@ -254,6 +254,7 @@ const TOWN = {
     },
   ],
 };
+MAPS.pueblo = Object.assign(TOWN, { id: 'pueblo' });
 
 async function bitIntro(ctx) {
   await ctx.say([

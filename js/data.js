@@ -92,6 +92,8 @@ const TREASURES = {
 // Enemigos y mundos se llenan desde js/worlds/*.js con addWorld().
 const ENEMIES = {};
 const WORLDS = [];
+// Mapas que se exploran caminando (el pueblo y las zonas de cada mundo). Ver addMaps().
+const MAPS = {};
 
 // Registra un mundo (ver docs/MUNDOS.md):
 //   id, order (lugar de su tubería en el pueblo), name, theme, requires (consola que lo abre),
@@ -104,6 +106,15 @@ function addWorld(w) {
   Object.assign(QUESTS, w.quests || {});
   WORLDS.push(w);
   WORLDS.sort((a, b) => a.order - b.order);
+}
+
+// Zonas explorables de un mundo. entry = { map, spawn: [x, y, cara] } es donde se aparece al
+// entrar por su tubería del pueblo. Sin zonas, la tubería lleva al mapa de paradas.
+function addMaps(worldId, { entry, maps }) {
+  Object.assign(MAPS, maps);
+  Object.entries(maps).forEach(([id, m]) => { m.id = id; m.world = worldId; });
+  const w = WORLDS.find((x) => x.id === worldId);
+  if (w) w.entry = entry;
 }
 
 const worldUnlocked = (w) => !w.requires || !!Save.data.consoles[w.requires];
