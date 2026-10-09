@@ -1,0 +1,19 @@
+/* Mapas que se caminan en 3D (js/scenes/town3d.js) y el pueblo en la era Polígono. */
+
+/* El 2D sigue armado debajo (por si three.js no carga); con el 3D encima, se esconde. */
+.town.r3d .tworld { visibility: hidden; }
+.poly-cv.t3d { z-index: 1; }
+
+/* Interfaz del pueblo en la era Polígono (cuadros de texto, menús, vitrina...). */
+.theme-hub-n64 {
+  --c0: #202030;
+  --c1: #7e57c2;
+  --c2: #3c8dd6;
+  --c3: #c9d6e3;
+}
+.theme-hub-n64 .box,
+.theme-hub-n64 .tbox { border-radius: 10px; box-shadow: 0 4px 0 rgba(32, 32, 48, 0.35); }
+.theme-n64 .town .tbox { border-radius: 10px; }
+
+/* En 3D, el cartel del área y las teclas se leen mejor con un fondo un poquito transparente. */
+.town.r3d .town-keys { background: rgba(32, 32, 48, 0.82); }
