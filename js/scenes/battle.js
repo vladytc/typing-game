@@ -133,9 +133,14 @@ Scenes.battle = {
   runTask(opts) {
     this.phase = 'typing';
     this.renderCmds();
-    const onDone = opts.onDone;
+    const { onDone, onUnit } = opts;
     this.task = new TypingTask(this.box, {
       ...opts,
+      // def.onWord (opcional): avisa cada palabra terminada, p. ej. para misiones de racha.
+      onUnit: (unit) => {
+        if (this.def.onWord) this.def.onWord(unit);
+        return onUnit ? onUnit(unit) : true;
+      },
       onDone: (res) => {
         this.st.chars += res.chars;
         this.st.errors += res.errors;
@@ -265,7 +270,7 @@ Scenes.battle = {
         if (this.p.hp <= 0) {
           this.dodge.stop();
           this.phase = 'busy';
-          this.later(() => { Sfx.lose(); Game.go('gameover', { enemyId: this.id, back: this.back }); }, 600);
+          this.later(() => { Sfx.lose(); Game.go('gameover', { enemyId: this.id, back: this.back, scene: this.def.mode || 'battle' }); }, 600);
         }
       },
       onDone: (res) => {

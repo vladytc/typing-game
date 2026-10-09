@@ -206,9 +206,21 @@ const TOWN = {
       id: 'arcade', sprite: 'arcade', x: 14, y: 4,
       async talk(ctx) {
         const best = (Save.data.arcade || {}).bloques || 0;
-        await ctx.say([`* Una máquina arcade: BLOQUES.\n* Récord: ${best} puntos.`]);
+        // Minijuegos que ya se desbloquearon, además de BLOQUES.
+        const extra = [
+          { scene: 'chupaletras', opt: 'chupa letras', name: 'CHUPA-LETRAS', best: (Save.data.arcade || {}).chupaletras || 0, when: Save.data.flags.chupaletras },
+        ].filter((g) => g.when);
+        if (!extra.length) {
+          await ctx.say([`* Una máquina arcade: BLOQUES.\n* Récord: ${best} puntos.`]);
+          Quests.start('arcade');
+          if (await ctx.choose(['jugar', 'ahora no']) === 0) Game.go('bloques', { back: 'town' });
+          return;
+        }
+        await ctx.say([`* Una máquina arcade con varios juegos.\n* BLOQUES · Récord: ${best}\n${extra.map((g) => `* ${g.name} · Récord: ${g.best}`).join('\n')}`]);
         Quests.start('arcade');
-        if (await ctx.choose(['jugar', 'ahora no']) === 0) Game.go('bloques', { back: 'town' });
+        const i = await ctx.choose(['bloques', ...extra.map((g) => g.opt), 'ahora no']);
+        if (i === 0) Game.go('bloques', { back: 'town' });
+        else if (i <= extra.length) Game.go(extra[i - 1].scene, { back: 'town' });
       },
     },
 
@@ -232,7 +244,12 @@ const TOWN = {
     },
     {
       id: 'f-tetrorey', sprite: 'tetrorey', x: 7, y: 10, when: () => Save.data.spared.tetrorey,
-      async talk(ctx) { await ctx.say(['* Este pueblo necesita orden.\n* ¿Por qué ninguna casa encaja con la otra?'], 'TETRO REY'); },
+      async talk(ctx) {
+        await ctx.say(['* Este pueblo necesita orden.\n* ¿Por qué ninguna casa encaja con la otra?'], 'TETRO REY');
+        const i = await ctx.choose(['qué te pasó', 'tetris', 'adiós'], 'TETRO REY');
+        if (i === 0) await ctx.say(['* Algo morado me puso a girar y girar...\n* Todavía me da vueltas la corona.'], 'TETRO REY');
+        if (i === 1) await ctx.say(['* ¡No digas esa palabra! Me da vértigo.'], 'TETRO REY');
+      },
     },
   ],
 };

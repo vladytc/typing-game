@@ -1,0 +1,155 @@
+/* ---------- Mundo 1: Valle Game Boy ---------- */
+
+/* El color que ninguna consola puede mostrar (pista del Glitch, docs/LORE.md §1.3). */
+:root { --glitch: #ff00ff; }
+
+/* Mapa del valle: 8 nodos, así que van más juntitos. */
+.theme-gb .scene-map .node { width: 70px; }
+.theme-gb .scene-map .link { width: 6px; }
+.theme-gb .scene-map .nname { font-size: 7px; }
+.theme-gb .scene-map .nstate { font-size: 6px; }
+.theme-gb .scene-map .nsprite canvas { max-width: 68px; height: auto; image-rendering: pixelated; }
+
+/* ---------- Tetro Rey ---------- */
+
+/* La mancha magenta en la torre del rey: casi nadie la nota. */
+.scene-tetrorey .esprite { position: relative; }
+.glitch-px {
+  position: absolute;
+  left: 81px;   /* columna 9 del sprite (x9) */
+  top: 108px;   /* fila 12: el cuerpo de la torre */
+  width: 9px;
+  height: 9px;
+  background: var(--glitch);
+  animation: bob 1.4s ease-in-out infinite, glitchBlink 4s steps(1) infinite;
+  pointer-events: none;
+}
+.glitch-px.reveal { animation: blink 0.15s steps(1) infinite; box-shadow: 0 0 0 3px #000; }
+@keyframes glitchBlink { 0%, 86% { opacity: 1; } 88% { opacity: 0; } 90% { opacity: 1; } 92% { opacity: 0.2; } 94% { opacity: 1; } }
+
+/* Fase 3: las palabras se leen en vertical, una letra por renglón. */
+.bbox.tr-tall .tt-words {
+  writing-mode: vertical-lr;
+  text-orientation: upright;
+  height: 132px;
+  font-size: 16px;
+  line-height: 2.2;
+  word-spacing: 0;
+  letter-spacing: 2px;
+}
+.bbox.tr-tall .w { margin-right: 26px; }
+.bbox.tr-tall .c.next { border-bottom: none; border-left: 4px solid var(--c0); }
+
+/* Fase 2: ¡LLUEVEN BLOQUES! (encima de la batalla) */
+.trb { position: absolute; inset: 0; background: var(--c3); z-index: 20; }
+.trb-well {
+  position: absolute;
+  left: 40px;
+  top: 70px;
+  border: 4px solid var(--c0);
+  border-top: none;
+  box-sizing: content-box;
+  overflow: hidden;
+  background: repeating-linear-gradient(0deg, transparent 0 33px, var(--c2) 33px 34px);
+}
+.trb-col { position: absolute; top: 0; bottom: 0; border-right: 2px dotted var(--c2); }
+.trb-top { position: absolute; left: 0; right: 0; border-top: 3px dashed var(--c1); }
+.trb-piece {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  border: 3px solid var(--c0);
+  background: var(--c3);
+  white-space: nowrap;
+}
+.trb-piece .t { color: var(--c2); }
+.trb-piece .nx { border-bottom: 3px solid var(--c0); }
+.trb-piece .nx.bad { background: var(--c0); color: var(--c3); }
+.trb-piece.falling { background: var(--c2); }
+.trb-piece.placed { background: var(--c1); color: var(--c3); }
+.trb-piece.cracked { background: var(--c3); color: var(--c1); border-style: dashed; }
+.trb-piece.cracked::after { content: ''; position: absolute; left: 30%; top: 2px; bottom: 2px; border-left: 2px solid var(--c0); transform: skewX(-30deg); }
+.trb-piece.pop { animation: pop 0.25s forwards; }
+.trb-panel { position: absolute; left: 430px; right: 20px; top: 30px; }
+.trb-panel h2 { font-size: 14px; line-height: 1.6; margin: 0 0 14px; text-shadow: 3px 3px 0 var(--c2); }
+.trb-panel .bar { width: 100%; margin-top: 6px; }
+
+/* ---------- Chupín: ABSORBER ---------- */
+
+.esprite.inhaling canvas { animation: inhale 0.5s ease-in-out infinite; }
+@keyframes inhale { 50% { transform: scale(1.12, 0.92); } }
+.chu { position: absolute; inset: 0; }
+.chu-label { position: absolute; top: 6px; left: 10px; right: 10px; font-size: 8px; color: var(--c1); }
+.chu-field { position: absolute; left: 0; right: 0; top: 24px; bottom: 0; }
+.chu-word {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 4px 8px;
+  font-size: 15px;
+  border: 3px solid var(--c1);
+  background: var(--c3);
+  color: var(--c1);
+  white-space: nowrap;
+  transform-origin: center;
+}
+.chu-word .t { color: var(--c2); }
+.chu-word.inhaled { border-color: var(--c0); color: var(--c0); background: var(--c2); animation: none; z-index: 5; }
+.chu-word.inhaled::before { content: '▶ '; }
+.chu-word.inhaled::after { content: ' ◀'; }
+.chu-word.inhaled .nx { border-bottom: 3px solid var(--c0); }
+.chu-word.inhaled .nx.bad { background: var(--c0); color: var(--c3); }
+.chu-word.pop { animation: pop 0.25s forwards; }
+
+/* ---------- Minijuego Chupa-Letras ---------- */
+
+.chl { position: absolute; inset: 0; }
+.chl-hud {
+  position: absolute;
+  top: 10px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--c1);
+}
+.chl-hud b { font-weight: normal; font-size: 13px; color: var(--c0); margin-left: 4px; }
+.chl-field {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 34px;
+  bottom: 30px;
+  border: 4px solid var(--c0);
+  overflow: hidden;
+  background: radial-gradient(circle at center, var(--c2) 0 50px, transparent 51px);
+}
+.chl-mouth { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+.chl-mouth canvas { display: block; }
+.chl-word {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 3px 7px;
+  font-size: 14px;
+  border: 3px solid var(--c0);
+  background: var(--c3);
+  white-space: nowrap;
+  z-index: 2;
+}
+.chl-word .t { color: var(--c2); }
+.chl-word.target { background: var(--c2); }
+.chl-word.target .t { color: var(--c1); }
+.chl-word.target .nx { border-bottom: 3px solid var(--c0); }
+.chl-word .nx.bad { background: var(--c0); color: var(--c3); }
+.chl-word.gold { border-style: double; border-width: 5px; animation: pulse 0.6s ease-in-out infinite; }
+.chl-word.gold::before { content: '★ '; }
+.chl-word.pop { animation: pop 0.25s forwards; }
+.chl-help { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; font-size: 8px; color: var(--c1); }
+.chl-over { left: 150px; width: 340px; top: 140px; }

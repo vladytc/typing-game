@@ -11,7 +11,7 @@ const QUESTS = {
     desc: 'Llena la vitrina del museo con consolas, tesoros y amigos.',
     progress: () => {
       const d = Save.data;
-      const friends = Object.keys(ENEMIES).filter((id) => !ENEMIES[id].mode);
+      const friends = Object.keys(ENEMIES).filter((id) => !ENEMIES[id].mode || ENEMIES[id].friend);
       const total = CONSOLES.length + Object.keys(TREASURES).length + friends.length;
       const got = Object.keys(d.consoles).length + Object.keys(d.treasures).length + friends.filter((id) => d.spared[id]).length;
       return `${got}/${total}`;
