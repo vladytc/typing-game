@@ -591,7 +591,154 @@ const CURIOSIDADES = {
       p.rows(28, 4, SPARKLE, { x: C.W });
     },
   },
+
+  // ===== GameCube (Mundo 5, js/worlds/gc.js). Ayudas de dibujo: GCP, gcPixText, drawGCCube (abajo). =====
+  gc_disco: {
+    console: 'gamecube',
+    title: 'Discos de 8 cm',
+    caption: 'La GameCube usaba discos chiquitos de 8 cm, en vez de los de 12 cm de un DVD. ¡Y aun así guardaban cerca de 1.5 GB!',
+    draw(g, w, h) {
+      const C = GCP;
+      const p = pixelArt(g, w, h, 64, 40, C.D);
+      const circle = (r, cx, cy) => (i, j) => (i - cx) ** 2 + (j - cy) ** 2 <= r * r;
+      p.shape(2, 1, 31, 31, '#3A3180', C.L, circle(15, 15, 15));          // un disco normal (12 cm)
+      p.shape(13, 12, 9, 9, C.D, C.L, circle(4, 4, 4));
+      gcPixText(p, 10, 34, '12CM', C.L);
+      p.shape(38, 8, 23, 23, C.P, C.K, circle(11, 11, 11));               // el disco de GameCube (8 cm)
+      for (let j = 0; j < 23; j++) for (let i = 0; i < 23; i++) {
+        const d = (i - 11) ** 2 + (j - 11) ** 2;
+        if (d >= 42 && d <= 64) p.r(38 + i, 8 + j, 1, 1, (i + j) % 3 ? C.S : C.L);   // arcoíris del disco
+      }
+      p.shape(46, 16, 7, 7, C.K, C.K, circle(3, 3, 3));                     // el hoyito del centro
+      gcPixText(p, 44, 34, '8CM', C.Y);
+      p.rows(56, 4, SPARKLE, { x: C.W }).rows(34, 1, SPARKLE, { x: C.Y });
+    },
+  },
+  gc_manija: {
+    console: 'gamecube',
+    title: 'La consola con manija',
+    caption: '¡La GameCube tenía manija atrás! Era una consola de mesa, pero la podías cargar como lonchera a casa de un amigo.',
+    draw(g, w, h) {
+      const C = GCP;
+      const p = pixelArt(g, w, h, 64, 40, C.S);
+      p.r(0, 32, 64, 8, C.G).r(0, 32, 64, 1, '#2f8a3c');                 // pasto
+      drawGCCube(p, 20, 10, C, 24);
+      p.rows(2, 3, SPARKLE, { x: C.W }).rows(58, 6, SPARKLE, { x: C.W });
+      // Flechitas de "¡vámonos!"
+      p.rows(48, 20, ['..x..', '...x.', 'xxxxx', '...x.', '..x..'], { x: C.R }).rows(54, 20, ['..x..', '...x.', 'xxxxx', '...x.', '..x..'], { x: C.R });
+    },
+  },
+  gc_dolphin: {
+    console: 'gamecube',
+    title: 'Nombre clave: Dolphin',
+    caption: 'Mientras la inventaban, la GameCube se llamaba "Dolphin" (delfín). Su procesador era Gekko y su chip de gráficos, Flipper.',
+    draw(g, w, h) {
+      const C = GCP;
+      const p = pixelArt(g, w, h, 64, 40, C.S);
+      p.r(0, 26, 64, 14, C.U);
+      for (let x = 0; x < 64; x += 8) p.r(x + 2, 27, 4, 1, C.W);            // olas con reflejos
+      p.rows(14, 6, [
+        '..........KK..........',
+        '.........KUUK.........',
+        '......KKKUUUUKKK......',
+        '....KKUUUUUUUUUWKK....',
+        '..KKUUUUUUUUUUUUKWK...',
+        '.KUUUUUUUUUUUUUUUUUKKK',
+        'KUUSSSSSSSSSSSUUUUUUUK',
+        'KUKSSSSSSSSSSSSKKKKKK.',
+        'KK.KKSSSSSSSSKK.......',
+        '.....KKKKKKKK.........',
+      ], { K: C.K, U: C.U, S: C.W, W: C.W });
+      p.r(31, 10, 1, 1, C.K);                                               // el ojito
+      for (let k = 0; k < 6; k++) p.r(8 + k * 2, 20 + k, 1, 1, C.W).r(40 + k * 2, 25 - k, 1, 1, C.W); // salpicadas
+      drawGCCube(p, 48, 30, C, 10);
+    },
+  },
+  gc_gbplayer: {
+    console: 'gamecube',
+    title: 'El Game Boy Player',
+    caption: 'El Game Boy Player (2003) se conectaba debajo de la GameCube: ¡con él jugabas cartuchos de Game Boy en la tele!',
+    draw(g, w, h) {
+      const C = GCP;
+      const p = pixelArt(g, w, h, 64, 40, C.D);
+      p.round(30, 2, 32, 24, C.P, C.K).r(33, 5, 26, 18, C.K).r(34, 6, 24, 16, '#9bbc0f'); // la tele
+      p.r(36, 14, 6, 6, '#306230').r(44, 10, 4, 4, '#0f380f').r(50, 16, 6, 4, '#8bac0f'); // un juego de Game Boy
+      p.r(43, 26, 6, 2, C.K);
+      drawGCCube(p, 6, 8, C, 18);                                            // la GameCube...
+      p.round(6, 28, 18, 6, C.K, C.K).r(7, 29, 16, 4, '#3A3180').r(11, 30, 8, 2, C.K); // ...con el Game Boy Player abajo
+      p.round(12, 34, 6, 6, C.P, C.K).r(13, 35, 4, 2, C.L);                  // el cartucho de Game Boy
+      p.r(24, 31, 6, 1, C.L).r(29, 26, 1, 6, C.L);                          // el cable a la tele
+      gcPixText(p, 37, 33, '2003', C.Y);
+    },
+  },
+  gc_melee: {
+    console: 'gamecube',
+    title: 'El mas vendido',
+    caption: 'Super Smash Bros. Melee (2001) fue el juego más vendido de la GameCube: ¡más de 7 millones de copias!',
+    draw(g, w, h) {
+      const C = GCP;
+      const p = pixelArt(g, w, h, 64, 40, C.I);
+      p.r(0, 30, 64, 10, C.D).r(4, 29, 56, 2, C.P);                         // la plataforma de la arena
+      p.shape(22, 4, 20, 14, C.Y, C.K, (i, j) => j < 9 || (i >= 3 + (j - 9) && i <= 16 - (j - 9))); // la copa
+      p.r(18, 6, 4, 2, C.Y).r(42, 6, 4, 2, C.Y).r(18, 6, 1, 6, C.Y).r(45, 6, 1, 6, C.Y); // las asas
+      p.r(30, 18, 4, 5, C.Y).round(25, 23, 14, 5, C.O, C.K);                 // la base
+      p.r(26, 6, 2, 6, C.W);                                                // brillo
+      p.rows(29, 7, ['..x..', '.xxx.', 'xxxxx', '.x.x.'], { x: C.W });       // estrellita
+      gcPixText(p, 4, 6, '+7M', C.W, 2);
+      p.rows(56, 3, SPARKLE, { x: C.Y }).rows(50, 18, SPARKLE, { x: C.W });
+      // Cuatro jugadores en la plataforma.
+      [C.R, C.U, C.Y, C.G].forEach((c, k) => p.r(8 + k * 14, 24, 4, 5, c).r(8 + k * 14, 23, 4, 1, C.K));
+    },
+  },
+  gc_boton_a: {
+    console: 'gamecube',
+    title: 'El gran boton A',
+    caption: 'En el control de la GameCube, el botón A era verde y GRANDE, justo en medio: ¡el más importante, imposible de fallar!',
+    draw(g, w, h) {
+      const C = GCP;
+      const p = pixelArt(g, w, h, 64, 40, C.S);
+      // El control: cuerpo índigo con dos agarraderas.
+      p.shape(4, 6, 56, 30, C.I, C.K, (i, j) => (j < 18 && i >= 2 && i <= 53) || (j >= 18 && ((i >= 2 && i <= 18 && j <= 28) || (i >= 37 && i <= 53 && j <= 28))));
+      p.round(10, 10, 9, 9, C.P, C.K).r(13, 13, 3, 3, C.L);                  // palanca
+      p.rows(18, 21, ['.x.', 'xxx', '.x.'], { x: C.K });                     // cruceta
+      p.round(36, 20, 7, 7, C.Y, C.K);                                        // palanca C (amarilla)
+      p.round(41, 9, 9, 9, C.G, C.K).r(43, 11, 2, 2, C.W);                   // ¡el botón A!
+      p.round(37, 15, 5, 5, C.R, C.K);                                        // B (rojo)
+      p.round(51, 7, 4, 7, C.P, C.K).round(42, 4, 7, 4, C.P, C.K);           // X y Y
+      p.r(30, 12, 3, 2, C.P);                                                 // START
+      p.rows(44, 12, ['.x.', 'x.x', 'xxx', 'x.x'], { x: C.W });              // la letra A
+      p.rows(2, 2, SPARKLE, { x: C.W }).rows(58, 34, SPARKLE, { x: C.W });
+    },
+  },
 };
+
+// ---------- Ayudas de dibujo de la GameCube ----------
+const GCP = {
+  K: '#17162B', I: '#4B3F9E', D: '#2D2566', L: '#8E86D9', S: '#7EC8FF', G: '#3BB54A', O: '#F28C28',
+  Y: '#F5D547', P: '#C8CBD6', W: '#FFFFFF', U: '#2B9EDB', R: '#E04B4B',
+};
+// Letras de 3 x 5 que le faltan a PIX_FONT (sin tocarla).
+const GC_GLYPHS = {
+  4: ['x.x', 'x.x', 'xxx', '..x', '..x'], 7: ['xxx', '..x', '.x.', '.x.', '.x.'], 8: ['xxx', 'x.x', 'xxx', 'x.x', 'xxx'],
+  C: ['xxx', 'x..', 'x..', 'x..', 'xxx'], M: ['x.x', 'xxx', 'xxx', 'x.x', 'x.x'], '+': ['...', '.x.', 'xxx', '.x.', '...'],
+};
+function gcPixText(p, x, y, text, c, s = 1) {
+  [...String(text)].forEach((ch, k) => (GC_GLYPHS[ch] || PIX_FONT[ch] || []).forEach((row, j) => [...row].forEach((v, i) => {
+    if (v === 'x') p.r(x + k * 4 * s + i * s, y + j * s, s, s, c);
+  })));
+}
+// La GameCube vista de 3/4: cubo índigo con tapa, manija atrás y 4 puertos (sz = ancho).
+function drawGCCube(p, x, y, C, sz = 20) {
+  const t = Math.max(3, Math.round(sz / 4));
+  const hy = y - Math.round(sz / 3);
+  p.r(x + 3, hy, sz - 6, 2, C.D).r(x + 3, hy, 2, Math.round(sz / 3) + 1, C.D).r(x + sz - 5, hy, 2, Math.round(sz / 3) + 1, C.D); // manija
+  p.shape(x + t, y, sz, t, C.L, C.K, (i, j) => i >= t - j - 1);           // tapa de arriba
+  p.round(x, y + t, sz, sz, C.I, C.K);                                    // frente
+  p.shape(x + sz - 1, y + 1, t + 1, sz + t - 1, C.D, C.K, (i, j) => j >= t - i - 1 && j <= sz + t - 2 - i + t); // costado
+  p.r(x + Math.round(sz / 2) - 2, y + t + 3, 4, 4, C.L);                  // el cubito del logo
+  for (let k = 0; k < 4; k++) p.r(x + 2 + k * Math.round((sz - 4) / 4), y + t + sz - 4, 2, 2, C.K); // 4 puertos
+  p.r(x + 2, y + t + 2, 2, 1, C.W);                                       // brillo de plástico
+}
 
 function addCuriosities(list) { Object.assign(CURIOSIDADES, list); }
 
