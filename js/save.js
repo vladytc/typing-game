@@ -17,7 +17,8 @@ function defaultSave() {
     team: [],      // Tecloides: [{ id, lv, xp }]
     flags: {},
     quests: {},    // id -> 'active' | 'done'
-    arcade: {},    // récords de minijuegos     // cosas que pasaron en el pueblo (diálogos, quests)
+    arcade: {},    // récords de minijuegos
+    pos: null,     // dónde estaba explorando: { map, x, y, face }     // cosas que pasaron en el pueblo (diálogos, quests)
     stats: { keys: {}, battles: [], bestWpm: 0 },
   };
 }
