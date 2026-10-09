@@ -9,12 +9,37 @@ function capsMatch(expected, typed) {
   return keyMatches(expected, typed);
 }
 
+// Modo estricto (opcional, desde el Mundo 3): los acentos y la ñ sí cuentan; las mayúsculas no.
+// Se puede apagar en toda la partida con Save.data.strictAccents = false.
+const strictOn = (wanted) => !!wanted && Save.data.strictAccents !== false;
+function strictMatch(expected, typed) {
+  return typed === expected || typed.toLowerCase() === expected.toLowerCase();
+}
+// ¿Le faltó solo el acento o la tilde? (para darle una pista en vez de solo marcar error)
+const missingAccent = (expected, typed) => typed !== expected && norm(typed) === norm(expected);
+const accentTip = (ch) => (norm(ch) === 'n' ? '¡Es Ñ, con tilde!' : `¡Lleva acento! ${ch}`);
+// Pista para el error en modo estricto ('' si el error no tiene que ver con acentos ni signos).
+function strictTip(expected, typed) {
+  if (missingAccent(expected, typed)) return accentTip(expected);
+  if (expected === '¿' || expected === '¡') return `Empieza con ${expected} (en Mac: Option+1 = ¡, Option+Shift+? = ¿)`;
+  return '';
+}
+
+// Elige cómo comparar teclas según las reglas activas (se pueden combinar).
+function pickMatch({ caps = false, strict = false } = {}) {
+  if (caps && strict) return (e, t) => strictMatch(e, t) && (e === e.toLowerCase() || t !== t.toLowerCase());
+  if (strict) return strictMatch;
+  if (caps) return capsMatch;
+  return keyMatches;
+}
+
 class TypingTask {
   // texts: lista de palabras/frases. onUnit(unit) se llama al terminar cada una;
   // si devuelve false, la tarea se detiene (por ejemplo, porque el enemigo ya cayó).
-  constructor(box, { label, texts, timeLimit, onUnit, onDone, caps = false }) {
-    Object.assign(this, { box, label, texts, timeLimit: timeLimit * diff().time, onUnit, onDone });
-    this.match = caps ? capsMatch : keyMatches;
+  // caps: exige mayúsculas (Mundo 2). strict: exige acentos y ñ (Mundo 3, ver strictOn).
+  constructor(box, { label, texts, timeLimit, onUnit, onDone, caps = false, strict = false }) {
+    Object.assign(this, { box, label, texts, timeLimit: timeLimit * diff().time, onUnit, onDone, strict: strictOn(strict) });
+    this.match = pickMatch({ caps, strict: this.strict });
     this.totalChars = texts.join('').length;
   }
 
@@ -22,7 +47,7 @@ class TypingTask {
     Object.assign(this, { i: 0, pos: 0, chars: 0, errors: 0, unitErrors: 0, active: false, done: false });
     this.box.innerHTML = `
       <div class="tt">
-        <div class="tt-label">${esc(this.label)}</div>
+        <div class="tt-label">${esc(this.label)}${this.strict ? ' <span class="tt-strict">ACENTOS Y Ñ CUENTAN</span>' : ''}</div>
         <div class="tt-words"></div>
         <div class="tt-timer"><i></i></div>
         <div class="tt-ready">¿LISTO?</div>
@@ -57,9 +82,11 @@ class TypingTask {
       this.errors++;
       this.unitErrors++;
       Sfx.error();
+      this.tip = this.strict ? strictTip(expected, e.key) : '';
       this.render(true);
       return;
     }
+    this.tip = '';
     Stats.record(expected, true);
     Sfx.key();
     this.pos++;
@@ -96,7 +123,7 @@ class TypingTask {
       if (j < this.i) return `<span class="w done">${esc(t)}</span>`;
       if (j > this.i) return `<span class="w">${esc(t)}</span>`;
       return `<span class="w cur">${chars(t)}</span>`;
-    }).join(' ');
+    }).join(' ') + (this.tip ? `<div class="tt-tip">${esc(this.tip)}</div>` : '');
   }
 
   finish(completed, aborted = false) {
@@ -124,7 +151,8 @@ class TypingTask {
 class Dodge {
   constructor(box, cfg, { onHit, onDone }) {
     Object.assign(this, { box, cfg, onHit, onDone });
-    this.match = cfg.caps ? capsMatch : keyMatches;
+    this.strict = strictOn(cfg.strict);
+    this.match = pickMatch({ caps: cfg.caps, strict: this.strict });
   }
 
   start() {

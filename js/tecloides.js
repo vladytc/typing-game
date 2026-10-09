@@ -5,7 +5,10 @@
 // Tipos. Ventaja x1.5, desventaja x0.67. BYTE es neutral.
 const TTYPES = { chispa: 'CHISPA', gota: 'GOTA', brote: 'BROTE', byte: 'BYTE' };
 const BEATS = { chispa: 'gota', gota: 'brote', brote: 'chispa' };
+// ESTATICA (tipo secreto del Glitch, desde el Mundo 3): x1.2 contra todos, pero BYTE le pega x2.
 function effectiveness(moveType, defType) {
+  if (defType === 'estatica') return moveType === 'byte' ? 2 : 1;
+  if (moveType === 'estatica') return 1.2;
   if (BEATS[moveType] === defType) return 1.5;
   if (BEATS[defType] === moveType) return 0.67;
   return 1;
