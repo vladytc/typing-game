@@ -212,13 +212,14 @@ const TOWN = {
       },
     },
 
-    // Los enemigos que perdonó se mudan al pueblo.
+    // Los enemigos que perdonó se mudan al pueblo y conservan la estética de su era (`era`).
+    // Los de mundos nuevos también pueden llegar solos: dale `home: [x, y]` y `townLine` a su enemigo.
     {
-      id: 'f-pixelito', sprite: 'pixelito', x: 13, y: 10, when: () => Save.data.spared.pixelito,
+      id: 'f-pixelito', era: 'gb', sprite: 'pixelito', x: 13, y: 10, when: () => Save.data.spared.pixelito,
       async talk(ctx) { await ctx.say(['* ¡Boing! ¡Me mudé al pueblo!\n* Aquí todo se ve en alta definición.'], 'PIXELITO'); },
     },
     {
-      id: 'f-cartuchon', sprite: 'cartuchon', x: 17, y: 8, when: () => Save.data.spared.cartuchon,
+      id: 'f-cartuchon', era: 'gb', sprite: 'cartuchon', x: 17, y: 8, when: () => Save.data.spared.cartuchon,
       async talk(ctx) {
         await ctx.say([
           '* Ya no soy gruñón. Bueno, solo los lunes.',
@@ -227,11 +228,11 @@ const TOWN = {
       },
     },
     {
-      id: 'f-pilabat', sprite: 'pilabat', x: 18, y: 2, when: () => Save.data.spared.pilabat,
+      id: 'f-pilabat', era: 'gb', sprite: 'pilabat', x: 18, y: 2, when: () => Save.data.spared.pilabat,
       async talk(ctx) { await ctx.say(['* Bzzt. Aquí hay enchufes por todos lados.\n* Soy muy feliz.'], 'PILABAT'); },
     },
     {
-      id: 'f-tetrorey', sprite: 'tetrorey', x: 7, y: 10, when: () => Save.data.spared.tetrorey,
+      id: 'f-tetrorey', era: 'gb', sprite: 'tetrorey', x: 7, y: 10, when: () => Save.data.spared.tetrorey,
       async talk(ctx) { await ctx.say(['* Este pueblo necesita orden.\n* ¿Por qué ninguna casa encaja con la otra?'], 'TETRO REY'); },
     },
   ],

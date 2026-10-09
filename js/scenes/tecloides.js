@@ -16,6 +16,7 @@ Scenes.tecloides = {
       st: { chars: 0, errors: 0, ms: 0, perfect: 0 },
       items: 3 + (Save.data.konami ? 3 : 0),
     });
+    document.body.className = `theme-${eraOfEnemy(enemyId)}`;
     Music.play('tecloides');
     Game.root.innerHTML = `
       <div class="mon intro-flash">

@@ -131,6 +131,16 @@ Al perder, `Game.go('gameover', { enemyId, back, scene: '<mode>' })` ofrece rein
 **Dificultad:** si tu mecánica tiene un tiempo, multiplícalo por `diff().time`. Si algo se
 mueve, multiplica su velocidad por `diff().speed`. Si algo hace daño, pásalo por `scaledDmg()`.
 
+## 3b. El pueblo y el museo (ya funcionan solos)
+
+- **Eras del pueblo** (`js/town-eras.js`): el pueblo toma la estética del mundo más avanzado
+  abierto. Si tu mundo trae una era nueva, agrega su entrada en `HUB_ERAS` (paleta por casilla
+  y por personaje). Si no, el pueblo se queda en la era anterior.
+- **Amigos perdonados**: dale a tu enemigo `home: [x, y]` (casilla libre del pueblo) y
+  `townLine: '* ...'`; al perdonarlo aparece en el pueblo con la estética de tu mundo.
+- **Museo**: tus `treasures` salen solos en la sala de tu mundo; la consola sale si tu mundo
+  tiene `console` y existe en `CONSOLES`.
+
 ## 4. Sprites
 
 Dibujos de 16×16 con letras, en `sprites` de tu mundo:

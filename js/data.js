@@ -76,16 +76,17 @@ const CONSOLES = [
   },
 ];
 
+// room: en qué sala del museo se exhibe ('pueblo' o el id de un mundo).
 const TREASURES = {
-  manual: { name: 'Manual de instrucciones', desc: 'Nadie lo leyó nunca. Excepto tú.' },
-  cartucho: { name: 'Cartucho misterioso', desc: 'Sopla antes de usar. Es la regla.' },
-  pilas: { name: 'Pilas AA', desc: 'Para jugar en el carro durante horas.' },
-  cable: { name: 'Cable Link', desc: 'Sirve para jugar con un amigo. ¡Ya tienes varios!' },
-  bloques: { name: 'Cartucho de bloques', sprite: 'cartucho', desc: 'Regalo de Don Chip. Venía incluido con la Game Boy.' },
-  espada: { name: 'Espada de madera', desc: 'Es peligroso ir solo. Un clásico de 1986.' },
-  medalla: { name: 'Medalla Pixel', desc: 'Se la ganaste a Dani Turbo en tu primer combate de Tecloides.' },
-  ficha: { name: 'Ficha dorada', desc: 'Premio por llegar a 40 puntos en BLOQUES.' },
-  zapper: { name: 'Pistola de luz', desc: 'Premio de Toby. Las de verdad solo funcionaban en teles de tubo.' },
+  manual: { room: 'gb', name: 'Manual de instrucciones', desc: 'Nadie lo leyó nunca. Excepto tú.' },
+  cartucho: { room: 'gb', name: 'Cartucho misterioso', desc: 'Sopla antes de usar. Es la regla.' },
+  pilas: { room: 'gb', name: 'Pilas AA', desc: 'Para jugar en el carro durante horas.' },
+  cable: { room: 'gb', name: 'Cable Link', desc: 'Sirve para jugar con un amigo. ¡Ya tienes varios!' },
+  bloques: { room: 'pueblo', name: 'Cartucho de bloques', sprite: 'cartucho', desc: 'Regalo de Don Chip. Venía incluido con la Game Boy.' },
+  espada: { room: 'pueblo', name: 'Espada de madera', desc: 'Es peligroso ir solo. Un clásico de 1986.' },
+  medalla: { room: 'gb', name: 'Medalla Pixel', desc: 'Se la ganaste a Dani Turbo en tu primer combate de Tecloides.' },
+  ficha: { room: 'pueblo', name: 'Ficha dorada', desc: 'Premio por llegar a 40 puntos en BLOQUES.' },
+  zapper: { room: 'pueblo', name: 'Pistola de luz', desc: 'Premio de Toby. Las de verdad solo funcionaban en teles de tubo.' },
 };
 
 // Enemigos y mundos se llenan desde js/worlds/*.js con addWorld().
@@ -97,7 +98,7 @@ const WORLDS = [];
 //   console (consola que se rescata), nodes, enemies, y opcionales: treasures, sprites, tracks, quests
 function addWorld(w) {
   Object.assign(ENEMIES, w.enemies || {});
-  Object.assign(TREASURES, w.treasures || {});
+  Object.entries(w.treasures || {}).forEach(([id, t]) => { TREASURES[id] = { room: w.id, ...t }; });
   Object.assign(SPRITES, w.sprites || {});
   Object.assign(TRACKS, w.tracks || {});
   Object.assign(QUESTS, w.quests || {});

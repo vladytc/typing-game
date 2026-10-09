@@ -132,10 +132,14 @@ class ChoicePrompt {
   }
 }
 
-function spriteCanvas(name, scale, silhouette = false, cls = '') {
+// colors (opcional): { a, b, c, d } para dibujarlo con una paleta propia en vez de la del tema.
+function spriteCanvas(name, scale, silhouette = false, cls = '', colors = null) {
   const c = document.createElement('canvas');
   c.className = cls;
-  drawSprite(c, name, { scale, silhouette });
+  if (colors && SPRITES[name]) {
+    c.width = c.height = 16 * scale;
+    paintSprite(c.getContext('2d'), name, 0, 0, scale, colors, silhouette);
+  } else drawSprite(c, name, { scale, silhouette });
   return c;
 }
 
@@ -148,7 +152,8 @@ const Game = {
     if (this.scene && this.scene.exit) this.scene.exit();
     this.scene = Scenes[name];
     this.root.className = `scene-${name}`;
-    document.body.className = 'theme-gb'; // cada escena puede cambiarlo (el mapa usa el tema de su mundo)
+    // Por defecto, la estética de la era del pueblo; los mundos y niveles ponen la suya.
+    document.body.className = typeof hubTheme === 'function' ? hubTheme() : 'theme-gb';
     this.root.innerHTML = '';
     this.lockUntil = performance.now() + 300;
     this.scene.enter(params);
