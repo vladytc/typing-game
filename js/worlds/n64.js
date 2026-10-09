@@ -10,7 +10,6 @@ WORDS.n64 = WORDS.n64 || ['64', '120', '1996', '4 puertos', '3 lados', '8 cuadro
 
 // ---------- Tecloides nuevos (solo si otro mundo no los definió ya) ----------
 TTYPES.estatica = TTYPES.estatica || 'ESTATICA';
-const addTecloide = (id, t) => { if (!TECLOIDES[id]) TECLOIDES[id] = t; };
 addTecloide('cactin', {
   name: 'Cactín', type: 'brote', sprite: 'cactin', hp: 50,
   desc: 'Un cactus de polígonos con sombrero. Pica, pero poquito.',
