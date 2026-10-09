@@ -4,7 +4,7 @@ Scenes.vitrina = {
   enter({ back = 'map' }) {
     this.back = back;
     const d = Save.data;
-    const friends = Object.keys(ENEMIES).filter((id) => !ENEMIES[id].mode);
+    const friends = Object.keys(ENEMIES).filter((id) => !ENEMIES[id].mode || ENEMIES[id].friend);
     this.rows = [
       {
         title: 'CONSOLAS',
