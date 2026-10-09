@@ -68,7 +68,7 @@ Scenes.town = {
     } else {
       this.era = m.theme || (world && world.theme) || 'gb';
       document.body.className = `theme-${this.era}`;
-      label = world ? `MUNDO ${world.order} · ${upper(world.name)}` : '';
+      label = world ? (upper(m.name) === upper(world.name) ? `MUNDO ${world.order}` : `MUNDO ${world.order} · ${upper(world.name)}`) : '';
     }
     this.css = paletteColors();
 
