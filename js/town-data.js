@@ -10,7 +10,7 @@
 // Leyenda del mapa (20 x 15 casillas):
 //   .  pasto      ,  pasto alto (¡encuentros salvajes!)   :  camino   *  flores
 //   T  árbol      ~  agua      R  techo     W  pared      D  puerta del museo (lleva a la vitrina)
-//   d  puerta cerrada          P  tubería (lleva al Valle Game Boy)  S  letrero   C  cueva   #  roca
+//   d  puerta cerrada          P  tubería de un mundo (ver PIPE_SLOTS)  S  letrero   C  cueva   #  roca
 const TILES = {
   '.': { s: 'grass' },
   ',': { s: 'tall', tall: true },
@@ -27,6 +27,14 @@ const TILES = {
   C: { s: 'cave', solid: true, look: 'cueva' },
   '#': { s: 'rock', solid: true },
 };
+
+// Plaza de las Tuberías: casilla de la tubería de cada mundo, según su `order`.
+// Si el mundo no existe o todavía no se abre, ahí solo hay pasto (¡nada de spoilers!).
+const PIPE_SLOTS = [[8, 12], [10, 12], [12, 12], [14, 12], [16, 12], [18, 12]];
+function pipeWorldAt(x, y) {
+  const slot = PIPE_SLOTS.findIndex(([px, py]) => px === x && py === y);
+  return WORLDS.find((w) => w.order === slot + 1 && worldUnlocked(w));
+}
 
 const BIT_TIPS = [
   '* ¿Sabías que antes la gente soplaba los cartuchos?\n* No servía, pero se sentía muy profesional.',
@@ -51,20 +59,20 @@ const TOWN = {
     'T,,..:..~~~~~..:..TT',
     'T,,,.:...~~~...:...T',
     'T,,,.:.........:...T',
-    'T,,,,:....S....::PST',
-    'T,,,,:.............T',
+    'T,,,,:....S.......ST',
+    'T,,,,:..P.P.P.P.P.PT',
     'T,,,,::::::::......T',
     'TTTTTTTTTTTTTTTTTTTT',
   ],
   // Dónde aparece el jugador según de dónde viene.
   spawns: {
     start: [10, 6, 'down'],
-    world: [16, 11, 'left'],
     vitrina: [5, 5, 'down'],
+    // 'pipe:<mundo>' se calcula con PIPE_SLOTS (abajo de su tubería).
   },
   signs: {
     '10,11': '* PUEBLO VITRINA\n* Población: unos cuantos píxeles.',
-    '18,11': '* TUBERIA AL VALLE GAME BOY\n* Párate encima para entrar.',
+    '18,11': '* PLAZA DE LAS TUBERIAS\n* Cada consola que rescates abre un camino nuevo.\n* Párate encima de una tubería para entrar.',
   },
   looks: {
     agua: '* El agua refleja tu cara.\n* Te ves... rápido.',
@@ -223,7 +231,7 @@ const TOWN = {
       async talk(ctx) { await ctx.say(['* Bzzt. Aquí hay enchufes por todos lados.\n* Soy muy feliz.'], 'PILABAT'); },
     },
     {
-      id: 'f-tetrorey', sprite: 'tetrorey', x: 8, y: 12, when: () => Save.data.spared.tetrorey,
+      id: 'f-tetrorey', sprite: 'tetrorey', x: 7, y: 10, when: () => Save.data.spared.tetrorey,
       async talk(ctx) { await ctx.say(['* Este pueblo necesita orden.\n* ¿Por qué ninguna casa encaja con la otra?'], 'TETRO REY'); },
     },
   ],
@@ -239,7 +247,7 @@ async function bitIntro(ctx) {
   await ctx.say([
     i === 0 ? '* ¡Genial! Seremos el mejor equipo.' : '* ...Lo voy a tomar como un sí. ¡Vamos!',
     '* Aquí se habla ESCRIBIENDO la respuesta.\n* ¡Justo como acabas de hacer!',
-    '* La tubería verde nos lleva al Valle Game Boy.\n* ¡Ahí está la primera consola!',
+    '* La tubería verde de la plaza, al sur, nos lleva al Valle Game Boy.\n* ¡Ahí está la primera consola!',
     '* (Muévete con las flechas. ENTER para hablar o revisar.)\n* (M abre tu diario de misiones.)',
   ], 'BIT');
   Quests.start('rescate_gb');
@@ -247,7 +255,16 @@ async function bitIntro(ctx) {
 
 async function bitTalk(ctx) {
   const first = Save.data.consoles.gameboy
-    ? '* ¡Rescatamos la Game Boy!\n* Don Chip seguro quiere verla.'
-    : '* La tubería verde nos lleva al Valle Game Boy.\n* ¡Ahí está la primera consola!';
+    ? '* Cada consola que rescatamos abre una tubería nueva en la plaza.\n* ¿A dónde nos llevará la siguiente?'
+    : '* La tubería verde de la plaza nos lleva al Valle Game Boy.\n* ¡Ahí está la primera consola!';
   await ctx.say([first, rand(BIT_TIPS)], 'BIT');
+}
+
+// Cuando se abre un mundo nuevo, Bit lo anuncia la siguiente vez que entras al pueblo.
+async function announcePipe(ctx, w) {
+  Sfx.secret();
+  await ctx.say([
+    '* ¿Escuchaste eso?\n* ¡Brotó una tubería nueva en la Plaza de las Tuberías!',
+    `* Dice que lleva a... ¡${upper(w.name)}!\n* ¿Vamos?`,
+  ], 'BIT');
 }

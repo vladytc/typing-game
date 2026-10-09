@@ -259,7 +259,7 @@ Scenes.battle = {
     this.phase = 'dodge';
     this.dodge = new Dodge(this.box, this.def.bullets, {
       onHit: () => {
-        this.p.hp = Math.max(0, this.p.hp - this.def.atk);
+        this.p.hp = Math.max(0, this.p.hp - scaledDmg(this.def.atk));
         this.updateBars();
         this.shake('.pinfo');
         if (this.p.hp <= 0) {
@@ -314,7 +314,8 @@ Scenes.battle = {
         Quests.complete('rescate_gb');
         const c = CONSOLES.find((x) => x.id === def.console);
         pages.push(`* ¡¡RESCATASTE LA ${upper(c.name)}!!\n* Ya brilla en tu vitrina.`);
-        pages.push('* Un nuevo mundo se abrirá pronto...\n* (Pídele a tu papá el siguiente.)', '* (Pssst... Don Chip, en el pueblo, querrá verla.)');
+        if (WORLDS.some((w) => w.requires === def.console)) pages.push('* A lo lejos, algo retumbó en el pueblo...\n* ¿Será en la Plaza de las Tuberías?');
+        pages.push('* (Pssst... Don Chip, en el pueblo, querrá verla.)');
       }
     }
     Save.write();

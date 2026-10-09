@@ -301,6 +301,7 @@ Scenes.tecloides = {
     const eff = effectiveness(m.type, myType);
     const stab = m.type === TECLOIDES[foe.id].type ? 1.2 : 1;
     let dmg = Math.max(1, Math.round(m.power * 0.22 * eff * stab * (1 + (foe.lv - 5) * 0.08)));
+    dmg = scaledDmg(dmg);
     if (res.completed) dmg = Math.ceil(dmg / 2);
     me.hp = Math.max(0, me.hp - dmg);
     Sfx.hurt();

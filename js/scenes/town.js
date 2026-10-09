@@ -12,7 +12,11 @@ Scenes.town = {
 
   enter({ from } = {}) {
     const m = TOWN;
-    if (from && m.spawns[from]) {
+    const pipe = from && from.startsWith('pipe:') && WORLDS.find((w) => `pipe:${w.id}` === from);
+    if (pipe) {
+      const [px, py] = PIPE_SLOTS[pipe.order - 1];
+      this.p = { x: px, y: py + 1, face: 'down' };
+    } else if (from && m.spawns[from]) {
       const [x, y, face] = m.spawns[from];
       this.p = { x, y, face };
     } else if (!this.p) {
@@ -36,6 +40,16 @@ Scenes.town = {
 
     if (!Save.data.flags.metBit) {
       this.later = setTimeout(() => this.run(async (ctx) => { await bitIntro(ctx); ctx.setFlag('metBit'); }), 500);
+    } else {
+      // ¿Se abrió un mundo nuevo desde la última visita?
+      const fresh = WORLDS.find((w) => w.requires && worldUnlocked(w) && !Save.data.flags[`pipe_${w.id}`]);
+      if (fresh) {
+        this.later = setTimeout(() => this.run(async (ctx) => {
+          ctx.setFlag(`pipe_${fresh.id}`);
+          await announcePipe(ctx, fresh);
+          if (QUESTS[`mundo_${fresh.id}`]) Quests.start(`mundo_${fresh.id}`);
+        }), 500);
+      }
     }
   },
 
@@ -51,7 +65,9 @@ Scenes.town = {
 
   tileAt(x, y) {
     const row = TOWN.map[y];
-    return row && row[x] ? TILES[row[x]] : null;
+    if (!row || !row[x]) return null;
+    if (row[x] === 'P') return pipeWorldAt(x, y) ? TILES.P : TILES['.'];
+    return TILES[row[x]];
   },
 
   paintMap() {
@@ -59,7 +75,7 @@ Scenes.town = {
     const colors = paletteColors();
     TOWN.map.forEach((row, y) => [...row].forEach((ch, x) => {
       paintSprite(g, 'grass', x * TILE, y * TILE, 2, colors);
-      const t = TILES[ch];
+      const t = this.tileAt(x, y);
       if (t && t.s !== 'grass') paintSprite(g, t.s, x * TILE, y * TILE, 2, colors);
     }));
   },
@@ -78,7 +94,7 @@ Scenes.town = {
     this.player = mk({ id: 'player', sprite: 'heroe', cls: 'player', x: this.p.x, y: this.p.y });
     // Bit aparece detrás del jugador (o en cualquier lado libre).
     const order = [OPPOSITE[this.p.face], 'down', 'up', 'left', 'right'];
-    const spot = order.map((d) => [this.p.x + DIRS[d][0], this.p.y + DIRS[d][1]]).find(([x, y]) => this.free(x, y));
+    const spot = order.map((d) => [this.p.x + DIRS[d][0], this.p.y + DIRS[d][1]]).find(([x, y]) => this.free(x, y) && !this.tileAt(x, y).warp);
     const [bx, by] = spot || [this.p.x, this.p.y];
     this.bit = mk({ id: 'bit', sprite: 'bit', cls: 'bit', x: bx, y: by, talk: bitTalk });
     [...this.npcs, this.player, this.bit].forEach((e) => this.place(e, true));
@@ -133,12 +149,11 @@ Scenes.town = {
     const t = this.tileAt(this.p.x, this.p.y);
     if (this.grace > 0) this.grace--;
     if (t.warp === 'world') {
+      const w = pipeWorldAt(this.p.x, this.p.y);
       Sfx.warp();
-      this.p = null;
-      this.enterFrom = 'world';
       this.mode = 'busy';
       this.player.el.classList.add('sink');
-      this.later = setTimeout(() => Game.go('map'), 450);
+      this.later = setTimeout(() => Game.go('map', { world: w.id }), 450);
       return;
     }
     if (t.warp === 'vitrina') {

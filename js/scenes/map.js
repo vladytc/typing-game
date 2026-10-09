@@ -2,30 +2,15 @@
 
 Scenes.map = {
   music: 'title',
-  enter() {
-    this.selectWorld(this.w || 0);
-  },
-
-  // Un mundo se abre cuando ya rescataste la consola que pide (ej. NES pide la Game Boy).
-  unlocked(w) { return !w.soon && (!w.requires || Save.data.consoles[w.requires]); },
-
-  selectWorld(w) {
-    this.w = w;
-    this.world = WORLDS[w];
+  // Se entra desde la tubería de un mundo en el pueblo: { world: 'gb' }.
+  enter({ world } = {}) {
+    this.world = WORLDS.find((w) => w.id === world) || this.world || WORLDS[0];
     // Cada mundo se pinta con la paleta de su consola.
     document.body.className = `theme-${this.world.theme || 'gb'}`;
     const nodes = this.world.nodes;
     const firstOpen = nodes.findIndex((id, i) => this.state(i) === 'open');
     this.i = firstOpen >= 0 ? firstOpen : nodes.length - 1;
     this.render();
-  },
-
-  switchWorld(dir) {
-    let w = this.w;
-    do { w += dir; } while (w >= 0 && w < WORLDS.length && !this.unlocked(WORLDS[w]));
-    if (w < 0 || w >= WORLDS.length) { Sfx.error(); return; }
-    Sfx.warp();
-    this.selectWorld(w);
   },
 
   state(i) {
@@ -42,11 +27,7 @@ Scenes.map = {
     const label = { open: '¡A JUGAR!', beaten: '★ VENCIDO', spared: '♥ AMIGO', locked: 'BLOQUEADO' };
     Game.root.innerHTML = `
       <div class="map">
-        <div class="worlds">${WORLDS.map((w) =>
-          `<div class="wtab ${w === this.world ? 'on' : ''} ${this.unlocked(w) ? '' : 'soon'}">${w.short}</div>`).join('')}
-          ${WORLDS.filter((w) => this.unlocked(w)).length > 1 ? '<span class="wkeys">↑ ↓ cambiar de mundo</span>' : ''}
-        </div>
-        <h2>MUNDO ${this.w + 1} · ${upper(this.world.name)}</h2>
+        <h2>MUNDO ${this.world.order} · ${upper(this.world.name)}</h2>
         <div class="path">${this.world.nodes.map((id, i) => `
           ${i ? '<div class="link"></div>' : ''}
           <div class="node ${this.state(i)} ${i === this.i ? 'sel' : ''}" data-i="${i}">
@@ -95,14 +76,12 @@ Scenes.map = {
 
   onKey(e) {
     const n = this.world.nodes.length;
-    if (e.key === 'ArrowUp') { this.switchWorld(-1); return; }
-    if (e.key === 'ArrowDown') { this.switchWorld(1); return; }
     if (e.key === 'ArrowRight') { this.i = Math.min(n - 1, this.i + 1); Sfx.move(); this.render(); }
     else if (e.key === 'ArrowLeft') { this.i = Math.max(0, this.i - 1); Sfx.move(); this.render(); }
     else if (isConfirm(e)) this.play();
     else if (e.key === 'v' || e.key === 'V') Game.go('vitrina', { back: 'map' });
     else if (e.key === 'e' || e.key === 'E') Game.go('stats', { back: 'map' });
     else if (e.key === 'm' || e.key === 'M') Game.go('diario', { back: 'map' });
-    else if (e.key === 'Escape') { Sfx.warp(); Game.go('town', { from: 'world' }); }
+    else if (e.key === 'Escape') { Sfx.warp(); Game.go('town', { from: `pipe:${this.world.id}` }); }
   },
 };

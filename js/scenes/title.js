@@ -15,9 +15,10 @@ Scenes.title = {
       </div>`;
     $('.title-sprite').appendChild(spriteCanvas('pixelito', 5, false, 'bounce'));
     const items = [
-      { label: started ? 'Continuar' : 'Comenzar', go: () => Game.go(started ? 'town' : 'story') },
+      { label: started ? 'Continuar' : 'Comenzar', go: () => Game.go(started ? 'town' : 'dificultad', { next: 'story' }) },
       { label: 'Vitrina', go: () => Game.go('vitrina', { back: 'title' }) },
       { label: 'Estadísticas', go: () => Game.go('stats', { back: 'title' }) },
+      { label: `Dificultad: ${diff().name}`, go: () => Game.go('dificultad', { next: 'title' }) },
       { label: `Sonido: ${Sfx.muted ? 'NO' : 'SI'}`, go: () => this.toggleSound() },
     ];
     this.menu = new ListMenu($('.title-menu'), items, { onPick: (i) => items[i].go(), start: this.lastPick || 0 });
@@ -27,7 +28,7 @@ Scenes.title = {
     Music.muted = Sfx.muted;
     Save.data.muted = Sfx.muted;
     Save.write();
-    this.lastPick = 3;
+    this.lastPick = 4;
     this.enter();
   },
   // Guiño al código más famoso de los videojuegos (Gradius, Contra...).
@@ -55,6 +56,35 @@ Scenes.title = {
 };
 
 const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+
+// Elegir dificultad (se puede cambiar cuando quieras desde el título).
+Scenes.dificultad = {
+  music: 'title',
+  enter({ next = 'title' }) {
+    const ids = Object.keys(DIFFICULTIES);
+    Game.root.innerHTML = `
+      <div class="title diff">
+        <h2>DIFICULTAD</h2>
+        <div class="diff-menu"></div>
+        <div class="box diff-desc"></div>
+        <p class="hint">↑ ↓ elegir · ENTER aceptar · Puedes cambiarla después desde el título</p>
+      </div>`;
+    const show = (i) => { $('.diff-desc').textContent = `* ${DIFFICULTIES[ids[i]].desc}`; };
+    const start = Math.max(0, ids.indexOf(Save.data.difficulty));
+    this.menu = new ListMenu($('.diff-menu'), ids.map((id) => ({ label: DIFFICULTIES[id].name })), {
+      start,
+      onMove: show,
+      onPick: (i) => {
+        Save.data.difficulty = ids[i];
+        Save.write();
+        Game.go(next);
+      },
+      onCancel: next === 'title' ? () => Game.go('title') : null,
+    });
+    show(start);
+  },
+  onKey(e) { this.menu.key(e); },
+};
 
 Scenes.story = {
   music: 'title',

@@ -6,7 +6,7 @@ class TypingTask {
   // texts: lista de palabras/frases. onUnit(unit) se llama al terminar cada una;
   // si devuelve false, la tarea se detiene (por ejemplo, porque el enemigo ya cayó).
   constructor(box, { label, texts, timeLimit, onUnit, onDone }) {
-    Object.assign(this, { box, label, texts, timeLimit, onUnit, onDone });
+    Object.assign(this, { box, label, texts, timeLimit: timeLimit * diff().time, onUnit, onDone });
     this.totalChars = texts.join('').length;
   }
 
@@ -141,10 +141,10 @@ class Dodge {
     this.elapsed += dt * 1000;
     if (this.spawned < this.cfg.count && this.elapsed >= this.nextSpawn) {
       this.spawn();
-      this.nextSpawn += this.cfg.interval;
+      this.nextSpawn += this.cfg.interval / diff().speed;
     }
     for (const b of [...this.bullets]) {
-      b.y += this.cfg.speed * dt;
+      b.y += this.cfg.speed * diff().speed * dt;
       b.el.style.transform = `translate(${b.x}px, ${b.y}px)`;
       if (b.y + b.h >= this.groundY) this.land(b);
     }

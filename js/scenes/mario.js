@@ -315,8 +315,8 @@ Scenes.mario = {
   // ---------- Tecleo ----------
 
   onKey(e) {
-    if (this.phase === 'over') { this.menu.key(e); return; }
-    if (e.key === 'Escape') { Game.go(this.back); return; }
+    if (this.phase === 'over' || this.phase === 'paused') { this.menu.key(e); return; }
+    if (e.key === 'Escape') { if (this.phase === 'play') this.pause(); return; }
     if (this.phase !== 'play' || e.repeat || e.key.length !== 1) return;
     const b = this.beat;
     if (!b) return;
@@ -356,6 +356,24 @@ Scenes.mario = {
     this.queue.push(a);
   },
 
+  // ESC pausa (y el reloj se detiene) en vez de salir de golpe.
+  pause() {
+    this.phase = 'paused';
+    const el = document.createElement('div');
+    el.className = 'smb-pause';
+    el.innerHTML = '<div>PAUSA</div><div class="smb-menu"></div>';
+    $('.smb').appendChild(el);
+    this.menu = new ListMenu($('.smb-pause .smb-menu'), [{ label: 'Seguir' }, { label: 'Salir del nivel' }], {
+      cols: 2,
+      onPick: (i) => {
+        if (i === 1) { Game.go(this.back); return; }
+        el.remove();
+        this.phase = 'play';
+      },
+      onCancel: () => { el.remove(); this.phase = 'play'; },
+    });
+  },
+
   // ---------- Bucle ----------
 
   loop(ts) {
@@ -368,6 +386,7 @@ Scenes.mario = {
   },
 
   update(dt) {
+    if (this.phase === 'paused') return;
     if (this.phase === 'play' || this.phase === 'finish') this.tickTime(dt);
     if (this.inv > 0) this.inv -= dt;
     this.pops = this.pops.filter((p) => (p.t += dt) < p.life);
@@ -389,7 +408,7 @@ Scenes.mario = {
     if (this.phase === 'play' && b && b.type === 'stomp' && !this.anim && Math.abs(this.tx - this.mx) < 0.05) {
       const en = this.enemies[b.enemy];
       if (!en.alive) { this.bi++; this.beatStart(); return; }
-      if (!b.armed) { b.armed = true; b.speed = (en.x - (this.mx + 1)) / (1.6 + b.word.length * 0.45); }
+      if (!b.armed) { b.armed = true; b.speed = (en.x - (this.mx + 1)) / ((1.6 + b.word.length * 0.45) * diff().time); }
       en.x -= b.speed * dt;
       if (en.x <= this.mx + 0.8) this.hurt(b.enemy);
     }
@@ -399,8 +418,9 @@ Scenes.mario = {
   tickTime(dt) {
     if (this.phase === 'finish') return;
     this.timeAcc += dt;
-    while (this.timeAcc >= 0.5) {
-      this.timeAcc -= 0.5;
+    const tick = 0.5 * diff().time; // en Fácil el reloj corre más lento
+    while (this.timeAcc >= tick) {
+      this.timeAcc -= tick;
       this.time--;
       if (this.time === 100 && !this.hurry) {
         this.hurry = true;

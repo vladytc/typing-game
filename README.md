@@ -6,7 +6,8 @@ consolas antiguas atrapadas en sus propios mundos y llena tu vitrina.
 ## Cómo jugar
 
 Abre `index.html` con doble clic. No hay que instalar nada. El progreso se guarda en
-ese navegador.
+ese navegador. Al empezar se elige la dificultad (**Fácil / Normal / Difícil**); se puede
+cambiar cuando quieras desde la pantalla de título.
 
 - **LUCHAR**: escribe las palabras. Más rápido = más daño. Sin errores = ¡PERFECTO!
 - **ACTUAR**: haz algo amable para llenar la barra de **PAZ**.
@@ -26,7 +27,7 @@ esquivar.
 
 ### Mundo 2: Castillo 8-Bit (NES) — Nivel 1-1
 
-Se abre al rescatar la Game Boy (en el mapa, ↑ ↓ cambia de mundo). Mario avanza mientras
+Se abre al rescatar la Game Boy. Mario avanza mientras
 escribes; cada tubería, hoyo, Goomba o bloque ? tiene su palabra. Las palabras con
 mayúscula (Mario, Goomba...) se escriben con SHIFT. Hay súper hongo, monedas, reloj,
 3 vidas y bandera. Dato real: si el tiempo termina en 1, 3 o 6 al tocar la bandera, hay
@@ -39,12 +40,15 @@ valen doble. Llegar a 40 puntos da un premio.
 
 ### Pueblo Vitrina
 
-El punto de partida. Muévete con las flechas y usa ENTER para hablar. Para contestar,
-**escribes** tu respuesta. La tubería verde lleva al Valle Game Boy y la puerta del museo
-lleva a la vitrina. Los enemigos que perdones se mudan al pueblo. La tecla **M** abre el
+El punto de partida y el centro de todo. Muévete con las flechas y usa ENTER para hablar.
+Para contestar, **escribes** tu respuesta. En la **Plaza de las Tuberías** (al sur) hay una
+tubería por cada mundo abierto: cada consola rescatada hace brotar la siguiente, así que
+nunca se ve qué mundo viene. La puerta del museo lleva a la vitrina. Los enemigos que perdones se mudan al pueblo. La tecla **M** abre el
 diario de misiones.
 
 ## Para papá
+
+- **Para agregar mundos y niveles** (incluso en paralelo): `docs/MUNDOS.md`.
 
 - **Estadísticas** muestra la velocidad en PPM (palabras por minuto), la precisión y un mapa
   de las teclas donde más se equivoca. El juego elige más seguido palabras con esas teclas.
