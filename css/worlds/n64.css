@@ -1,0 +1,264 @@
+/* MUNDO 4 — Isla Polígono (Nintendo 64). Paleta del lore §7.1 y estilos de sus escenas 3D. */
+
+.theme-n64 {
+  --c0: #202030; /* negro */
+  --c1: #7E57C2; /* morado */
+  --c2: #3C8DD6; /* agua */
+  --c3: #C9D6E3; /* niebla */
+  --n64-sky: #9FD3FF;
+  --n64-grass: #58B85C;
+  --n64-yellow: #F7E463;
+  --n64-red: #D64545;
+  --n64-orange: #F0953C;
+  --n64-white: #F4F4F4;
+}
+
+/* ---------- Mapa: 10 paradas en dos filas, con cielo y niebla ---------- */
+
+.theme-n64 .map { background: linear-gradient(var(--n64-sky), var(--c3) 55%); }
+.theme-n64 .map h2 { margin: 4px 0 8px; }
+.theme-n64 .path { flex-wrap: wrap; row-gap: 2px; }
+.theme-n64 .path > .link:nth-child(10) { display: none; } /* la fila de arriba termina en la 5ª parada */
+.theme-n64 .node { width: 92px; }
+.theme-n64 .link { width: 18px; margin-top: 52px; }
+.theme-n64 .ncursor { height: 18px; font-size: 13px; }
+.theme-n64 .nsprite { height: 58px; }
+.theme-n64 .nsprite canvas { width: 48px; height: 48px; }
+.theme-n64 .node:last-child .nsprite canvas { width: 58px; height: 58px; }
+.theme-n64 .nname { font-size: 7px; line-height: 1.4; margin-top: 4px; min-height: 20px; }
+.theme-n64 .nstate { margin-top: 2px; }
+.theme-n64 .map-info { margin-top: 6px; height: 100px; line-height: 1.9; font-size: 9px; }
+.theme-n64 .map-foot { margin-top: 6px; }
+
+/* ---------- Comunes del 3D ---------- */
+
+.poly-cv {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated; /* 320x240 estirado al doble, como la N64 */
+}
+.poly-note {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  z-index: 50;
+  background: var(--c0);
+  color: var(--c3);
+  font-size: 7px;
+  padding: 4px 6px;
+  pointer-events: none;
+}
+.poly-note.fail { background: var(--n64-red); color: var(--n64-white); }
+
+/* ---------- Combate con enemigos 3D (battle64.js) ---------- */
+
+.battle.n64 { background: linear-gradient(var(--n64-sky) 0, var(--c3) 210px); }
+.esprite.has3d canvas.idle { display: none; }
+.poly-cv.b64 { position: static; width: 280px; height: 172px; }
+
+/* Efectos de lectura de cada enemigo. */
+.battle.fx-blur .tt-words { animation: n64blur 0.9s ease-out both; }
+.battle.fx-far .tt-words { animation: n64far 1s ease-out both; transform-origin: 30% 50%; }
+.battle.fx-tilt .tt-words { animation: n64tilt 4s ease-in-out infinite alternate; transform-origin: 40% 50%; }
+.battle.fx-shake .tt-words { animation: n64shake 0.16s steps(2) infinite; }
+.battle.fx-frame .tt-words {
+  display: inline-block;
+  max-width: 420px;
+  margin-left: 60px;
+  padding: 2px 12px;
+  border: 5px solid #E8B830;
+  outline: 2px solid var(--c0);
+  background: var(--n64-white);
+  animation: n64frame 6s ease-in-out infinite alternate;
+}
+.battle.fx-frame .bullet:nth-child(3n) { background: var(--n64-yellow); }
+.battle.fx-frame .bullet:nth-child(3n + 1) { background: #F2B3B3; }
+.battle.fx-frame .bullet:nth-child(3n + 2) { background: var(--n64-sky); }
+
+@keyframes n64blur { 0%, 55% { filter: blur(5px); } 100% { filter: none; } }
+@keyframes n64far { from { transform: scale(0.2); opacity: 0.25; } to { transform: none; opacity: 1; } }
+@keyframes n64tilt { from { transform: rotate(-15deg); } to { transform: rotate(15deg); } }
+@keyframes n64shake {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(2px, -2px); }
+  100% { transform: translate(-2px, 1px); }
+}
+@keyframes n64frame {
+  0% { transform: rotate(-30deg) scale(0.75); }
+  50% { transform: rotate(0) scale(1); }
+  100% { transform: rotate(30deg) scale(0.75); }
+}
+
+/* ---------- Melodías (ocarin.js, también en el pueblo) ---------- */
+
+.mel { text-align: center; }
+.mel.shake { animation: shake 0.3s; }
+.mel-title { font-size: 9px; color: var(--c1); margin-bottom: 4px; }
+.mel-seq { font-size: 16px; letter-spacing: 6px; height: 26px; }
+.mel-seq span { color: var(--c1); }
+.mel-seq span.ok { color: var(--c2); }
+.mel-seq span.pf { color: var(--c0); text-shadow: 2px 2px 0 var(--n64-yellow); }
+.mel-seq span.nx { color: var(--c0); border-bottom: 3px solid var(--c0); }
+.mel-pads { display: flex; justify-content: center; gap: 10px; margin: 2px 0 6px; }
+.pad {
+  width: 46px;
+  height: 36px;
+  line-height: 30px;
+  font-size: 14px;
+  border: 3px solid var(--c0);
+  background: var(--pc);
+  opacity: 0.55;
+  color: var(--c0);
+}
+.pad.on { animation: n64pad 0.35s ease-out; }
+.mel-msg { font-size: 9px; height: 14px; color: var(--c1); }
+.mel-msg.pf { color: var(--c0); }
+.mel-msg.bad { color: var(--n64-red); }
+@keyframes n64pad { 0% { opacity: 1; transform: translateY(-6px) scale(1.15); filter: brightness(1.4); } 100% { opacity: 0.55; transform: none; } }
+
+/* ---------- Templo de la Melodía ---------- */
+
+.oc { position: absolute; inset: 0; }
+.oc-3d { position: absolute; inset: 0; background: linear-gradient(#4A3F7A, #6A5FA0); }
+.oc-title, .c-title {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--n64-white);
+  text-shadow: 2px 2px 0 var(--c0);
+  pointer-events: none;
+}
+.oc-box { position: absolute; left: 16px; right: 16px; bottom: 12px; height: 150px; }
+.oc-box .tb-text { font-size: 11px; }
+.oc-best { position: absolute; right: 14px; bottom: 8px; font-size: 7px; }
+
+/* ---------- Circuito Isla ---------- */
+
+.kart { position: absolute; inset: 0; color: var(--n64-white); }
+.k-3d { position: absolute; inset: 0; background: linear-gradient(var(--n64-sky), var(--n64-grass)); }
+.k-hud {
+  position: absolute;
+  top: 10px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  text-shadow: 2px 2px 0 var(--c0);
+  font-size: 12px;
+}
+.k-pos { font-size: 30px; color: var(--n64-yellow); }
+.k-item { position: absolute; left: 50%; transform: translateX(-50%); text-align: center; }
+.k-item-box {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto;
+  border: 3px solid var(--n64-white);
+  background: rgba(32, 32, 48, 0.6);
+  font-size: 24px;
+  line-height: 38px;
+}
+.k-item-name { font-size: 8px; margin-top: 4px; }
+.k-strip {
+  position: absolute;
+  left: 60px;
+  right: 60px;
+  bottom: 78px;
+  height: 6px;
+  background: rgba(32, 32, 48, 0.6);
+  border: 2px solid var(--n64-white);
+}
+.k-strip i {
+  position: absolute;
+  top: -6px;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--c0);
+  transform: translateX(-50%);
+}
+.k-msg {
+  position: absolute;
+  top: 150px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 16px;
+  color: var(--n64-yellow);
+  text-shadow: 3px 3px 0 var(--c0);
+  opacity: 0;
+  pointer-events: none;
+}
+.k-msg.big { opacity: 1; font-size: 48px; top: 140px; }
+.k-msg.show { animation: n64msg 1.4s ease-out forwards; }
+@keyframes n64msg { 0% { opacity: 1; transform: scale(1.4); } 15% { transform: scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
+.k-type { z-index: 5; }
+.st-word.item { color: var(--n64-orange); }
+.st-word.defend { color: #FF8080; animation: shake 0.25s; }
+.k-def { position: absolute; left: 0; right: 0; top: 0; height: 5px; }
+.k-def i { display: block; height: 100%; background: var(--n64-red); }
+.k-box { position: absolute; left: 16px; right: 16px; bottom: 80px; height: 140px; z-index: 20; color: var(--c0); }
+.k-box.k-end { top: 90px; bottom: auto; height: auto; text-align: center; font-size: 10px; line-height: 2.2; }
+.k-endmenu { width: 360px; margin: 10px auto 0; text-align: left; }
+
+/* ---------- Castillo de los Cuadros ---------- */
+
+.castle { position: absolute; inset: 0; }
+.c-3d { position: absolute; inset: 0; background: linear-gradient(#2A2440, #6B5F52); }
+.c-hud {
+  position: absolute;
+  top: 34px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--n64-yellow);
+  text-shadow: 2px 2px 0 var(--c0);
+}
+.c-row { margin-left: 8px; font-size: 10px; letter-spacing: 2px; }
+.c-row i { font-style: normal; color: rgba(244, 244, 244, 0.35); }
+.c-row i.got { color: var(--n64-white); }
+.c-row i.pf { color: var(--n64-yellow); }
+.c-hp { display: flex; align-items: center; gap: 6px; color: var(--n64-white); font-size: 9px; }
+.c-hp .bar { width: 90px; }
+.c-flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 40; }
+.c-flash.on { animation: n64flash 0.7s ease-out; }
+@keyframes n64flash { 0% { opacity: 0; } 40% { opacity: 1; } 100% { opacity: 0; } }
+.c-box { position: absolute; left: 16px; right: 16px; bottom: 12px; height: 168px; }
+.c-box .tb-text { font-size: 11px; }
+.c-box .tt-words { font-size: 17px; line-height: 1.8; }
+.wp-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 10px; }
+.wpick .copt { font-size: 11px; line-height: 2; }
+.wp-hidden { font-size: 11px; }
+.wp-foot { position: absolute; bottom: 8px; left: 16px; font-size: 7px; }
+.w.cur.ice { background: #CFE8FF; outline: 2px solid var(--c2); }
+
+/* ---------- Estadio Polígono ---------- */
+
+.mon.estadio .est-3d { position: absolute; inset: 0; background: linear-gradient(var(--n64-sky), var(--n64-grass)); }
+.mon.estadio .info { background: rgba(201, 214, 227, 0.92); z-index: 2; }
+.mon.estadio .spr { z-index: 2; }
+.mon.estadio .mbox { z-index: 3; }
+.locutor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 156px;
+  z-index: 3;
+  background: rgba(32, 32, 48, 0.8);
+  color: var(--n64-white);
+  font-size: 8px;
+  padding: 5px 12px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.locutor b { color: var(--n64-yellow); font-weight: normal; }
+.locutor.pop { animation: n64loc 0.4s ease-out; }
+@keyframes n64loc { from { transform: translateX(-30px); opacity: 0.2; } to { transform: none; opacity: 1; } }

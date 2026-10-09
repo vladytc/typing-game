@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/worlds/n64.css">
 </head>
 <body class="theme-gb">
   <div id="stage">
@@ -32,6 +33,7 @@
   <!-- Mundos: cada uno se registra solo con addWorld() (ver docs/MUNDOS.md) -->
   <script src="js/worlds/gb.js"></script>
   <script src="js/worlds/nes.js"></script>
+  <script src="js/worlds/n64.js"></script>
   <script src="js/town-data.js"></script>
   <script src="js/scenes/title.js"></script>
   <script src="js/scenes/town.js"></script>
@@ -43,6 +45,13 @@
   <script src="js/scenes/diario.js"></script>
   <script src="js/scenes/bloques.js"></script>
   <script src="js/scenes/mario.js"></script>
+  <!-- Mundo 4 (N64): three.js se carga solo al entrar, desde poly3d.js -->
+  <script src="js/scenes/poly3d.js"></script>
+  <script src="js/scenes/battle64.js"></script>
+  <script src="js/scenes/ocarin.js"></script>
+  <script src="js/scenes/kart.js"></script>
+  <script src="js/scenes/estadio.js"></script>
+  <script src="js/scenes/castillo.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
