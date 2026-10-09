@@ -138,7 +138,8 @@ function spriteCanvas(name, scale, silhouette = false, cls = '', colors = null) 
   c.className = cls;
   if (colors && SPRITES[name]) {
     c.width = c.height = 16 * scale;
-    paintSprite(c.getContext('2d'), name, 0, 0, scale, colors, silhouette);
+    // Los colores propios del sprite (SPRITE_PALETTES) ganan: así conserva su estética original.
+    paintSprite(c.getContext('2d'), name, 0, 0, scale, { ...colors, ...SPRITE_PALETTES[name] }, silhouette);
   } else drawSprite(c, name, { scale, silhouette });
   return c;
 }
