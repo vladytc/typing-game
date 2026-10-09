@@ -1,0 +1,85 @@
+/* ---------- Mundo 2: Castillo 8-Bit (NES) ----------
+   Escenas del castillo (kongo, patos, mazmorra, punin, caparazon): lienzo arriba,
+   barra de estado y un panel de texto abajo, blanco sobre negro como en la NES. */
+
+.nesx { position: absolute; inset: 0; background: #000; color: #fcfcfc; }
+.nesx-cv { position: absolute; left: 0; top: 0; }
+
+.nesx-hud {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 302px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 8px;
+  white-space: nowrap;
+}
+.nb-label { margin-right: -8px; }
+.nb { display: inline-block; width: 70px; height: 10px; border: 2px solid #fcfcfc; }
+.nb i { display: block; height: 100%; background: #f83800; transition: width 0.3s; }
+.nb.mercy i { background: #f8b800; }
+.nb.enemy i { background: #b8f818; }
+
+/* El panel usa sus propios colores: así los diálogos, elecciones y retos se ven blanco sobre negro. */
+.nesx-panel {
+  --c0: #fcfcfc;
+  --c1: #bcbcbc;
+  --c2: #f8b800;
+  --c3: #000000;
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 332px;
+  bottom: 8px;
+  border: 4px solid #fcfcfc;
+  background: #000;
+  color: #fcfcfc;
+  font-size: 12px;
+  line-height: 1.9;
+  overflow: hidden;
+}
+.nesx-panel > .tb-text,
+.nesx-panel > .choice,
+.nesx-end,
+.nesx-word,
+.pt-msg,
+.mz-msg { padding: 10px 14px; }
+.nesx-panel .tt { padding: 10px 14px; }
+.nesx-panel .tt-label { font-size: 9px; margin-bottom: 6px; }
+.nesx-panel .tt-words { font-size: 14px; line-height: 1.75; word-spacing: 6px; }
+.nesx-panel .tt-timer { bottom: 10px; left: 14px; right: 14px; }
+.nesx-panel .copt { font-size: 12px; line-height: 1.75; }
+.nesx-speaker {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #fcfcfc;
+  color: #000;
+  padding: 3px 8px;
+  font-size: 8px;
+  line-height: 1.4;
+}
+
+/* Palabra a escribir (barriles, avisos, bloques): las mayúsculas cuentan. */
+.nesx-word { text-align: center; }
+.nw-hint { font-size: 9px; color: #f8b800; height: 16px; }
+.nw-word { font-size: 26px; letter-spacing: 2px; margin-top: 18px; min-height: 34px; }
+.nw-word .ok { color: #7c7c7c; }
+.nw-word .nx { border-bottom: 4px solid #f8b800; }
+.nw-word .nx.bad { color: #f83800; animation: shake 0.2s; }
+
+.nesx-end { margin-top: 30px; }
+.nesx-end .opt { color: #7c7c7c; }
+.nesx-end .opt.sel { color: #fcfcfc; }
+
+/* Patos de Letras: la tira de patos atrapados, como en el original. */
+.pt-dots { display: flex; gap: 2px; flex-wrap: nowrap; }
+.pt-dots i { width: 8px; height: 8px; background: #fcfcfc; }
+.pt-dots i.hit { background: #f83800; }
+.pt-dots i.miss { background: #3c3c3c; }
+.pt-msg, .mz-msg { font-size: 12px; line-height: 2; }
+.pt-msg span, .mz-msg span { font-size: 8px; color: #bcbcbc; }
+.mz-msg b { font-weight: normal; color: #f8b800; }
