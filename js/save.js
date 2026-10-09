@@ -13,6 +13,7 @@ function defaultSave() {
     tutorialDone: false,
     muted: false,
     konami: false,
+    difficulty: 'normal', // ver DIFFICULTIES
     team: [],      // Tecloides: [{ id, lv, xp }]
     flags: {},
     quests: {},    // id -> 'active' | 'done'
@@ -37,6 +38,15 @@ const Save = {
     this.write();
   },
 };
+
+// Dificultad: multiplica el tiempo para escribir, la velocidad de lo que cae y el daño recibido.
+const DIFFICULTIES = {
+  facil: { name: 'Fácil', desc: 'Más tiempo para escribir, todo cae más lento y los golpes duelen menos.', time: 1.5, speed: 0.7, dmg: 0.6 },
+  normal: { name: 'Normal', desc: 'El reto pensado para el juego.', time: 1, speed: 1, dmg: 1 },
+  dificil: { name: 'Difícil', desc: 'Menos tiempo, todo más rápido y los golpes duelen más. ¡Para dedos turbo!', time: 0.75, speed: 1.3, dmg: 1.4 },
+};
+const diff = () => DIFFICULTIES[Save.data.difficulty] || DIFFICULTIES.normal;
+const scaledDmg = (n) => Math.max(1, Math.round(n * diff().dmg));
 
 const xpToNext = (level) => 15 + level * 10;
 const playerMaxHp = () => 20 + Save.data.level * 4;
@@ -81,6 +91,7 @@ const Stats = {
   },
   addBattle(rec) {
     const s = Save.data.stats;
+    rec.diff = Save.data.difficulty;
     s.battles.push(rec);
     if (s.battles.length > 50) s.battles.shift();
     const isRecord = rec.wpm > s.bestWpm;

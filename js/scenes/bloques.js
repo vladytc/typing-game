@@ -24,12 +24,12 @@ Scenes.bloques = {
           <div class="bstat"><span>LINEAS</span><b class="blines">0</b></div>
           <div class="bstat"><span>RECORD</span><b>${best}</b></div>
           <div class="bstat"><span>SIGUIENTE</span><b class="bnext"></b></div>
-          <p class="bhelp">Escribe la palabra que cae.<br>Las apiladas valen doble.<br><br>ESC: salir</p>
+          <p class="bhelp">Escribe la palabra que cae.<br>Las apiladas valen doble.<br><br>ESC: pausa</p>
         </div>
         <div class="box bover hidden"></div>
       </div>`;
     this.well = $('.well');
-    Object.assign(this, { score: 0, level: 1, lines: 0, cleared: 0, stack: [], piece: null, target: null, active: false, over: false });
+    Object.assign(this, { score: 0, level: 1, lines: 0, cleared: 0, stack: [], piece: null, target: null, active: false, over: false, paused: false });
     this.queue = [this.word(), this.word()];
     this.readyT = setTimeout(() => this.start(), 600);
   },
@@ -52,7 +52,7 @@ Scenes.bloques = {
     this.raf = requestAnimationFrame(this.loop);
   },
 
-  speed() { return 50 + (this.level - 1) * 9; },
+  speed() { return (50 + (this.level - 1) * 9) * diff().speed; },
 
   spawn() {
     const text = this.queue.shift();
@@ -167,6 +167,27 @@ Scenes.bloques = {
     this.render(p);
   },
 
+  pause() {
+    this.paused = true;
+    this.active = false;
+    cancelAnimationFrame(this.raf);
+    const box = $('.bover');
+    box.classList.remove('hidden');
+    box.innerHTML = '<div class="bover-text">PAUSA</div><div class="bover-menu"></div>';
+    const resume = () => {
+      box.classList.add('hidden');
+      this.paused = false;
+      this.active = true;
+      this.last = performance.now();
+      this.raf = requestAnimationFrame(this.loop);
+    };
+    this.menu = new ListMenu($('.bover-menu'), [{ label: 'Seguir' }, { label: 'Salir' }], {
+      cols: 2,
+      onPick: (i) => (i === 0 ? resume() : Game.go(this.back)),
+      onCancel: resume,
+    });
+  },
+
   gameOver() {
     this.active = false;
     this.over = true;
@@ -192,8 +213,8 @@ Scenes.bloques = {
   },
 
   onKey(e) {
-    if (this.over) { this.menu.key(e); return; }
-    if (e.key === 'Escape') { Game.go(this.back); return; }
+    if (this.over || this.paused) { this.menu.key(e); return; }
+    if (e.key === 'Escape') { if (this.active) this.pause(); return; }
     if (!this.active || e.repeat || e.key.length !== 1 || e.key === ' ') return;
     this.key(e.key);
   },
