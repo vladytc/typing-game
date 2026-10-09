@@ -93,6 +93,11 @@ terminada en la batalla, p. ej. para misiones de racha).
 | `mazmorra` | `js/scenes/mazmorra.js` | Mazmorra por cuartos: puertas y cofres que se abren con frases; al fondo, combate con `tragabombas` | — |
 | `punin` | `js/scenes/punin.js` | Boxeo: esquivar escribiendo el aviso, golpear cuando se marea | `drop` |
 | `caparazon` | `js/scenes/caparazon.js` | Jefe del Mundo 2: saltar bloques al ritmo de un metrónomo | `console` |
+| `wiigym` | `js/scenes/wii-gym.js` | Mundo 6: Entrenador Mi, 3 pruebas de ritmo (boliche, tenis por manos, box al compás). `{ arcade: 'boliche' \| 'tenis' \| 'box' }` = minijuego suelto | `drop` |
+| `wiitorneo` | `js/scenes/wii-torneo.js` | Mundo 6: Tecloides 3 contra 3 (hereda de `tecloides`), esquivar con 20 % menos de tiempo | entrenador en `TRAINERS` |
+| `cometa` | `js/scenes/wii-cometa.js` | Jefe del Mundo 6: lluvia desde 4 lados hacia un planeta, texto de cabeza/espejo, 7 estrellitas, caída libre | los de `battle` + `fallWords` |
+
+Enemigos de la Wii en el combate normal: `wii: true` (+ `model`, `wiiTask`, `wiiDodge`) los pasa por `js/scenes/wii-battle.js` (3D, tareas propias y PAUSA con ESC en la lluvia).
 
 Campos opcionales extra del modo `battle`: `caps: true` (exige mayúsculas con SHIFT), `music`,
 `fightTime` (multiplica el tiempo de LUCHAR), `fightList(words)` y `fightUnit(unit, dmg, battle)`
