@@ -1,0 +1,305 @@
+/* ==========================================================================
+   MUNDO 3 — Reino 16-Bit (Super Nintendo). Paleta de LORE.md §6.1.
+   Las ventanas de texto son azules con degradado, como en los RPG de 16 bits:
+   dentro de .box se redefinen los 4 tonos para que todo lo de adentro (palabras,
+   lluvia de letras, menús) se vea claro sobre azul sin tocar css/style.css.
+   ========================================================================== */
+
+.theme-snes {
+  --c0: #1a1a2e; /* más oscuro (contorno, texto) */
+  --c1: #2e5c9a; /* cielo oscuro */
+  --c2: #5fcde4; /* cielo */
+  --c3: #fff8e7; /* crema */
+}
+
+/* Planeta Oscuro (Reina Nébula): azul oscuro y morado. */
+.theme-nebula {
+  --c0: #e6f0ff;
+  --c1: #9b8cff;
+  --c2: #5fcde4;
+  --c3: #0d0b26;
+}
+
+.theme-snes .box {
+  --c0: #ffffff;
+  --c1: #b8c8ff;
+  --c2: #ffd93d;
+  --c3: #22307a;
+  color: var(--c0);
+  background: linear-gradient(180deg, #3a5bd0 0%, #22307a 70%, #1c2468 100%);
+  border: 4px solid #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 0 0 3px #1a1a2e, inset 0 0 0 2px #7f93e8;
+}
+.theme-nebula .box {
+  --c0: #ffffff;
+  --c1: #c3b8ff;
+  --c2: #f79ac0;
+  --c3: #1a1240;
+  color: var(--c0);
+  background: linear-gradient(180deg, #2a1d5e 0%, #120c30 100%);
+  border: 4px solid #c39bd3;
+  border-radius: 8px;
+  box-shadow: 0 0 0 3px #05040f;
+}
+.theme-snes .box .tt-ready,
+.theme-nebula .box .tt-ready { background: transparent; text-shadow: 3px 3px 0 #1a1a2e; }
+
+/* ---------- Modo estricto de acentos (lo usa TypingTask en cualquier mundo) ---------- */
+.tt-strict {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 5px;
+  font-size: 7px;
+  color: var(--c3);
+  background: var(--c2);
+  vertical-align: 1px;
+}
+.tt-tip { font-size: 10px; line-height: 1.6; word-spacing: normal; color: var(--c2); margin-top: 6px; animation: shake 0.2s; }
+
+/* ---------- Mapa del mundo: 10 nodos en dos filas ---------- */
+.theme-snes .map {
+  background:
+    radial-gradient(ellipse 80px 50px at 50% 100%, #3fbf3f 97%, transparent 100%) 0 100% / 160px 50px repeat-x,
+    linear-gradient(180deg, #5fcde4 0%, #bfefff 70%, #9be86e 100%);
+}
+.theme-snes .map h2 { margin: 4px 0 12px; text-shadow: 2px 2px 0 #fff8e7; }
+.theme-snes .path { flex-wrap: wrap; row-gap: 2px; }
+.theme-snes .node { width: 92px; }
+.theme-snes .ncursor { height: 16px; font-size: 12px; color: #e8393d; }
+.theme-snes .nsprite { height: 56px; }
+.theme-snes .nsprite canvas { width: 48px; height: 48px; }
+.theme-snes .nname { margin-top: 4px; }
+.theme-snes .link { margin-top: 44px; border-top-color: #e8393d; }
+.theme-snes .map-info { margin-top: 8px; height: 104px; }
+.theme-snes .map-foot, .theme-snes .map-keys { color: #1a1a2e; }
+
+/* ---------- Combate normal: cielo con colinas en parallax (dos capas que se mueven distinto) ---------- */
+.theme-snes .battle {
+  background:
+    radial-gradient(ellipse 75px 46px at 50% 100%, #1e7a2e 97%, transparent 100%) 0 166px / 150px 46px repeat-x,
+    radial-gradient(ellipse 115px 70px at 50% 100%, #3fbf3f 97%, transparent 100%) 0 142px / 230px 70px repeat-x,
+    radial-gradient(ellipse 75px 80px at 50% 100%, #c39bd3 97%, transparent 100%) 0 132px / 150px 80px repeat-x,
+    linear-gradient(180deg, #2e5c9a 0, #5fcde4 140px, #bfefff 211px, #fff8e7 212px);
+  animation: snesParallax 30s linear infinite;
+}
+@keyframes snesParallax {
+  from { background-position: 0 166px, 0 142px, 0 132px, 0 0; }
+  to { background-position: -450px 166px, -230px 142px, -150px 132px, 0 0; }
+}
+.theme-snes .enemy-info { text-shadow: 2px 2px 0 #fff8e7; }
+.theme-snes .emercy i { background: #ffd93d; }
+.theme-snes .ehp i { background: #e8393d; }
+.theme-snes .pbar i { background: #3fbf3f; }
+.theme-snes .cmd.sel { background: #ffd93d; border-color: #1a1a2e; }
+
+/* Modosiete: piso Modo 7 detrás y palabras en perspectiva (más chicas al fondo). */
+.m7-backdrop { position: absolute; left: 0; top: 0; width: 640px; height: 212px; }
+.battle.has-m7 { animation: none; }
+.battle.persp .tt-words { transform: perspective(420px) rotateX(30deg); transform-origin: 50% 100%; }
+
+/* ---------- Pausa de las escenas de acción ---------- */
+.snes-pause {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  background: rgba(26, 26, 46, 0.75);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  font-size: 18px;
+}
+.snes-pmenu { width: 360px; text-align: left; font-size: 12px; margin: 10px auto 0; }
+.snes-pause .opt { color: #8c8c9c; }
+.snes-pause .opt.sel { color: #ffffff; }
+
+/* ---------- Rayo Cero / Pista Cero ---------- */
+.race { position: absolute; inset: 0; background: #1a1a2e; color: #fff; }
+.race-cv { position: absolute; left: 0; top: 0; width: 640px; height: 400px; }
+.race-hud {
+  position: absolute;
+  top: 10px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: 9px;
+  line-height: 1.7;
+  text-shadow: 2px 2px 0 #1a1a2e;
+}
+.race-hud b { font-size: 16px; font-weight: normal; color: #ffd93d; }
+.race-hud > div:last-child { text-align: right; }
+.r-pos { font-size: 28px; color: #ffd93d; text-shadow: 3px 3px 0 #e8393d; }
+.race-prog {
+  position: absolute;
+  top: 58px;
+  left: 140px;
+  right: 140px;
+  height: 6px;
+  background: rgba(26, 26, 46, 0.6);
+  border: 2px solid #fff;
+}
+.race-prog span { position: absolute; right: -44px; top: -4px; font-size: 7px; }
+.race-prog i { position: absolute; top: -6px; width: 8px; height: 14px; margin-left: -4px; border: 1px solid #fff; transition: left 0.2s linear; }
+.rp-me { background: #3b7bd8; }
+.rp-foe { background: #e8393d; }
+.race-flash {
+  position: absolute;
+  top: 150px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 40px;
+  color: #ffd93d;
+  text-shadow: 4px 4px 0 #e8393d;
+  z-index: 4;
+}
+.race-type {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 80px;
+  background: linear-gradient(180deg, #22307a, #1a1a2e);
+  border-top: 4px solid #fff;
+  padding: 8px 20px 0;
+}
+.rt-hint { font-size: 8px; height: 16px; color: #9be7ff; }
+.rt-hint.bad { color: #ff8c1a; }
+.rt-line { font-size: 20px; line-height: 1.6; white-space: nowrap; overflow: hidden; }
+.rt-line span { display: inline-block; width: 20px; text-align: center; }
+.rt-line .ok { color: #6d7bb0; }
+.rt-line .nx { border-bottom: 4px solid #ffd93d; background: rgba(255, 255, 255, 0.15); }
+.rt-line .nx.bad { color: #ff8c1a; animation: shake 0.2s; }
+.rt-line .turbo { color: #ffd93d; }
+.rt-line .turbo.ok { color: #9c8a40; }
+.race-card { position: absolute; left: 40px; right: 40px; bottom: 92px; z-index: 5; min-height: 110px; }
+.race-card.end { top: 70px; bottom: auto; text-align: center; font-size: 11px; line-height: 2.2; }
+
+/* ---------- Capitán Vulpino / Escuadrón Zorrino ---------- */
+.fox { position: absolute; inset: 0; background: #0b0b1e; color: #fff; overflow: hidden; }
+.fox.hurt { animation: foxHurt 0.3s; }
+@keyframes foxHurt {
+  25% { transform: translate(-6px, 3px); filter: brightness(1.8); }
+  75% { transform: translate(6px, -3px); }
+}
+.fox-cv { position: absolute; inset: 0; width: 640px; height: 480px; }
+.fox-words { position: absolute; inset: 0; }
+.fword {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 4px 8px;
+  font-size: 16px;
+  color: #fff;
+  background: rgba(26, 26, 46, 0.85);
+  border: 3px solid #e8393d;
+  white-space: nowrap;
+}
+.fword .t { color: #ffd93d; }
+.fword.target { border-color: #ffd93d; background: #8e44ad; }
+.fword.radio { border-color: #3fbf3f; color: #9be86e; }
+.fword.pop { animation: pop 0.25s forwards; }
+.fox-hud {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  right: 12px;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  font-size: 8px;
+  line-height: 2;
+  text-shadow: 2px 2px 0 #000;
+}
+.fox-hud .bar { display: inline-block; vertical-align: middle; width: 110px; height: 10px; border-color: #fff; background: #1a1a2e; margin-left: 4px; }
+.fh-foe { text-align: right; }
+.fh-php i { background: #3fbf3f; }
+.fh-ehp i { background: #e8393d; }
+.fh-mercy i { background: #ffd93d; }
+.fh-mid { text-align: center; font-size: 12px; color: #ffd93d; }
+.fh-lives { font-size: 16px; color: #e8393d; }
+.fox-flash {
+  position: absolute;
+  top: 160px;
+  left: 0;
+  right: 0;
+  z-index: 12;
+  text-align: center;
+  font-size: 20px;
+  color: #9be7ff;
+  text-shadow: 3px 3px 0 #2e5c9a;
+}
+.fox-flash.small { font-size: 10px; color: #ffd93d; }
+.fox-radio {
+  position: absolute;
+  left: 100px;
+  top: 60px;
+  width: 420px;
+  z-index: 11;
+  padding: 8px 10px;
+  font-size: 9px;
+  line-height: 1.8;
+  background: rgba(26, 26, 46, 0.85);
+  border: 2px solid #9be86e;
+}
+.fox-box { position: absolute; left: 24px; right: 24px; bottom: 16px; height: 150px; z-index: 20; }
+.fox-box.end { top: 90px; bottom: auto; height: auto; text-align: center; font-size: 11px; line-height: 2.2; }
+
+/* ---------- Arena Modo 7 (Tecloides 3 contra 3) ---------- */
+.mon.arena7 .arena-floor { position: absolute; left: 0; top: 0; width: 640px; height: 480px; }
+.theme-snes .mon .info { background: rgba(255, 248, 231, 0.92); border-radius: 6px; border-color: #1a1a2e; }
+.theme-snes .mon .info .bar i { background: #3fbf3f; }
+
+/* ---------- Reina Nébula ---------- */
+.battle.dark {
+  background: radial-gradient(ellipse 250px 130px at 50% 120px, #2a1d5e 0%, #0d0b26 70%, #05040f 100%);
+  transition: background 1s;
+}
+.battle.dark.lit { background: radial-gradient(ellipse 340px 190px at 50% 120px, #4a3a8e 0%, #1a1450 70%, #0d0b26 100%); }
+.theme-nebula .ehp i { background: #f79ac0; }
+.theme-nebula .emercy i { background: #ffd93d; }
+.theme-nebula .cmd.sel { background: #8e44ad; color: #ffffff; border-color: #c39bd3; }
+.neb-cv { width: 240px; height: 172px; }
+.c.hid { color: var(--c1); }
+.tt.scan .scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 30px;
+  height: 3px;
+  background: #5fcde4;
+  box-shadow: 0 0 8px #5fcde4;
+  animation: scanMove 1.5s linear infinite;
+}
+@keyframes scanMove { from { top: 30px; } to { top: 150px; } }
+.charge { position: absolute; left: 16px; right: 16px; bottom: 34px; height: 10px; border: 2px solid #ffd93d; }
+.charge i { display: block; width: 0; height: 100%; background: linear-gradient(90deg, #ffd93d, #ff8c1a); transition: width 0.1s; }
+.bit-warn {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 196px;
+  z-index: 5;
+  text-align: center;
+  font-size: 9px;
+  color: #ffd93d;
+  text-shadow: 2px 2px 0 #05040f;
+  animation: blink 0.5s steps(1) 4;
+}
+.dodge.spiral .ground { display: none; }
+.bullet.cria { border-radius: 12px 12px 4px 4px; }
+.battle.crias .bbox { top: 230px; }
+
+/* ---------- Vitrina ----------
+   Con los tesoros y amigos del Reino 16-Bit ya no caben en una sola fila:
+   las repisas se parten en varias filas con casillas un poco más chicas. */
+.vitrina h2 { margin-bottom: 4px; }
+.vitrina .shelf-title { margin: 4px 0 2px; }
+.vitrina .shelf { flex-wrap: wrap; gap: 4px 6px; }
+.vitrina .slot { width: 42px; height: 42px; }
+.vitrina .slot canvas { width: 32px; height: 32px; }
