@@ -94,11 +94,12 @@ const WORLDS = [];
 
 // Registra un mundo (ver docs/MUNDOS.md):
 //   id, order (lugar de su tubería en el pueblo), name, theme, requires (consola que lo abre),
-//   console (consola que se rescata), nodes, enemies, y opcionales: treasures, sprites, tracks, quests
+//   console (consola que se rescata), nodes, enemies, y opcionales: treasures, sprites, palettes, tracks, quests
 function addWorld(w) {
   Object.assign(ENEMIES, w.enemies || {});
   Object.assign(TREASURES, w.treasures || {});
   Object.assign(SPRITES, w.sprites || {});
+  Object.assign(SPRITE_PALETTES, w.palettes || {});
   Object.assign(TRACKS, w.tracks || {});
   Object.assign(QUESTS, w.quests || {});
   WORLDS.push(w);

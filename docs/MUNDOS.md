@@ -80,6 +80,19 @@ nebula: {
 | `battle` (por defecto) | `js/scenes/battle.js` | Combate estilo Deltarune: LUCHAR/ACTUAR/OBJETO/PERDONAR + lluvia de letras | `hp, atk, def, fightWords, words, intro, check, idle, calm, taunts, acts[], bullets{count, interval, speed, pool}, drop, console` (copia a Pixelito en `worlds/gb.js`) |
 | `tecloides` | `js/scenes/tecloides.js` | Batalla de Tecloides contra un entrenador de `TRAINERS` (`js/tecloides.js`) | El id del nodo = id del entrenador |
 | `mario` | `js/scenes/mario.js` | Nivel de plataformas por tecleo (Mundo 1-1) | — (el nivel está en `L11` dentro de la escena) |
+| `kongo` | `js/scenes/kongo.js` | Subir vigas saltando barriles con mayúsculas (`{ endless: true }` = arcade BARRILES) | — |
+| `patos` | `js/scenes/patos.js` | Patos de Letras: atrapar patos escribiendo su letra (`{ turbo: true }` = sílabas) | — |
+| `mazmorra` | `js/scenes/mazmorra.js` | Mazmorra por cuartos: puertas y cofres que se abren con frases; al fondo, combate con `tragabombas` | — |
+| `punin` | `js/scenes/punin.js` | Boxeo: esquivar escribiendo el aviso, golpear cuando se marea | `drop` |
+| `caparazon` | `js/scenes/caparazon.js` | Jefe del Mundo 2: saltar bloques al ritmo de un metrónomo | `console` |
+
+Campos opcionales extra del modo `battle`: `caps: true` (exige mayúsculas con SHIFT), `music`,
+`fightTime` (multiplica el tiempo de LUCHAR), `fightList(words)` y `fightUnit(unit, dmg, battle)`
+(cambian las palabras y el daño; ejemplo: Tragabombas en `worlds/nes.js`). La batalla se pinta con
+el `theme` del mundo dueño del enemigo. `TypingTask` y `Dodge` aceptan `caps: true` (usa `capsMatch`).
+
+Las escenas del Mundo 2 comparten `js/nes-kit.js`: paleta `NES`, `paintNes()`, `nesArt()` (dibujos
+NES → sprites con su propia paleta) y `nesScene({...})` (lienzo + panel + pausa con ESC).
 
 ### Crear una mecánica nueva (`mode` nuevo)
 
@@ -136,7 +149,9 @@ mueve, multiplica su velocidad por `diff().speed`. Si algo hace daño, pásalo p
 Dibujos de 16×16 con letras, en `sprites` de tu mundo:
 `.` transparente · `a` más claro · `b` claro · `c` oscuro · `d` más oscuro.
 Se pintan con la paleta del mundo (`.theme-<id>`), así que el mismo dibujo cambia de color
-por mundo. Para sprites a todo color (como Mario), mira `paintNes()` en `js/scenes/mario.js`.
+por mundo. Si un sprite necesita sus propios colores, ponlos en `palettes` de tu mundo
+(`{ id: { a, b, c, d } }` en hex; ganan sobre la paleta del mundo). Para dibujos a todo color en un
+canvas propio (como Mario), mira `paintNes()` en `js/nes-kit.js`.
 
 ## 5. Música
 

@@ -1,5 +1,13 @@
 // Combate por turnos estilo RPG: LUCHAR / ACTUAR / OBJETO / PERDONAR,
 // y después el turno del enemigo (esquivar escribiendo lo que cae).
+//
+// Campos opcionales del enemigo (además de los de docs/MUNDOS.md):
+//   caps: true          exige mayúsculas con SHIFT al escribir (LUCHAR, ACTUAR y la lluvia)
+//   music: 'pista'      pista propia en vez de 'battle' / 'boss'
+//   fightTime: 0.8      multiplica el tiempo de LUCHAR (menos de 1 = más prisa)
+//   fightList(words)    cambia la lista de palabras de LUCHAR (devuelve la lista nueva)
+//   fightUnit(unit, dmg, battle)  ajusta el daño de cada palabra (devuelve el daño)
+// El combate se pinta con el tema del mundo al que pertenece el enemigo.
 
 const COMMANDS = ['LUCHAR', 'ACTUAR', 'OBJETO', 'PERDONAR'];
 
@@ -14,7 +22,9 @@ Scenes.battle = {
       st: { chars: 0, errors: 0, ms: 0, perfect: 0 },
       cmd: 0, phase: 'intro', timers: [],
     });
-    Music.play(def.boss ? 'boss' : 'battle');
+    const world = WORLDS.find((w) => w.enemies && w.enemies[enemyId]);
+    if (world && world.theme) document.body.className = `theme-${world.theme}`;
+    Music.play(def.music || (def.boss ? 'boss' : 'battle'));
     const NAME = upper(def.name);
     Game.root.innerHTML = `
       <div class="battle ${def.boss ? 'boss' : ''}">
@@ -135,6 +145,7 @@ Scenes.battle = {
     this.renderCmds();
     const onDone = opts.onDone;
     this.task = new TypingTask(this.box, {
+      caps: !!this.def.caps,
       ...opts,
       onDone: (res) => {
         this.st.chars += res.chars;
@@ -156,15 +167,17 @@ Scenes.battle = {
   },
 
   fight() {
-    const words = pickWords(this.def.words, this.def.fightWords);
+    let words = pickWords(this.def.words, this.def.fightWords);
+    if (this.def.fightList) words = this.def.fightList(words);
     const total = words.join('').length;
     let dealt = 0;
     this.runTask({
       label: '¡LUCHAR! Escribe rápido:',
       texts: words,
-      timeLimit: total * 560 + 2500,
+      timeLimit: (total * 560 + 2500) * (this.def.fightTime || 1),
       onUnit: (unit) => {
-        const { dmg, perfect } = this.damageFor(unit);
+        let { dmg, perfect } = this.damageFor(unit);
+        if (this.def.fightUnit) dmg = this.def.fightUnit(unit, dmg, this);
         dealt += dmg;
         if (perfect) this.st.perfect++;
         this.e.hp = Math.max(0, this.e.hp - dmg);
@@ -257,7 +270,7 @@ Scenes.battle = {
 
   startDodge() {
     this.phase = 'dodge';
-    this.dodge = new Dodge(this.box, this.def.bullets, {
+    this.dodge = new Dodge(this.box, { caps: !!this.def.caps, ...this.def.bullets }, {
       onHit: () => {
         this.p.hp = Math.max(0, this.p.hp - scaledDmg(this.def.atk));
         this.updateBars();
