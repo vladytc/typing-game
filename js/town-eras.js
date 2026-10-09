@@ -78,6 +78,37 @@ const HUB_ERAS = {
   },
 };
 
+// Eras que solo se ven en su barrio del pueblo (todavía no son era de todo el pueblo).
+// Mismo formato que HUB_ERAS. Los colores de la N64 son los de .theme-n64 (css/worlds/n64.css).
+const BARRIO_ERAS = {
+  n64: {
+    label: 'ERA POLIGONO',
+    shadows: true,
+    tiles: {
+      grass: { a: '#58b85c', b: '#7fd07f', c: '#2f7d3a', d: '#202030' },
+      tall: { a: '#58b85c', b: '#7fd07f', c: '#2f7d3a', d: '#202030' },
+      flower: { a: '#58b85c', b: '#f7e463', c: '#2f7d3a', d: '#d64545' },
+      path: { a: '#e8dcb5', b: '#c9a66b', c: '#8a6a3a', d: '#202030' },
+      rock: { a: '#ffffff', b: '#c9d6e3', c: '#7e57c2', d: '#202030' },
+      water: { a: '#ffffff', b: '#9fd3ff', c: '#3c8dd6', d: '#202030' },
+      roof: { a: '#ffffff', b: '#f7e463', c: '#d64545', d: '#202030' },
+      wall: { a: '#ffffff', b: '#c9d6e3', c: '#3c8dd6', d: '#202030' },
+      door: { a: '#f7e463', b: '#c9a66b', c: '#7e57c2', d: '#202030' },
+      tree: { a: '#ffffff', b: '#7fd07f', c: '#2f7d3a', d: '#202030' },
+      pipe: { a: '#ffffff', b: '#7fd07f', c: '#2f7d3a', d: '#202030' },
+      sign: { a: '#ffffff', b: '#f7e463', c: '#7e57c2', d: '#202030' },
+      cave: { a: '#ffffff', b: '#c9d6e3', c: '#7e57c2', d: '#202030' },
+    },
+    chars: { a: '#c9d6e3', b: '#3c8dd6', c: '#7e57c2', d: '#202030' },
+    charOverrides: {
+      bit: { a: '#ffffff', b: '#ffffff', c: '#7e57c2', d: '#202030' },
+      heroe: { a: '#f7e463', b: '#ffffff', c: '#d64545', d: '#202030' },
+    },
+  },
+};
+// Paleta de una era, sea de todo el pueblo o solo de un barrio.
+const eraDef = (era) => HUB_ERAS[era] || BARRIO_ERAS[era];
+
 // Era del pueblo = la del mundo más avanzado que ya está abierto.
 // Eras que todavía no tienen estética de pueblo usan la más cercana anterior.
 function hubEra() {
@@ -89,13 +120,14 @@ const hubTheme = () => HUB_ERAS[hubEra()].theme;
 
 // Colores de una casilla del mapa del pueblo en la era actual.
 function tileColors(era, sprite) {
-  return HUB_ERAS[era].tiles[sprite] || HUB_ERAS[era].tiles.grass || GB4;
+  const e = eraDef(era) || HUB_ERAS.gb;
+  return e.tiles[sprite] || e.tiles.grass || GB4;
 }
 
 // Colores de un personaje. Si tiene era propia (un amigo rescatado), se queda en la suya;
 // si es del pueblo (Bit, Don Chip...), viaja en el tiempo con el pueblo.
 function charColors(sprite, era) {
-  const e = HUB_ERAS[era] || HUB_ERAS.gb;
+  const e = eraDef(era) || HUB_ERAS.gb;
   return e.charOverrides[sprite] || e.chars;
 }
 
