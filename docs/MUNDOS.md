@@ -85,7 +85,7 @@ nebula: {
 
 Una escena puede **heredar de la batalla** con `Object.assign(Object.create(Scenes.battle), {...})` y cambiar
 solo lo que necesite (mira `tetrorey.js`). Campos opcionales extra de un enemigo: `friend: true` (tiene `mode`
-propio pero se puede perdonar y sale en AMIGOS de la vitrina) y `onWord(unit)` (se llama con cada palabra
+propio pero se puede perdonar, se muda al pueblo y cuenta en la misión "Amigos del pueblo") y `onWord(unit)` (se llama con cada palabra
 terminada en la batalla, p. ej. para misiones de racha).
 
 ### Crear una mecánica nueva (`mode` nuevo)
@@ -143,10 +143,43 @@ mueve, multiplica su velocidad por `diff().speed`. Si algo hace daño, pásalo p
 - **Eras del pueblo** (`js/town-eras.js`): el pueblo toma la estética del mundo más avanzado
   abierto. Si tu mundo trae una era nueva, agrega su entrada en `HUB_ERAS` (paleta por casilla
   y por personaje). Si no, el pueblo se queda en la era anterior.
-- **Amigos perdonados**: dale a tu enemigo `home: [x, y]` (casilla libre del pueblo) y
-  `townLine: '* ...'`; al perdonarlo aparece en el pueblo con la estética de tu mundo.
-- **Museo**: tus `treasures` salen solos en la sala de tu mundo; la consola sale si tu mundo
+- **Amigos perdonados**: dale a tu enemigo `home: [x, y]` (casilla libre del pueblo),
+  `townLine: '* ...'` y, si quieres, `townFacts: ['* Dato: ...']` (datos "propios" del
+  personaje); al perdonarlo aparece en el pueblo con la estética de tu mundo. Los amigos ya no
+  salen en la vitrina: viven en el pueblo y platican con `friendTalk` (ver "Curiosidades").
+- **Museo**: solo consolas y tesoros. Tus `treasures` salen solos en la sala de tu mundo; la consola sale si tu mundo
   tiene `console` y existe en `CONSOLES`.
+
+## 3c. Curiosidades (datos con imagen)
+
+Los amigos del pueblo y Don Chip enseñan **curiosidades**: un dato real de la consola con una
+ilustración en pixel art (`js/curiosidades.js`). Agrega las de tu consola en tu `addWorld`:
+
+```js
+curiosities: {
+  snes_modo7: {
+    console: 'snes',                      // id de CONSOLES
+    title: 'El Modo 7',                   // se muestra con upper()
+    caption: 'El Modo 7 giraba y agrandaba el piso para fingir 3D.',  // 1 a 3 renglones
+    draw(g, w, h) {                       // canvas de 384 x 240
+      const p = pixelArt(g, w, h, 64, 40, '#1a1a2e');   // cuadrícula de 64 x 40 "píxeles"
+      p.r(x, y, ancho, alto, color);      // rectángulo
+      p.round(x, y, ancho, alto, relleno, contorno);   // caja con esquinas redondas
+      p.rows(x, y, ['.ab.', 'abba'], { a: '#fff', b: '#f00' });  // dibujito con letras
+    },
+    // o, sin draw: rows: [...], palette: { a: '#fff' }, bg: '#000'
+  },
+},
+```
+
+(Si tu archivo se carga después de `js/curiosidades.js`, también sirve `addCuriosities({...})`.)
+Usa los colores de tu consola, y **solo datos reales y verificables**.
+
+- `friendTalk(ctx, enemyId, { say, facts, extra, bye })`: plática de un amigo. Dice su línea y
+  ofrece `cuéntame un dato` (sus `facts` + los `facts` de su consola en `CONSOLES`) y
+  `enséñame algo` (las curiosidades de su consola). No repite hasta agotarlos.
+- `showCuriosity(ctx, id)`: abre el visor desde cualquier guion del pueblo (promesa; ENTER cierra).
+- Atajo para probar en la consola del navegador: `showCuriosity(null, 'gb_tetris')`.
 
 ## 4. Sprites
 

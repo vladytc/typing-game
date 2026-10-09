@@ -102,11 +102,25 @@ const TOWN = {
           ], 'DON CHIP');
           await ctx.give('bloques');
         }
-        const i = await ctx.choose(['cuéntame un dato', 'adiós'], 'DON CHIP');
-        if (i === 1) { await ctx.say(['* ¡Vuelve pronto! Y no soples los cartuchos.'], 'DON CHIP'); return; }
-        // Datos de la Game Boy siempre; los de otras consolas cuando ya las rescató.
-        const pool = CONSOLES.filter((c) => c.id === 'gameboy' || d.consoles[c.id])
-          .flatMap((c) => c.facts.map((f) => `* ${upper(c.name)} (${c.year}):\n* ${f}`));
+        // Los amigos son los expertos en SU consola; Don Chip tiene un poquito de todo.
+        if (!ctx.flag('chipExpertos') && recruitableFriends().some((id) => d.spared[id])) {
+          ctx.setFlag('chipExpertos');
+          await ctx.say([
+            '* Psst... ¿Ya viste a los amigos que se mudaron al pueblo?',
+            '* Cada uno sabe MUCHISIMO de su propia consola.\n* Pregúntales. Yo solo soy el que tiene de todo.',
+          ], 'DON CHIP');
+        }
+        // Datos y curiosidades de la Game Boy siempre; los de otras consolas cuando ya las rescató.
+        const owned = CONSOLES.filter((c) => c.id === 'gameboy' || d.consoles[c.id]);
+        const i = await ctx.choose(['cuéntame un dato', 'enséñame algo', 'adiós'], 'DON CHIP');
+        if (i === 2) { await ctx.say(['* ¡Vuelve pronto! Y no soples los cartuchos.'], 'DON CHIP'); return; }
+        if (i === 1) {
+          const { item } = pickNext(ctx, 'chipCurio', curiositiesFor(owned.map((c) => c.id)));
+          await ctx.say(['* Ven, ven. Mira lo que tengo en mi álbum...\n* Eso, mi joven amigo, es HISTORIA.'], 'DON CHIP');
+          await showCuriosity(ctx, item);
+          return;
+        }
+        const pool = owned.flatMap((c) => c.facts.map((f) => `* ${upper(c.name)} (${c.year}):\n* ${f}`));
         await ctx.say([pool[ctx.counter('chipFact') % pool.length]], 'DON CHIP');
       },
     },
@@ -225,32 +239,47 @@ const TOWN = {
     },
 
     // Los enemigos que perdonó se mudan al pueblo y conservan la estética de su era (`era`).
-    // Los de mundos nuevos también pueden llegar solos: dale `home: [x, y]` y `townLine` a su enemigo.
+    // Platican con friendTalk (js/curiosidades.js): su línea, y luego datos y curiosidades de su consola.
+    // Los de mundos nuevos también pueden llegar solos: dale `home: [x, y]`, `townLine` y `townFacts` a su enemigo.
     {
       id: 'f-pixelito', era: 'gb', sprite: 'pixelito', x: 13, y: 10, when: () => Save.data.spared.pixelito,
-      async talk(ctx) { await ctx.say(['* ¡Boing! ¡Me mudé al pueblo!\n* Aquí todo se ve en alta definición.'], 'PIXELITO'); },
+      talk: (ctx) => friendTalk(ctx, 'pixelito', {
+        curio: 'gb_pantalla',
+        say: ['* ¡Boing! ¡Me mudé al pueblo!\n* Aquí todo se ve en alta definición.'],
+        facts: ['* Dato: la pantalla de la Game Boy tenía 160 x 144 píxeles.\n* Yo soy uno de ellos. ¡El más guapo!'],
+        bye: '* ¡Boing! ¡Boing! (Así se dice adiós en píxel.)',
+      }),
     },
     {
       id: 'f-cartuchon', era: 'gb', sprite: 'cartuchon', x: 17, y: 8, when: () => Save.data.spared.cartuchon,
-      async talk(ctx) {
-        await ctx.say([
-          '* Ya no soy gruñón. Bueno, solo los lunes.',
-          '* Dato: soplarnos no nos arreglaba.\n* Lo que funcionaba era sacarnos y volvernos a meter.',
-        ], 'CARTUCHON');
-      },
+      talk: (ctx) => friendTalk(ctx, 'cartuchon', {
+        curio: 'gb_guerra',
+        say: ['* Ya no soy gruñón. Bueno, solo los lunes.'],
+        facts: ['* Dato: soplarnos no nos arreglaba.\n* Lo que funcionaba era sacarnos y volvernos a meter.\n* ¡Y la humedad del aliento hasta nos podía oxidar!'],
+        bye: '* Bye. Y NADA de soplarme, ¿eh?',
+      }),
     },
     {
       id: 'f-pilabat', era: 'gb', sprite: 'pilabat', x: 18, y: 2, when: () => Save.data.spared.pilabat,
-      async talk(ctx) { await ctx.say(['* Bzzt. Aquí hay enchufes por todos lados.\n* Soy muy feliz.'], 'PILABAT'); },
+      talk: (ctx) => friendTalk(ctx, 'pilabat', {
+        curio: 'gb_pilas',
+        say: ['* Bzzt. Aquí hay enchufes por todos lados.\n* Soy muy feliz.'],
+        facts: ['* Bzzt. Dato: la Game Boy original comía 4 pilas AA.\n* La Game Boy Pocket (1996) ya solo usaba 2 AAA. ¡A dieta!'],
+        bye: '* Bzzt... me voy a recargar. Adiós.',
+      }),
     },
     {
       id: 'f-tetrorey', era: 'gb', sprite: 'tetrorey', x: 7, y: 10, when: () => Save.data.spared.tetrorey,
-      async talk(ctx) {
-        await ctx.say(['* Este pueblo necesita orden.\n* ¿Por qué ninguna casa encaja con la otra?'], 'TETRO REY');
-        const i = await ctx.choose(['qué te pasó', 'tetris', 'adiós'], 'TETRO REY');
-        if (i === 0) await ctx.say(['* Algo morado me puso a girar y girar...\n* Todavía me da vueltas la corona.'], 'TETRO REY');
-        if (i === 1) await ctx.say(['* ¡No digas esa palabra! Me da vértigo.'], 'TETRO REY');
-      },
+      talk: (ctx) => friendTalk(ctx, 'tetrorey', {
+        curio: 'gb_tetris',
+        say: ['* Este pueblo necesita orden.\n* ¿Por qué ninguna casa encaja con la otra?'],
+        facts: ['* Dato real: Tetris lo inventó Alekséi Pázhitnov en 1984, en Moscú.\n* Mi tatara-tatarabuelo, pues.'],
+        extra: [
+          { opt: 'qué te pasó', run: (c) => c.say(['* Algo morado me puso a girar y girar...\n* Todavía me da vueltas la corona.'], 'TETRO REY') },
+          { opt: 'tetris', run: (c) => c.say(['* ¡No digas esa palabra! Me da vértigo.'], 'TETRO REY') },
+        ],
+        bye: '* Puedes retirarte. En orden, por favor.',
+      }),
     },
   ],
 };
