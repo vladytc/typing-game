@@ -201,7 +201,8 @@ Scenes.ocarin = {
     water.rotation.x = -Math.PI / 2;
     water.position.y = -2.5;
     for (let i = 0; i < 8; i++) {
-      const a = (i / 8) * Math.PI * 2;
+      // Medio paso de giro: así ningún pilar queda entre la cámara y Ocarín.
+      const a = ((i + 0.5) / 8) * Math.PI * 2;
       const p = v.mesh(new THREE.CylinderGeometry(0.7, 0.8, 9, 6), N64C.white);
       p.position.set(Math.cos(a) * 11, 4.5, Math.sin(a) * 11);
       const cap = v.mesh(new THREE.BoxGeometry(2, 0.6, 2), N64C.sand);
@@ -210,7 +211,7 @@ Scenes.ocarin = {
     // La máscara del easter egg (§7.8), colgada de un pilar.
     const mask = v.mesh(new THREE.ConeGeometry(0.8, 0.5, 5), N64C.purple);
     mask.rotation.x = Math.PI / 2;
-    mask.position.set(Math.cos(Math.PI * 0.75) * 10.2, 5, Math.sin(Math.PI * 0.75) * 10.2);
+    mask.position.set(Math.cos(Math.PI * 0.625) * 10.2, 5, Math.sin(Math.PI * 0.625) * 10.2);
     this.oca = M.ocarin(v);
     this.oca.position.set(0, 0, -3);
     v.scene.add(this.oca);
