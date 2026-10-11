@@ -288,7 +288,7 @@ const NES_BASE = {
   },
   drawPops(dt) {
     const g = this.g;
-    g.font = '12px "Press Start 2P", monospace';
+    g.font = '12px "Press Start 2P", TQSym, monospace';
     g.textAlign = 'center';
     this.pops = (this.pops || []).filter((p) => {
       p.t += dt;
@@ -302,7 +302,7 @@ const NES_BASE = {
   // Etiqueta de texto con caja negra (palabras sobre barriles, patos, bloques...).
   label(text, x, y, { pos = 0, active = false } = {}) {
     const g = this.g;
-    g.font = '14px "Press Start 2P", monospace';
+    g.font = '14px "Press Start 2P", TQSym, monospace';
     const w = g.measureText(text).width + 12;
     g.fillStyle = active ? NES.W : NES.K;
     g.fillRect(Math.round(x - w / 2), y - 18, w, 24);

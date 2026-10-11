@@ -763,7 +763,21 @@ class Town3D {
       lift.scale.setScalar(s);
       lift.position.y = -box.min.y * s;
     }
+    if (e.id === 'player') this.xray(o);
     return { o: wrap, model: o };
+  }
+
+  // Silueta del héroe que se ve solo cuando algo (una casa, un árbol alto) queda delante de él.
+  xray(model) {
+    const mat = new THREE.MeshBasicMaterial({ color: '#FFFFFF', transparent: true, opacity: 0.45, depthWrite: false, fog: false });
+    mat.depthFunc = THREE.GreaterDepth;
+    const meshes = [];
+    model.traverse((m) => { if (m.isMesh) meshes.push(m); });
+    meshes.forEach((m) => {
+      const g = new THREE.Mesh(m.geometry, mat);
+      g.renderOrder = 999;
+      m.add(g);
+    });
   }
 
   chest(open) {

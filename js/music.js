@@ -10,6 +10,9 @@ const Music = (() => {
   let master = null;
   let noiseBuf = null;
   let muted = false;
+  // Canciones en loop que se detuvieron: si vuelven a sonar poco después (al salir de una
+  // pausa, o al volver de una pelea al mismo mapa), siguen donde iban en vez de empezar de cero.
+  const held = {};
 
   const NOTE = { C: -9, 'C#': -8, D: -7, 'D#': -6, E: -5, F: -4, 'F#': -3, G: -2, 'G#': -1, A: 0, 'A#': 1, B: 2 };
   const freq = (n) => {
@@ -83,11 +86,21 @@ const Music = (() => {
     const track = TRACKS[name];
     if (!track) return;
     if (current && current.name === name) return;
+    const h = held[name];
+    const back = h && performance.now() - h.at < 120000 ? h : null;
     stop();
     const c = ctx();
     if (!c) return;
     setup(c);
     const start = c.currentTime + 0.05;
+    if (back) {
+      // Cada voz conserva cuánto le faltaba para su siguiente nota, así siguen juntas.
+      current = back;
+      current.voices.forEach((v) => { v.next = start + Math.max(0, v.next - back.ctxAt); });
+      tick();
+      timer = setInterval(tick, 50);
+      return;
+    }
     current = {
       name, bpm: track.bpm, loop: track.loop !== false,
       voices: track.voices.map((v) => {
@@ -100,6 +113,10 @@ const Music = (() => {
   }
 
   function stop() {
+    if (current && current.loop) {
+      const c = ctx();
+      held[current.name] = { ...current, at: performance.now(), ctxAt: c ? c.currentTime : 0 };
+    }
     clearInterval(timer);
     timer = null;
     current = null;

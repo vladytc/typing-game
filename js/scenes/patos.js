@@ -223,7 +223,7 @@ Scenes.patos = nesScene({
       paintTones(g, 'toby', 288, ty, 4);
       if (this.toby.kind === 'show') for (let i = 0; i < this.toby.n; i++) paintNes(g, NES_ART.patoloco, 250 + i * 40, ty - 26, 1.5);
       else {
-        g.font = '12px "Press Start 2P", monospace';
+        g.font = '12px "Press Start 2P", TQSym, monospace';
         g.fillStyle = NES.W;
         g.fillText('JE JE JE', 270, ty - 10);
       }

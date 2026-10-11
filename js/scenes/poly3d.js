@@ -83,7 +83,7 @@ class PolyView {
       g.fillStyle = bg;
       g.fillRect(0, 0, w, h);
       g.fillStyle = fg;
-      g.font = `${size}px "Press Start 2P", monospace`;
+      g.font = `${size}px "Press Start 2P", TQSym, monospace`;
       g.textAlign = 'center';
       g.textBaseline = 'middle';
       String(text).split('\n').forEach((line, i, all) => g.fillText(line, w / 2, h / 2 + (i - (all.length - 1) / 2) * size * 1.5));

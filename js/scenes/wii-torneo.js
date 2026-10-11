@@ -58,7 +58,7 @@ Scenes.wiitorneo = Object.assign(Object.create(Scenes.tecloides), {
       g.fillStyle = WIIC.navy;
       wiiRoundRect(g, 220, 4, 200, 32, 8); g.fill();
       g.fillStyle = WIIC.sky;
-      g.font = '10px "Press Start 2P", monospace';
+      g.font = '10px "Press Start 2P", TQSym, monospace';
       g.textAlign = 'center';
       g.fillText(Math.floor(ts / 1200) % 2 ? '¡DA-NI! ¡DA-NI!' : 'TECLOIDES 3 VS 3', 320, 25);
       this.floorRaf = requestAnimationFrame(step);
