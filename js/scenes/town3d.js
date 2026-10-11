@@ -33,7 +33,7 @@ const T3_KIND = {
   sign: 'sign', cave: 'cave', rock: 'rock', rocas: 'rock', puente: 'bridge', s16_puente: 'bridge', nes_puente: 'bridge',
 };
 // Personajes con modelo 3D propio (Poly.models), por sprite.
-const T3_MODELS = { trianguloso: 'trianguloso', cactin: 'cactin', texturin: 'texturin', niebla: 'niebla', camaraloca: 'camaraloca', pakito: 'pakito', marco: 'marco', ocarin: 'ocarin' };
+const T3_MODELS = { trianguloso: 'trianguloso', cactin: 'cactin', texturin: 'texturin', niebla: 'niebla', camaraloca: 'camaraloca', pakito: 'pakito', marco: 'marco', ocarin: 'ocarin', bit: 'bit', dani: 'dani' };
 const T3_ROOFS = ['#D64545', '#3C8DD6', '#F0953C', '#7E57C2', '#E8B830'];
 
 // Junta muchas geometrías en UNA sola malla (una llamada de dibujo por material).
@@ -631,7 +631,7 @@ class Town3D {
       stack.push([i + 1, j], [i - 1, j], [i, j + 1], [i, j - 1]);
     }
     const S = T3S;
-    const b = band.vc;
+    const b = new T3Bake(); // malla propia: se vuelve transparente si el héroe pasa detrás (fadeHouses)
     const w = (x1 - x0 + 1) * S - 0.3;
     const d = (y1 - y0 + 1) * S - 0.5;
     const cx = (x0 + x1 + 1) * S / 2;
@@ -663,6 +663,27 @@ class Town3D {
       plaque.position.set(cx, wallH - 0.35, front + 0.06);
       band.grp.add(plaque);
     }
+    const mesh = b.mesh(this.mats.vc.clone());
+    if (mesh) {
+      band.grp.add(mesh);
+      this.houses = this.houses || [];
+      this.houses.push({ mesh, x0, x1, y0, y1, a: 1 });
+    }
+  }
+
+  // Si una casa queda entre la cámara y el héroe (él detrás, al norte), se vuelve casi transparente.
+  fadeHouses(dt) {
+    if (!this.houses) return;
+    const { x, y } = this.sc.p;
+    const k = 1 - Math.exp(-dt * 10);
+    this.houses.forEach((h) => {
+      const behind = x >= h.x0 - 1 && x <= h.x1 + 1 && y < h.y0 && y >= h.y0 - 3;
+      h.a += ((behind ? 0.28 : 1) - h.a) * k;
+      const m = h.mesh.material;
+      const solid = h.a > 0.98;
+      m.opacity = solid ? 1 : h.a;
+      if (m.transparent === solid) { m.transparent = !solid; m.depthWrite = solid; m.needsUpdate = true; }
+    });
   }
 
   // Barrios de eras viejas: relieves de pixel art (bloques y cartones con la paleta de su era).
@@ -743,7 +764,7 @@ class Town3D {
       const key = (e.kind === 'foe' && ENEMIES[e.enemy] && ENEMIES[e.enemy].model) || T3_MODELS[e.sprite];
       if (key && Poly.models[key]) o = Poly.models[key](v);
       else if (e.sprite === 'piloto') o = Poly.models.kart(v, N64C.purple, '#3A2A5A');
-      if (o) hgt = e.big ? 3.4 : 2.2;
+      if (o) hgt = e.big ? 3.4 : e.id === 'bit' ? 1.3 : 2.2;
     }
     if (!o) {
       // Cartón (billboard): el mismo dibujo del 2D, con la paleta de su era.
@@ -875,7 +896,7 @@ class Town3D {
   camGoal() {
     const r = this.ents.get(this.sc.player);
     const p = r ? r.holder.position : new THREE.Vector3();
-    const [up, back] = this.opt.cam || [11.5, 9];
+    const [up, back] = this.opt.cam || [13, 10.5];
     return { pos: new THREE.Vector3(p.x, p.y + up, p.z + back), look: new THREE.Vector3(p.x, p.y + 1, p.z - 2) };
   }
 
@@ -910,6 +931,7 @@ class Town3D {
     });
     this.anims.forEach((f) => f(dt, t));
     if (this.waterMesh) this.waterMesh.position.y = -0.18 + Math.sin(t * 1.4) * 0.05;
+    this.fadeHouses(dt);
     if (this.cine) { this.cine(dt, t); return; }
     const g = this.camGoal();
     const a = 1 - Math.exp(-dt * 5);
