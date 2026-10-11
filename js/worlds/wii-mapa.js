@@ -848,7 +848,10 @@ const WII_T3 = {
     const S = T3S;
     const b = wiiSm(band);
     const h = c.h;
-    const H = 2.6 + T3Hash(x >> 1, y >> 1, 5) * 3.6; // de 2 en 2 casillas, la misma altura
+    // De 2 en 2 casillas, la misma altura. Si detrás (al norte) se puede caminar, va bajito:
+    // la cámara mira desde el sur y un edificio alto taparía al héroe.
+    const back = [1, 2, 3].some((k) => { const t = this.sc.tileAt(x, y - k); return t && !t.solid; });
+    const H = back ? 1.7 + T3Hash(x >> 1, y >> 1, 5) * 0.6 : 2.6 + T3Hash(x >> 1, y >> 1, 5) * 3.6;
     // Blanco con ventanas azules, zócalo gris y una franja de color arriba (de 2 en 2 casillas, como la altura).
     const roof = WII3.roof[Math.floor(T3Hash(x >> 1, y >> 1, 7) * WII3.roof.length)];
     b.add(new THREE.BoxGeometry(S, H, S), T3M(X, h + H / 2, Z), '#FAFAFA');
