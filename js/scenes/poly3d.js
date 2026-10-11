@@ -381,6 +381,47 @@ const Poly = {
       return g;
     },
 
+    // Bit: el cursor con cara. Un bloque morado redondeado y su rayita de cursor que parpadea abajo.
+    bit(v) {
+      const g = new THREE.Group();
+      const block = v.mesh(new THREE.BoxGeometry(0.9, 0.95, 0.6), N64C.purple, null, g);
+      block.position.y = 0.95;
+      [-0.2, 0.2].forEach((x) => {
+        const eye = v.mesh(new THREE.BoxGeometry(0.16, 0.2, 0.06), '#FFFFFF', null, g);
+        eye.position.set(x, 1.08, 0.31);
+        const pupil = v.mesh(new THREE.BoxGeometry(0.08, 0.1, 0.04), N64C.black, null, g);
+        pupil.position.set(x + 0.03, 1.05, 0.35);
+      });
+      const smile = v.mesh(new THREE.BoxGeometry(0.3, 0.06, 0.05), N64C.black, null, g);
+      smile.position.set(0, 0.78, 0.31);
+      const bar = v.mesh(new THREE.BoxGeometry(0.75, 0.1, 0.18), '#FFFFFF', null, g);
+      bar.position.y = 0.25;
+      g.userData.anim = (t) => { bar.visible = Math.floor(t * 2) % 2 === 0; };
+      return g;
+    },
+
+    // Dani Turbo: gorra ancha, lentes oscuros y chamarra; el rival de siempre.
+    dani(v) {
+      const g = new THREE.Group();
+      const shirt = v.mesh(new THREE.BoxGeometry(0.8, 0.9, 0.5), N64C.water, null, g);
+      shirt.position.y = 1.0;
+      const jacket = v.mesh(new THREE.BoxGeometry(1.0, 0.35, 0.56), N64C.purple, null, g);
+      jacket.position.y = 1.32;
+      const head = v.mesh(new THREE.IcosahedronGeometry(0.42, 0), N64C.skin, null, g);
+      head.position.y = 1.85;
+      const shades = v.mesh(new THREE.BoxGeometry(0.62, 0.13, 0.12), N64C.black, null, g);
+      shades.position.set(0, 1.9, 0.33);
+      const cap = v.mesh(new THREE.CylinderGeometry(0.46, 0.48, 0.26, 6), N64C.purple, null, g);
+      cap.position.y = 2.2;
+      const brim = v.mesh(new THREE.BoxGeometry(0.95, 0.06, 0.5), N64C.purple, null, g);
+      brim.position.set(0, 2.1, 0.3);
+      [-0.2, 0.2].forEach((x) => {
+        const l = v.mesh(new THREE.BoxGeometry(0.28, 0.55, 0.3), N64C.black, null, g);
+        l.position.set(x, 0.3, 0);
+      });
+      return g;
+    },
+
     kart(v, color, cap) {
       const g = new THREE.Group();
       const bodyMat = v.mat(color, {}); // material propio: la estrella lo pinta de colores
