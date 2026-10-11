@@ -35,7 +35,11 @@
 //   - modelos de casilla nuevos (d3: 'gcArbol', 'gcFlor', 'gcPanel'...) con brillo de plástico y
 //     contorno negro tipo cel-shading;
 //   - los enemigos con `model` se ven con sus modelos de js/scenes/gc3d.js (GC3.models);
-//   - estrellas en las zonas del espacio, luz de contra lila y agua con reflejos.
+//   - estrellas en las zonas del espacio, luz de contra lila;
+//   - el look de GameCube (gcDress): 640×480 sin pixelear, luz de caricatura en 3 tonos,
+//     contornos negros en TODO lo que se hornea (casas, palmeras, puentes, bosque), rayas en las
+//     orillas de mesetas e islas, suelo pintado a mano (caminos de tierra con orilla, pasto con
+//     matitas), cielo de degradado con nubes de remolino, y agua de caricatura con espuma.
 
 const GC_FACTS = CONSOLES.find((c) => c.id === 'gamecube').facts;
 
@@ -50,7 +54,7 @@ Object.assign(TREASURES, {
 const gcPalArt = (rows, pal) => Object.assign(rows.slice(), { pal });
 const GC_GROUND = {
   gc_pasto: gcPalArt(SPRITES.grass, { a: '#5CC96A', b: '#8EE59A', c: '#2F8A3C', d: '#17162B' }),
-  gc_camino: gcPalArt(SPRITES.path, { a: '#FFFFFF', b: '#ECEBF7', c: '#C8CBD6', d: '#8E86D9' }),
+  gc_camino: gcPalArt(SPRITES.path, { a: '#F6E2A8', b: '#EBD08F', c: '#D3B272', d: '#A9844E' }),
   gc_arena: gcPalArt(SPRITES.path, { a: '#FFF6D8', b: '#F5E6B8', c: '#D9C48E', d: '#8B5E3C' }),
   gc_piso: gcPalArt([
     'aaaaaaaaaaaaaaac',
@@ -323,12 +327,66 @@ const GC_LOOKS = {
 };
 
 // ---------- Modelos 3D de casilla (estilo GameCube: plástico brillante y contorno de caricatura) ----------
-// Se juntan en dos mallas por mapa: una brillante (Phong) y una de contornos (caras de atrás en negro).
-function gcPut(r3, geo, m, color, line = 1.08) {
-  const k = r3.gcK || (r3.gcK = { shiny: new T3Bake(), line: new T3Bake() });
-  if (line) k.line.add(geo.clone(), m.clone().multiply(new THREE.Matrix4().makeScale(line, line, line)), GCC.black);
-  k.shiny.add(geo, m, color);
+// Se juntan en pocas mallas por mapa: una brillante (Phong con luz "de caricatura"), una de
+// contornos (caras de atrás en negro, un poquito más grandes), las orillas de los bordes y la espuma.
+
+// Como T3Bake, pero respeta las normales de cada figura: las esferas se ven redonditas
+// (plástico de GameCube), no facetadas como en la N64.
+const GcBake = typeof T3Bake === 'undefined' ? null : class extends T3Bake {
+  add(geo, m, color) {
+    const g = geo.index ? geo.toNonIndexed() : geo;
+    if (!g.attributes.normal) g.computeVertexNormals();
+    if (m) g.applyMatrix4(m);
+    const P = g.attributes.position.array;
+    const N = g.attributes.normal.array;
+    const col = new THREE.Color(color || '#ffffff');
+    for (let i = 0; i < P.length; i += 3) {
+      this.p.push(P[i], P[i + 1], P[i + 2]);
+      this.n.push(N[i], N[i + 1], N[i + 2]);
+      this.c.push(col.r, col.g, col.b);
+    }
+    if (g !== geo) g.dispose();
+    geo.dispose();
+  }
+};
+
+const gcKit = (r3) => r3.gcK || (r3.gcK = { shiny: new GcBake(), line: new T3Bake(), edge: new T3Bake(), foam: new T3Bake() });
+
+// Contorno de caricatura de una figura: la misma figura, crecida un grosor parejo (no un
+// porcentaje: así una casa y un tallo tienen la misma línea) y dibujada por dentro en negro.
+function gcHull(r3, geo, m) {
+  const g = geo.clone();
+  g.computeBoundingBox();
+  const size = g.boundingBox.getSize(new THREE.Vector3());
+  const ctr = g.boundingBox.getCenter(new THREE.Vector3());
+  const sc = new THREE.Vector3();
+  const M = m || new THREE.Matrix4();
+  M.decompose(new THREE.Vector3(), new THREE.Quaternion(), sc);
+  const ws = [size.x * Math.abs(sc.x), size.y * Math.abs(sc.y), size.z * Math.abs(sc.z)];
+  const minD = Math.min(...ws);
+  // Las figuras planas o finísimas (rayitas de letrero) no llevan contorno.
+  if (!(minD > 0.05)) { g.dispose(); return; }
+  const w = Math.max(0.022, Math.min(0.08, minD * 0.11));
+  const T = (x, y, z) => new THREE.Matrix4().makeTranslation(x, y, z);
+  const grow = new THREE.Matrix4().makeScale(1 + (2 * w) / ws[0], 1 + (2 * w) / ws[1], 1 + (2 * w) / ws[2]);
+  gcKit(r3).line.add(g, M.clone().multiply(T(ctr.x, ctr.y, ctr.z)).multiply(grow).multiply(T(-ctr.x, -ctr.y, -ctr.z)), GCC.black);
 }
+
+function gcPut(r3, geo, m, color, line = 1) {
+  if (line) gcHull(r3, geo, m);
+  gcKit(r3).shiny.add(geo, m, color);
+}
+
+// Luz de caricatura (cel-shading) para materiales Phong: tres tonos con bordes limpios
+// (sombra, medio tono y luz) y un brillito duro de plástico en vez del degradado suave.
+function gcToonShader(sh) {
+  sh.fragmentShader = sh.fragmentShader.replace('#include <lights_phong_pars_fragment>', THREE.ShaderChunk.lights_phong_pars_fragment
+    .replace('float dotNL = saturate( dot( geometry.normal, directLight.direction ) );',
+      'float gcNL = dot( geometry.normal, directLight.direction );\n\tfloat dotNL = smoothstep( -0.02, 0.05, gcNL ) * 0.5 + smoothstep( 0.34, 0.41, gcNL ) * 0.5;')
+    .replace(/reflectedLight\.directSpecular \+= [^\n]*/,
+      'vec3 gcH = normalize( directLight.direction + geometry.viewDir );\n\tfloat gcS = smoothstep( 0.55, 0.62, pow( saturate( dot( geometry.normal, gcH ) ), material.specularShininess ) );\n\treflectedLight.directSpecular += directLight.color * material.specularColor * gcS * step( 0.0, gcNL ) * material.specularStrength;'));
+}
+const gcToon = (mat) => { mat.onBeforeCompile = gcToonShader; mat.needsUpdate = true; return mat; };
 
 const GC_PROPS = {
   gcArbol(r3, x, y, c, X, Z) {
@@ -339,7 +397,7 @@ const GC_PROPS = {
     gcPut(r3, new THREE.CylinderGeometry(0.22, 0.3, 1.4, 6), T3M(X + ox, h + 0.7, Z + oz), GCC.brown, 0);
     // Los del borde del mapa (casi todos) van más sencillos: así el mapa entero se dibuja fluido.
     const edge = x === 0 || y === 0 || x === r3.sc.W - 1 || y === r3.sc.H - 1;
-    gcPut(r3, new THREE.IcosahedronGeometry(1.0, edge ? 0 : 1), T3M(X + ox, h + 2.0, Z + oz, 1, 0.85, 1, j(3) * 3), j(4) < 0.5 ? '#3BB54A' : '#4CC85A', 1.07);
+    gcPut(r3, new THREE.IcosahedronGeometry(1.0, 1), T3M(X + ox, h + 2.0, Z + oz, 1, 0.85, 1, j(3) * 3), j(4) < 0.5 ? '#3BB54A' : '#4CC85A', 1.07);
     if (!edge) gcPut(r3, new THREE.IcosahedronGeometry(0.55, 0), T3M(X + ox + 0.4, h + 2.6, Z + oz + 0.25), '#7BE08A', 1.1);
   },
   gcArbusto(r3, x, y, c, X, Z) {
@@ -430,30 +488,445 @@ function gcModelKey(e) {
   return null;
 }
 
+// ---------- El look de GameCube del mapa entero ----------
+
+// Suelo pintado "a mano" a más resolución (32 px por casilla en vez de 16): pasto con matitas,
+// caminos de tierra clarita con orilla y piedritas, arena, y pisos metálicos limpios. Los caminos
+// y el pasto se dibujan como manchas redondeadas (sin esquinas de cuadrito), pero su orilla queda
+// justo en el borde de la casilla: se sigue viendo exacto por dónde se camina.
+const GC_SOIL = {
+  grass: { fill: '#5CC96A', dark: '#43AF52', light: '#86E293', edge: '#3E9F4C' },
+  path: { fill: '#F6E2A8', dark: '#E2C788', light: '#FFF3D0', edge: '#C49A5E' },
+  sand: { fill: '#FCEBBE', dark: '#EED79C', light: '#FFF8E2', edge: '#E3C68A' },
+  sea: { fill: '#4FB6E3', dark: '#3AA2D6', light: '#7FCDEF', edge: '#4FB6E3' },
+};
+
+function gcSoilClass(r3, x, y, ground) {
+  const c = r3.cells[y] && r3.cells[y][x];
+  if (!c || c.h < -10) return null;
+  const under = c.t.under || ground;
+  const top = (c.kind === 'ground' || c.kind === 'water' || c.kind === 'bridge') && c.t.s !== under ? c.t.s : under;
+  if (c.kind === 'water' || c.kind === 'bridge') return 'sea';
+  if (top === 'gc_pasto' || top === 'tall' || top === 'flower' || top === 'grass') return 'grass';
+  if (top === 'gc_camino') return 'path';
+  if (top === 'gc_arena') return 'sand';
+  return `tile:${top}`;
+}
+
+// Textura de un tipo de suelo en un rectángulo de casillas (manchitas deterministas por casilla).
+function gcSoilPaint(g, cls, x0, y0, x1, y1, K) {
+  const s = GC_SOIL[cls];
+  g.fillStyle = s.fill;
+  g.fillRect(x0 * K, y0 * K, (x1 - x0) * K, (y1 - y0) * K);
+  for (let y = y0; y < y1; y++) {
+    for (let x = x0; x < x1; x++) {
+      const j = (k) => T3Hash(x, y, k + 40);
+      const px = x * K;
+      const py = y * K;
+      if (cls === 'grass') {
+        // Matitas en "v" (como las de Animal Crossing) y puntitos de luz.
+        g.strokeStyle = s.dark;
+        g.lineWidth = 2;
+        g.lineCap = 'round';
+        for (let i = 0; i < 3; i++) {
+          const cx = px + 4 + j(i) * (K - 8);
+          const cy = py + 5 + j(i + 5) * (K - 10);
+          g.beginPath();
+          g.moveTo(cx - 3, cy - 3);
+          g.lineTo(cx, cy + 1);
+          g.lineTo(cx + 3, cy - 3);
+          g.stroke();
+        }
+        g.fillStyle = s.light;
+        if (j(9) < 0.6) g.fillRect(px + j(10) * (K - 4), py + j(11) * (K - 4), 2, 2);
+      } else if (cls === 'sea') {
+        g.fillStyle = s.light;
+        g.fillRect(px + j(1) * (K - 6), py + j(2) * (K - 3), 6, 2);
+      } else {
+        // Piedritas y granitos.
+        for (let i = 0; i < 4; i++) {
+          g.fillStyle = i % 2 ? s.dark : s.light;
+          g.beginPath();
+          g.ellipse(px + 3 + j(i) * (K - 6), py + 3 + j(i + 4) * (K - 6), 1.2 + j(i + 8) * 1.6, 1 + j(i + 12), 0, 0, Math.PI * 2);
+          g.fill();
+        }
+      }
+    }
+  }
+}
+
+// Pisos de las zonas del espacio, redibujados nítidos (paneles con remaches y baldosas biseladas).
+function gcTilePaint(g, sprite, x, y, K, old) {
+  const px = x * K;
+  const py = y * K;
+  if (sprite === 'gc_piso') {
+    g.fillStyle = '#C8CBD6';
+    g.fillRect(px, py, K, K);
+    g.fillStyle = '#E2E4EC';
+    g.fillRect(px, py, K, 1);
+    g.fillRect(px, py, 1, K);
+    g.fillStyle = '#9D97D6';
+    g.fillRect(px, py + K - 2, K, 2);
+    g.fillRect(px + K - 2, py, 2, K);
+    g.fillStyle = '#BCBFCD';
+    g.fillRect(px + K / 2 - 4, py + K / 2 - 4, 8, 8);
+    g.fillStyle = '#4B3F9E';
+    [[6, 6], [K - 6, 6], [6, K - 6], [K - 6, K - 6]].forEach(([a, b]) => { g.beginPath(); g.arc(px + a, py + b, 1.6, 0, Math.PI * 2); g.fill(); });
+    return;
+  }
+  if (sprite === 'gc_baldosa') {
+    const h = K / 2;
+    [[0, 0, '#8E86D9', '#B9B3F0', '#6A5FC4'], [h, h, '#8E86D9', '#B9B3F0', '#6A5FC4'], [h, 0, '#4B3F9E', '#6A5FC4', '#2D2566'], [0, h, '#4B3F9E', '#6A5FC4', '#2D2566']].forEach(([ox, oy, f, hi, lo]) => {
+      g.fillStyle = f;
+      g.fillRect(px + ox, py + oy, h, h);
+      g.fillStyle = hi;
+      g.fillRect(px + ox, py + oy, h, 2);
+      g.fillRect(px + ox, py + oy, 2, h);
+      g.fillStyle = lo;
+      g.fillRect(px + ox, py + oy + h - 2, h, 2);
+      g.fillRect(px + ox + h - 2, py + oy, 2, h);
+    });
+    return;
+  }
+  // Cualquier otro: el pixel art de siempre, sin suavizar.
+  g.imageSmoothingEnabled = false;
+  g.drawImage(old, x * 16, y * 16, 16, 16, px, py, K, K);
+  g.imageSmoothingEnabled = true;
+}
+
+function gcGround(r3) {
+  const mat = r3.mats.g3;
+  const old = mat && mat.map && mat.map.image;
+  if (!old) return;
+  const { W, H } = r3.sc;
+  const K = 32;
+  const CW = W * K;
+  const CH = H * K;
+  const ground = r3.sc.m.ground || 'grass';
+  const cls = [];
+  for (let y = 0; y < H; y++) { cls.push([]); for (let x = 0; x < W; x++) cls[y].push(gcSoilClass(r3, x, y, ground)); }
+  const cv = document.createElement('canvas');
+  cv.width = CW;
+  cv.height = CH;
+  const g = cv.getContext('2d');
+  // 1) Fondo: el suelo del mapa en todas partes.
+  const base = { gc_pasto: 'grass', gc_arena: 'sand', gc_camino: 'path' }[ground] || `tile:${ground}`;
+  if (GC_SOIL[base]) gcSoilPaint(g, base, 0, 0, W, H, K);
+  else for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) gcTilePaint(g, base.slice(5), x, y, K, old);
+  // 2) El mar (casilla exacta: las orillas de la isla son rectas) y los pisos especiales.
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const k = cls[y][x];
+      if (k === 'sea' && base !== 'sea') gcSoilPaint(g, 'sea', x, y, x + 1, y + 1, K);
+      else if (k && k.startsWith('tile:') && k !== base) gcTilePaint(g, k.slice(5), x, y, K, old);
+    }
+  }
+  // 3) Manchas redondeadas: arena, pasto y encima los caminos.
+  const P = K; // margen: los caminos que salen del mapa siguen derechito
+  const mask = document.createElement('canvas');
+  mask.width = CW + P * 2;
+  mask.height = CH + P * 2;
+  const mg = mask.getContext('2d');
+  const blur = document.createElement('canvas');
+  blur.width = mask.width;
+  blur.height = mask.height;
+  const bg = blur.getContext('2d');
+  const pat = document.createElement('canvas');
+  pat.width = CW;
+  pat.height = CH;
+  const pg = pat.getContext('2d');
+  ['sand', 'grass', 'path'].forEach((k) => {
+    if (k === base) return;
+    let any = false;
+    mg.clearRect(0, 0, mask.width, mask.height);
+    mg.fillStyle = '#fff';
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        if (cls[y][x] !== k) continue;
+        any = true;
+        const x0 = x === 0 ? 0 : P + x * K;
+        const y0 = y === 0 ? 0 : P + y * K;
+        const x1 = x === W - 1 ? mask.width : P + (x + 1) * K;
+        const y1 = y === H - 1 ? mask.height : P + (y + 1) * K;
+        mg.fillRect(x0, y0, x1 - x0, y1 - y0);
+      }
+    }
+    if (!any) return;
+    bg.clearRect(0, 0, blur.width, blur.height);
+    bg.filter = `blur(${Math.round(K * 0.28)}px)`;
+    bg.drawImage(mask, 0, 0);
+    bg.filter = 'none';
+    gcSoilPaint(pg, k, 0, 0, W, H, K);
+    const A = bg.getImageData(P, P, CW, CH).data;
+    const S = pg.getImageData(0, 0, CW, CH).data;
+    const out = g.getImageData(0, 0, CW, CH);
+    const O = out.data;
+    const e = new THREE.Color(GC_SOIL[k].edge);
+    const er = Math.round(e.r * 255);
+    const eg = Math.round(e.g * 255);
+    const eb = Math.round(e.b * 255);
+    for (let i = 0; i < O.length; i += 4) {
+      const a = A[i + 3];
+      if (a >= 150) { O[i] = S[i]; O[i + 1] = S[i + 1]; O[i + 2] = S[i + 2]; } else if (a >= 108) { O[i] = er; O[i + 1] = eg; O[i + 2] = eb; }
+    }
+    g.putImageData(out, 0, 0);
+  });
+  const tex = new THREE.CanvasTexture(cv);
+  tex.anisotropy = Math.min(8, r3.v.renderer.capabilities.getMaxAnisotropy());
+  r3.v.texs.push(tex);
+  mat.map = tex;
+  mat.needsUpdate = true;
+  // Sin el "cuadriculado" de brillo por casilla de la N64: el suelo es parejo.
+  r3.v.scene.children.forEach((o) => {
+    if (o.isMesh && o.material === mat && o.geometry.attributes.color) {
+      o.geometry.attributes.color.array.fill(0.92);
+      o.geometry.attributes.color.needsUpdate = true;
+    }
+  });
+}
+
+// Orillas: línea negra en el borde de arriba (y en las esquinas) de todo lo que sobresale
+// (mesetas, islas en el vacío); espuma blanca donde la tierra toca el agua.
+function gcEdges(r3) {
+  const { W, H } = r3.sc;
+  const S = T3S;
+  const k = gcKit(r3);
+  const L = 0.075;
+  const wet = (x, y) => {
+    const c = r3.cells[y] && r3.cells[y][x];
+    if (!c) return r3.opt.edge === 'sea';
+    return (c.kind === 'water' || c.kind === 'bridge') && c.h > -10;
+  };
+  const box = (cx, cy, cz, sx, sy, sz) => k.edge.add(new THREE.BoxGeometry(sx, sy, sz), T3M(cx, cy, cz), GCC.black);
+  const foam = (x0, z0, x1, z1) => k.foam.quad([x0, 0, z1], [x1, 0, z1], [x1, 0, z0], [x0, 0, z0], '#ffffff');
+  const sides = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const c = r3.cells[y][x];
+      if (!c || c.h < -10 || c.kind === 'water' || c.kind === 'bridge') continue;
+      const top = c.h;
+      const x0 = x * S;
+      const z0 = y * S;
+      const X = x0 + S / 2;
+      const Z = z0 + S / 2;
+      const low = sides.map(([dx, dy]) => {
+        if (wet(x + dx, y + dy)) return 'wet';
+        const n = r3.groundH(x + dx, y + dy);
+        return n < top - 0.05 ? n : null;
+      });
+      sides.forEach(([dx, dy], i) => {
+        const l = low[i];
+        if (l === null) return;
+        if (l === 'wet') {
+          // Espuma: una franja pegada a la orilla y otra más delgadita un poco más afuera.
+          const o = 0.06;
+          [[0, 0.3], [0.48, 0.58]].forEach(([a, b]) => {
+            if (dy === -1) foam(x0 - o, z0 - b, x0 + S + o, z0 - a);
+            if (dy === 1) foam(x0 - o, z0 + S + a, x0 + S + o, z0 + S + b);
+            if (dx === -1) foam(x0 - b, z0 - o, x0 - a, z0 + S + o);
+            if (dx === 1) foam(x0 + S + a, z0 - o, x0 + S + b, z0 + S + o);
+          });
+          return;
+        }
+        // Raya del borde de arriba y, si abajo hay suelo (no vacío), la del pie del escalón.
+        const ex = X + dx * S / 2;
+        const ez = Z + dy * S / 2;
+        const sx = dx ? L : S + L;
+        const sz = dy ? L : S + L;
+        box(ex, top, ez, sx, L, sz);
+        if (l > -10) box(ex, l + 0.02, ez, sx, L, sz);
+        // Esquina de afuera: raya vertical.
+        const j = (i + 1) % 4;
+        const l2 = low[j];
+        if (l2 !== null && l2 !== 'wet') {
+          const [ddx, ddy] = sides[j];
+          const bottom = Math.max(Math.max(l, l2), top - 7);
+          const hgt = top - bottom;
+          box(X + (dx + ddx) * S / 2, bottom + hgt / 2, Z + (dy + ddy) * S / 2, L, hgt, L);
+        }
+      });
+    }
+  }
+}
+
+// Cielo de degradado (domo que sigue a la cámara) y nubes de caricatura con remolinos.
+function gcSky(r3) {
+  const v = r3.v;
+  const space = !!r3.opt.gcSpace;
+  const horizon = new THREE.Color(r3.opt.fogColor || '#CFE6FF');
+  const mid = new THREE.Color(space ? '#2D2566' : (r3.opt.sky || GCC.sky));
+  const zenith = new THREE.Color(space ? '#08061A' : '#2F7FE3');
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { hz: { value: horizon }, md: { value: mid }, zn: { value: zenith }, nd: { value: new THREE.Color(space ? '#0E0A26' : horizon) } },
+    vertexShader: 'varying vec3 vD; void main() { vD = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: 'uniform vec3 hz; uniform vec3 md; uniform vec3 zn; uniform vec3 nd; varying vec3 vD; void main() { float y = vD.y; vec3 c = mix(hz, md, smoothstep(0.0, 0.18, y)); c = mix(c, zn, smoothstep(0.18, 0.75, y)); c = mix(c, nd, smoothstep(0.0, -0.6, y)); gl_FragColor = vec4(c, 1.0); }',
+    side: THREE.BackSide,
+    depthWrite: false,
+    fog: false,
+  });
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(300, 24, 12), mat);
+  dome.renderOrder = -10;
+  dome.frustumCulled = false;
+  v.scene.add(dome);
+  r3.anims.push(() => dome.position.copy(v.camera.position));
+  if (space) return;
+  // Nubes: dos dibujos en una textura, en planos que miran al centro del mapa (una sola malla).
+  const tex = v.tex(256, 256, (g) => {
+    const shapes = [
+      [[64, 84, 30], [104, 64, 40], [152, 60, 44], [196, 80, 30], [130, 92, 32]],
+      [[56, 88, 24], [92, 70, 32], [134, 62, 38], [176, 72, 32], [208, 90, 22]],
+    ];
+    shapes.forEach((cs, n) => {
+      g.save();
+      g.translate(0, n * 128);
+      const outline = () => { g.beginPath(); cs.forEach(([x, y, r]) => { g.moveTo(x + r, y); g.arc(x, y, r, 0, Math.PI * 2); }); g.rect(cs[0][0], 86, cs[cs.length - 1][0] - cs[0][0], 22); };
+      outline();
+      g.lineWidth = 7;
+      g.strokeStyle = '#A9CDF0';
+      g.stroke();
+      g.fillStyle = '#FFFFFF';
+      g.fill();
+      g.save();
+      outline();
+      g.clip();
+      g.fillStyle = '#DCEBFA';
+      g.fillRect(0, 94, 256, 40);
+      g.restore();
+      // Remolinos (el "viento" de The Wind Waker).
+      g.strokeStyle = '#B8D6F3';
+      g.lineWidth = 3.5;
+      g.lineCap = 'round';
+      cs.slice(1, 4).forEach(([x, y, r], i) => {
+        g.beginPath();
+        for (let t = 0; t <= 1; t += 0.04) {
+          const a = t * Math.PI * 3.2 + i;
+          const rr = r * 0.5 * (1 - t * 0.8);
+          const px = x + Math.cos(a) * rr;
+          const py = y + 4 + Math.sin(a) * rr * 0.8;
+          if (t === 0) g.moveTo(px, py); else g.lineTo(px, py);
+        }
+        g.stroke();
+      });
+      g.restore();
+    });
+  });
+  const { W, H } = r3.sc;
+  const cx = (W * T3S) / 2;
+  const cz = (H * T3S) / 2;
+  const R = Math.max(W, H) * T3S * 0.8 + 60;
+  const bake = new T3Bake();
+  const o = new THREE.Object3D();
+  for (let i = 0; i < 11; i++) {
+    const a = (i / 11) * Math.PI * 2 + T3Hash(i, 3, 5);
+    const w = 34 + T3Hash(i, 4, 5) * 26;
+    o.position.set(Math.cos(a) * R, 26 + T3Hash(i, 5, 5) * 22, Math.sin(a) * R);
+    o.lookAt(0, o.position.y, 0);
+    o.updateMatrix();
+    bake.add(new THREE.PlaneGeometry(w, w / 2), o.matrix.clone(), '#ffffff', i % 2 ? [0, 0, 1, 0.5] : [0, 0.5, 1, 1]);
+  }
+  const clouds = bake.mesh(new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, fog: false }));
+  clouds.position.set(cx, 0, cz);
+  clouds.renderOrder = -5;
+  v.scene.add(clouds);
+  r3.anims.push((dt) => { clouds.rotation.y += dt * 0.006; });
+}
+
+// Agua de caricatura: azul parejo con rayitas blancas de olas que se mueven despacio.
+function gcWater(r3) {
+  const v = r3.v;
+  const tex = v.tex(128, 128, (g) => {
+    g.fillStyle = '#2E9FE0';
+    g.fillRect(0, 0, 128, 128);
+    g.fillStyle = '#3AACEA';
+    const wrap = (f) => [-128, 0, 128].forEach((ox) => [-128, 0, 128].forEach((oy) => f(ox, oy)));
+    for (let i = 0; i < 5; i++) {
+      const x = T3Hash(i, 1, 21) * 128;
+      const y = T3Hash(i, 2, 21) * 128;
+      wrap((ox, oy) => { g.beginPath(); g.ellipse(x + ox, y + oy, 22, 9, 0, 0, Math.PI * 2); g.fill(); });
+    }
+    g.strokeStyle = 'rgba(255,255,255,0.85)';
+    g.lineWidth = 3;
+    g.lineCap = 'round';
+    for (let i = 0; i < 5; i++) {
+      const x = T3Hash(i, 3, 21) * 128;
+      const y = T3Hash(i, 4, 21) * 128;
+      const w = 8 + T3Hash(i, 5, 21) * 8;
+      wrap((ox, oy) => {
+        g.beginPath();
+        g.moveTo(x + ox - w, y + oy);
+        g.quadraticCurveTo(x + ox - w / 2, y + oy - 4, x + ox, y + oy);
+        g.quadraticCurveTo(x + ox + w / 2, y + oy + 4, x + ox + w, y + oy);
+        g.stroke();
+      });
+    }
+  });
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.9, depthWrite: false });
+  const UNIT = 14; // una textura cada 14 unidades (7 casillas)
+  const dress = (mesh) => {
+    const geo = mesh.geometry;
+    const pos = geo.attributes.position;
+    const uv = new Float32Array(pos.count * 2);
+    const wp = new THREE.Vector3();
+    mesh.updateMatrixWorld();
+    for (let i = 0; i < pos.count; i++) {
+      wp.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrixWorld);
+      uv[i * 2] = wp.x / UNIT;
+      uv[i * 2 + 1] = wp.z / UNIT;
+    }
+    geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    if (mesh.material && mesh.material !== mat) mesh.material.dispose();
+    mesh.material = mat;
+  };
+  const sea = v.scene.children.find((o) => o.isMesh && o.geometry.parameters && o.geometry.parameters.width === 900);
+  if (sea) dress(sea);
+  if (r3.waterMesh) dress(r3.waterMesh);
+  if (sea || r3.waterMesh) r3.anims.push((dt, t) => { tex.offset.set(t * 0.012, Math.sin(t * 0.5) * 0.03); });
+}
+
 function gcDress(r3) {
   const v = r3.v;
   const { W, H } = r3.sc;
-  // Mallas de los modelos propios: plástico brillante y contornos de caricatura.
+  // GameCube = 480 líneas: el doble de resolución que la N64, y sin pixelear al estirar.
+  v.renderer.setSize(640, 480, false);
+  v.canvas.style.imageRendering = 'auto';
+  v.canvas.classList.add('gc-hd');
+  // Todo lo de polígonos planos (casas, puentes, palmeras, letreros, orillas) con luz de caricatura.
+  r3.mats.vc.shininess = 0;
+  r3.mats.vc.specular = new THREE.Color(0x000000);
+  gcToon(r3.mats.vc);
+  gcGround(r3);
+  gcEdges(r3);
+  gcSky(r3);
+  gcWater(r3);
+  // Mallas propias: plástico brillante, contornos, rayas de orilla y espuma.
   if (r3.gcK) {
-    const shiny = r3.gcK.shiny.mesh(new THREE.MeshPhongMaterial({ vertexColors: true, shininess: 60, specular: 0x666677 }));
-    const line = r3.gcK.line.mesh(new THREE.MeshBasicMaterial({ color: GCC.black, side: THREE.BackSide }));
-    if (shiny) v.scene.add(shiny);
-    if (line) v.scene.add(line);
+    const k = r3.gcK;
+    const shiny = k.shiny.mesh(gcToon(new THREE.MeshPhongMaterial({ vertexColors: true, shininess: 40, specular: 0x9a9aa8 })));
+    const line = k.line.mesh(new THREE.MeshBasicMaterial({ color: GCC.black, side: THREE.BackSide }));
+    const edge = k.edge.mesh(new THREE.MeshBasicMaterial({ color: GCC.black }));
+    const foam = k.foam.mesh(new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, depthWrite: false }));
+    [shiny, line, edge].forEach((m) => { if (m) v.scene.add(m); });
+    if (foam) {
+      foam.renderOrder = 3;
+      v.scene.add(foam);
+      const sea = r3.opt.edge === 'sea';
+      r3.anims.push((dt, t) => {
+        foam.position.y = (sea || !r3.waterMesh ? -0.18 : r3.waterMesh.position.y) + 0.025;
+        foam.material.opacity = 0.75 + Math.sin(t * 2.2) * 0.15;
+      });
+    }
     r3.gcK = null;
   }
-  // Todo lo demás también brilla un poquito (plástico pulido).
-  r3.mats.vc.shininess = 28;
-  r3.mats.vc.specular = new THREE.Color(0x333344);
+  // Luz más medida: con tonos de caricatura, la de la N64 deja todo "quemado" de blanco.
+  v.scene.children.forEach((o) => {
+    if (o.isHemisphereLight) o.intensity = 0.52;
+    else if (o.isDirectionalLight) o.intensity = 0.58;
+  });
   // Luz de contra lila, como en las batallas de gc3d.js.
   const rim = new THREE.DirectionalLight(GCC.lila, 0.4);
   rim.position.set(-20, 12, -25);
   v.scene.add(rim);
-  // Agua con reflejos.
-  if (r3.waterMesh) {
-    const old = r3.waterMesh.material;
-    r3.waterMesh.material = new THREE.MeshPhongMaterial({ color: GCC.water, transparent: true, opacity: 0.74, shininess: 90, specular: 0xffffff, depthWrite: false });
-    if (old) old.dispose();
-  }
   // En el espacio: estrellas alrededor de todo el mapa.
   if (r3.opt.gcSpace) {
     const pos = [];
@@ -475,11 +948,52 @@ if (typeof Town3D !== 'undefined' && !Town3D.gcHooked) {
   const prop0 = P.prop;
   const body0 = P.body;
   const build0 = P.build;
+  const pine0 = P.pine;
 
   P.prop = function gcProp(x, y, c, X, Z, band) {
     const f = c && c.native && GC_PROPS[c.kind];
     if (f) { f(this, x, y, c, X, Z, band); return; }
-    prop0.call(this, x, y, c, X, Z, band);
+    if (!(c && c.native && gcIsZone(this.sc)) || c.kind === 'water' || c.kind === 'void') { prop0.call(this, x, y, c, X, Z, band); return; }
+    if (c.kind === 'ground') {
+      // Pasto alto en matas redondas de hojitas verdes claras (sin contorno: es pasto, no un objeto).
+      if (c.t.tall || c.t.s === 'tall') {
+        const j = (k) => T3Hash(x, y, k + 60);
+        for (let i = 0; i < 4; i++) {
+          const mx = X + (i % 2 ? 0.45 : -0.45) + (j(i) - 0.5) * 0.3;
+          const mz = Z + (i < 2 ? -0.45 : 0.45) + (j(i + 4) - 0.5) * 0.3;
+          for (let b = 0; b < 3; b++) {
+            const a = (b / 3) * Math.PI * 2 + j(i + 8) * 2;
+            gcKit(this).shiny.add(new THREE.ConeGeometry(0.24, 0.8 + j(i + b) * 0.3, 4), T3M(mx + Math.cos(a) * 0.14, c.h + 0.38, mz + Math.sin(a) * 0.14, 1, 1, 1, a, Math.cos(a) * 0.3, Math.sin(a) * 0.3), b === 1 ? '#86E077' : '#55C45E');
+          }
+        }
+        return;
+      }
+      prop0.call(this, x, y, c, X, Z, band);
+      return;
+    }
+    // Los modelos de siempre (casas, palmeras, puentes, letreros, pasto alto...) también con
+    // contorno de caricatura: cada pieza que se hornea deja su silueta negra.
+    const vc = band.vc;
+    const r3 = this;
+    band.vc = {
+      add(geo, m, color, uv) { gcHull(r3, geo, m); vc.add(geo, m, color, uv); },
+      quad(...a) { vc.quad(...a); },
+    };
+    try { prop0.call(this, x, y, c, X, Z, band); } finally { band.vc = vc; }
+  };
+
+  // El bosque de alrededor: árboles redonditos con contorno (no pinos de la N64).
+  P.pine = function gcPine(b, X, Y, Z, seed, s = 1) {
+    if (!gcIsZone(this.sc)) return pine0.call(this, b, X, Y, Z, seed, s);
+    const j = (k) => T3Hash(seed, k, 3);
+    b.add(new THREE.CylinderGeometry(0.2, 0.28, 1.2, 5), T3M(X, Y + 0.6 * s, Z, s, s, s, j(1) * 6), GCC.brown);
+    // La copa va con los modelos brillantes (normales suaves: redondita, no facetada). Los que
+    // quedan muy lejos del mapa (casi en la niebla) van más sencillos y sin contorno.
+    const MW = this.sc.W * T3S;
+    const MH = this.sc.H * T3S;
+    const far = Math.max(-X, X - MW, -Z, Z - MH) > 12;
+    gcPut(this, new THREE.IcosahedronGeometry(1.15, far ? 0 : 1), T3M(X, Y + 2.0 * s, Z, s, s * 0.9, s, j(2) * 6), j(3) < 0.5 ? '#3BB54A' : '#2FA043', far ? 0 : 1);
+    return undefined;
   };
 
   P.body = function gcBody(e) {
@@ -504,8 +1018,8 @@ if (typeof Town3D !== 'undefined' && !Town3D.gcHooked) {
   P.build = function gcBuild(flat) {
     const gc = gcIsZone(this.sc);
     const sky0 = Poly.sky;
-    // En el espacio no hay montañas ni nubes en el cielo: solo estrellas (gcDress).
-    if (gc && this.opt.gcSpace) Poly.sky = (v, o) => sky0.call(Poly, v, { ...o, mountains: 0, clouds: 0, missing: 0 });
+    // Sin las montañas cafés ni las nubes facetadas de la N64: el cielo lo pone gcSky.
+    if (gc) Poly.sky = (v, o) => sky0.call(Poly, v, { ...o, mountains: 0, clouds: 0, missing: 0 });
     try { build0.call(this, flat); } finally { Poly.sky = sky0; }
     if (gc) gcDress(this);
   };
