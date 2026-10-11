@@ -769,37 +769,102 @@ function wiiLed(r3, X, Y, Z, band) {
 
 const WII_CANAL_COLS = ['#5BC0EB', '#43D17A', '#FFD54F', '#F48FB1', '#FF8A3D', '#9C6ADE', '#1E88E5'];
 
-// Modelos de casilla (this = el Town3D). (x, y) casilla, (X, Z) su centro en el mundo, band.vc = malla horneada.
+// ---------- Estilo 3D de la Ciudad Sensor: brillante, limpio y con color (como los deportes de 2006) ----------
+// El blanco y el azul siguen siendo la identidad; el pasto es verde de verdad, los caminos blancos con
+// orilla azul y la plaza gris clarito, para que siempre se sepa por dónde se camina.
+const WII3 = {
+  grass: '#72C847', grassL: '#86D65A', grassD: '#5DB43C', tuft: ['#4FAE3C', '#3E9A33', '#62BE45'],
+  path: '#FFFFFF', pathSeam: '#E2EEF7', pathEdge: '#2E9BE6',
+  pave: '#D5E0EC', paveSeam: '#BCCBDC',
+  court: '#3FAA5C', courtL: '#49B666', field: ['#5DC85B', '#4CB74C'], line: '#FAFDFF',
+  trunk: '#A47A58', leaf: ['#45B649', '#56C24E', '#3CA847'], leafHi: '#78D158',
+  roof: ['#1E88E5', '#43D17A', '#FF8A3D', '#F48FB1', '#FFD54F', '#9C6ADE', '#5BC0EB'],
+  glass: '#4FB3F0', plinth: '#C3D0DE',
+  flower: ['#F48FB1', '#FFD54F', '#FAFAFA', '#FF8A3D', '#5BC0EB'],
+  shadow: '#16324D',
+};
+
+// Malla horneada propia de la Wii: guarda las normales de cada geometría (esferas lisas, no facetadas).
+class WiiBake extends T3Bake {
+  add(geo, m, color, uv) {
+    const g = geo.index ? geo.toNonIndexed() : geo;
+    if (m) g.applyMatrix4(m);
+    if (!g.attributes.normal) g.computeVertexNormals();
+    const P = g.attributes.position.array;
+    const N = g.attributes.normal.array;
+    const U = g.attributes.uv && g.attributes.uv.array;
+    const col = new THREE.Color(color || '#ffffff');
+    for (let i = 0; i < P.length / 3; i++) {
+      this.p.push(P[i * 3], P[i * 3 + 1], P[i * 3 + 2]);
+      this.n.push(N[i * 3], N[i * 3 + 1], N[i * 3 + 2]);
+      this.c.push(col.r, col.g, col.b);
+      if (uv) this.u.push(uv[0] + (uv[2] - uv[0]) * (U ? U[i * 2] : 0), uv[1] + (uv[3] - uv[1]) * (U ? U[i * 2 + 1] : 0));
+    }
+    if (g !== geo) g.dispose();
+    geo.dispose();
+  }
+}
+const wiiSm = (band) => band.wiiSm || (band.wiiSm = new WiiBake());
+
+// Sombra redondita y suave (una textura de degradado; todas las de los objetos van en UNA malla).
+function wiiShadowMat(r3) {
+  if (r3.wiiShMat) return r3.wiiShMat;
+  const tex = r3.v.tex(64, 64, (g, w, h) => {
+    const gr = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
+    gr.addColorStop(0, 'rgba(255,255,255,1)');
+    gr.addColorStop(0.45, 'rgba(255,255,255,0.75)');
+    gr.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = gr;
+    g.fillRect(0, 0, w, h);
+  });
+  r3.wiiShMat = new THREE.MeshBasicMaterial({
+    map: tex, color: WII3.shadow, transparent: true, opacity: 0.34, depthWrite: false,
+    polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+  });
+  return r3.wiiShMat;
+}
+function wiiShadow(band, X, Y, Z, rx, rz = rx) {
+  const bake = band.wiiSh || (band.wiiSh = new WiiBake());
+  bake.add(new THREE.PlaneGeometry(rx * 2, rz * 2), T3M(X, Y + 0.025, Z, 1, 1, 1, 0, -Math.PI / 2), '#ffffff', [0, 0, 1, 1]);
+}
+
+// Modelos de casilla (this = el Town3D). (x, y) casilla, (X, Z) su centro en el mundo, wiiSm(band) = malla horneada (lisa y brillante).
 const WII_T3 = {
   arbol(x, y, c, X, Z, band) {
-    const b = band.vc;
+    const b = wiiSm(band);
     const h = c.h;
     const j = (k) => T3Hash(x, y, k);
     const ox = (j(1) - 0.5) * 0.4;
     const oz = (j(2) - 0.5) * 0.4;
     const s = 0.85 + j(3) * 0.3;
-    b.add(new THREE.CylinderGeometry(0.14, 0.2, 1.2 * s, 8), T3M(X + ox, h + 0.6 * s, Z + oz), '#E6E9EE');
-    b.add(new THREE.IcosahedronGeometry(0.95 * s, 1), T3M(X + ox, h + 1.75 * s, Z + oz), j(4) < 0.5 ? '#8BE3AE' : '#6FD69A');
-    b.add(new THREE.IcosahedronGeometry(0.5 * s, 1), T3M(X + ox + 0.35, h + 2.3 * s, Z + oz + 0.2), '#B8F0CC');
+    // Árbol de bolita: tronco café, copa verde lisa y un brillito arriba (sin hojas fuera de lugar).
+    b.add(new THREE.CylinderGeometry(0.16, 0.24, 1.2 * s, 6, 1, true), T3M(X + ox, h + 0.6 * s, Z + oz), WII3.trunk);
+    b.add(new THREE.SphereGeometry(1.0 * s, 10, 6), T3M(X + ox, h + 1.8 * s, Z + oz, 1, 0.92, 1), WII3.leaf[Math.floor(j(4) * 3)]);
+    b.add(new THREE.SphereGeometry(0.5 * s, 7, 4), T3M(X + ox - 0.3, h + 2.35 * s, Z + oz + 0.35), WII3.leafHi);
+    wiiShadow(band, X + ox, h, Z + oz, 1.15 * s);
   },
 
   edificio(x, y, c, X, Z, band) {
     const S = T3S;
-    const b = band.vc;
+    const b = wiiSm(band);
     const h = c.h;
     const H = 2.6 + T3Hash(x >> 1, y >> 1, 5) * 3.6; // de 2 en 2 casillas, la misma altura
+    // Blanco con ventanas azules, zócalo gris y una franja de color arriba (de 2 en 2 casillas, como la altura).
+    const roof = WII3.roof[Math.floor(T3Hash(x >> 1, y >> 1, 7) * WII3.roof.length)];
     b.add(new THREE.BoxGeometry(S, H, S), T3M(X, h + H / 2, Z), '#FAFAFA');
-    for (let k = 1; k < H - 0.6; k += 1.1) b.add(new THREE.BoxGeometry(S * 1.02, 0.32, S * 1.02), T3M(X, h + k + 0.3, Z), '#9FD8F5');
-    b.add(new THREE.BoxGeometry(S * 1.04, 0.14, S * 1.04), T3M(X, h + H, Z), '#E6E9EE');
+    b.add(new THREE.BoxGeometry(S * 1.03, 0.45, S * 1.03), T3M(X, h + 0.22, Z), WII3.plinth);
+    for (let k = 1; k < H - 0.6; k += 1.1) b.add(new THREE.BoxGeometry(S * 1.02, 0.34, S * 1.02), T3M(X, h + k + 0.3, Z), WII3.glass);
+    b.add(new THREE.BoxGeometry(S * 1.04, 0.4, S * 1.04), T3M(X, h + H - 0.3, Z), roof);
     if (T3Hash(x, y, 6) < 0.3) wiiLed(this, X + 0.5, h + H + 0.22, Z + 0.5, band);
   },
 
   canal(x, y, c, X, Z, band) {
-    const b = band.vc;
+    const b = wiiSm(band);
     const h = c.h;
     const col = c.t.c3 || WII_CANAL_COLS[Math.floor(T3Hash(x, y, 1) * WII_CANAL_COLS.length)];
-    b.add(new THREE.CylinderGeometry(0.08, 0.08, 1.2, 6), T3M(X, h + 0.6, Z), '#AAB2BD');
+    b.add(new THREE.CylinderGeometry(0.08, 0.08, 1.2, 8), T3M(X, h + 0.6, Z), '#AAB2BD');
     b.add(new THREE.BoxGeometry(1.8, 1.15, 0.22), T3M(X, h + 1.75, Z), '#FAFAFA');
+    wiiShadow(band, X, h, Z, 0.9, 0.5);
     [0.12, -0.12].forEach((o) => b.add(new THREE.BoxGeometry(1.5, 0.85, 0.04), T3M(X, h + 1.75, Z + o), col));
   },
 
@@ -808,7 +873,7 @@ const WII_T3 = {
     const R = wiiRect(this, x, y, 'pantalla');
     if (!R) return;
     const S = T3S;
-    const b = band.vc;
+    const b = wiiSm(band);
     const x0 = R.x0 * S;
     const x1 = (R.x1 + 1) * S;
     const z0 = R.y0 * S;
@@ -832,27 +897,29 @@ const WII_T3 = {
   },
 
   letrero(x, y, c, X, Z, band) {
-    const b = band.vc;
+    const b = wiiSm(band);
     const h = c.h;
     b.add(new THREE.CylinderGeometry(0.09, 0.09, 1.1, 8), T3M(X, h + 0.55, Z), '#AAB2BD');
     b.add(new THREE.BoxGeometry(1.5, 0.95, 0.16), T3M(X, h + 1.4, Z), '#FAFAFA');
-    b.add(new THREE.BoxGeometry(1.2, 0.65, 0.04), T3M(X, h + 1.4, Z + 0.09), '#5BC0EB');
+    b.add(new THREE.BoxGeometry(1.2, 0.65, 0.04), T3M(X, h + 1.4, Z + 0.09), WIIC.blue);
+    wiiShadow(band, X, h, Z, 0.75, 0.4);
     b.add(new THREE.BoxGeometry(0.8, 0.08, 0.02), T3M(X, h + 1.5, Z + 0.12), '#FAFAFA');
     b.add(new THREE.BoxGeometry(0.6, 0.08, 0.02), T3M(X, h + 1.32, Z + 0.12), '#FAFAFA');
   },
 
   // Tubería blanca (mismas medidas que la verde de town3d.js: ahí se para el jugador).
   tubo(x, y, c, X, Z, band) {
-    const b = band.vc;
+    const b = wiiSm(band);
     const h = c.h;
     b.add(new THREE.CylinderGeometry(0.7, 0.7, 0.8, 16), T3M(X, h + 0.4, Z), '#FAFAFA');
     b.add(new THREE.CylinderGeometry(0.9, 0.9, 0.32, 16), T3M(X, h + 0.96, Z), '#5BC0EB');
     b.add(new THREE.CylinderGeometry(0.62, 0.62, 0.04, 16), T3M(X, h + 1.12, Z), '#0D47A1');
+    wiiShadow(band, X, h, Z, 1.15);
   },
 
   valla(x, y, c, X, Z, band) {
     const S = T3S;
-    const b = band.vc;
+    const b = wiiSm(band);
     const h = c.h;
     const same = (i, j) => { const t = this.sc.tileAt(i, j); return !!t && t.w3 === 'valla'; };
     b.add(new THREE.BoxGeometry(0.2, 0.9, 0.2), T3M(X, h + 0.45, Z), '#FAFAFA');
@@ -866,18 +933,19 @@ const WII_T3 = {
   },
 
   pinos(x, y, c, X, Z, band) {
-    const b = band.vc;
+    const b = wiiSm(band);
     const h = c.h;
     [[0, 0.35], [-0.42, -0.3], [0.42, -0.3]].forEach(([ox, oz]) => {
       b.add(new THREE.CylinderGeometry(0.1, 0.17, 0.55, 8), T3M(X + ox, h + 0.28, Z + oz), '#FAFAFA');
       b.add(new THREE.CylinderGeometry(0.09, 0.09, 0.07, 8), T3M(X + ox, h + 0.5, Z + oz), '#F44336');
       b.add(new THREE.SphereGeometry(0.11, 8, 6), T3M(X + ox, h + 0.66, Z + oz), '#FAFAFA');
+      wiiShadow(band, X + ox, h, Z + oz, 0.28);
     });
   },
 
   red(x, y, c, X, Z, band) {
     const S = T3S;
-    const b = band.vc;
+    const b = wiiSm(band);
     const h = c.h;
     const net = (i, j) => { const t = this.sc.tileAt(i, j); return !!t && t.w3 === 'red'; };
     const alongZ = net(x, y - 1) || net(x, y + 1);
@@ -888,11 +956,12 @@ const WII_T3 = {
   },
 
   balanza(x, y, c, X, Z, band) {
-    const b = band.vc;
+    const b = wiiSm(band);
     const h = c.h;
     b.add(new THREE.BoxGeometry(1.5, 0.16, 0.9), T3M(X, h + 0.1, Z), '#FAFAFA');
     b.add(new THREE.BoxGeometry(1.3, 0.02, 0.7), T3M(X, h + 0.19, Z), '#E6E9EE');
     b.add(new THREE.SphereGeometry(0.05, 6, 4), T3M(X + 0.6, h + 0.2, Z + 0.38), '#5BC0EB');
+    wiiShadow(band, X, h, Z, 0.95, 0.65);
   },
 
   // Tele enorme de la Sala Sensor con la barra sensora encima (las 3 casillas son UNA tele).
@@ -900,7 +969,7 @@ const WII_T3 = {
     const R = wiiRect(this, x, y, 'tele');
     if (!R) return;
     const S = T3S;
-    const b = band.vc;
+    const b = wiiSm(band);
     const w = (R.x1 - R.x0 + 1) * S;
     const cx = (R.x0 + R.x1 + 1) * S / 2;
     const cz = (R.y0 + R.y1 + 1) * S / 2;
@@ -920,7 +989,7 @@ const WII_T3 = {
 
   gradas(x, y, c, X, Z, band) {
     const S = T3S;
-    const b = band.vc;
+    const b = wiiSm(band);
     const h = c.h;
     const j = (k) => T3Hash(x, y, k);
     const pass = (i, k) => this.passable(i, k);
@@ -930,7 +999,7 @@ const WII_T3 = {
     for (let i = 0; i < 3; i++) {
       const hh = 0.6 + i * 0.8;
       const off = S / 3 - i * (S / 3);
-      b.add(new THREE.BoxGeometry(S, hh, S / 3), T3M(X, h, Z).multiply(rot).multiply(T3M(0, hh / 2, off)), ['#FAFAFA', '#E6E9EE', '#D9F0FB'][i]);
+      b.add(new THREE.BoxGeometry(S, hh, S / 3), T3M(X, h, Z).multiply(rot).multiply(T3M(0, hh / 2, off)), ['#E3F2FD', '#90CAF9', '#42A5F5'][i]);
       if (j(i) < 0.8) {
         const px = (j(i + 3) - 0.5) * 1.3;
         b.add(new THREE.CylinderGeometry(0.14, 0.18, 0.3, 6), T3M(X, h, Z).multiply(rot).multiply(T3M(px, hh + 0.15, off)), shirts[(x + y * 3 + i) % shirts.length]);
@@ -952,6 +1021,7 @@ const WII_T3 = {
     g.add(ring);
     g.position.set(X, c.h + 0.25, Z);
     band.grp.add(g);
+    wiiShadow(band, X, c.h, Z, 1.1);
     this.anims.push((dt, t) => { g.rotation.y = t * 1.6 + x; g.position.y = c.h + 0.25 + Math.sin(t * 3) * 0.06; });
   },
 
@@ -959,14 +1029,14 @@ const WII_T3 = {
   estrella(x, y, c, X, Z, band) {
     const geo = new THREE.ExtrudeGeometry(wiiStarShape(0.98), { depth: 0.16, bevelEnabled: false });
     // rz gira la estrella en su plano (se aplica primero); rx la acuesta en el piso.
-    band.vc.add(geo, T3M(X, 0.12, Z, 1, 1, 1, 0, -Math.PI / 2, (x + y) % 2 ? 0.63 : 0), (x + y) % 2 ? '#FFD54F' : '#FFE27A');
+    wiiSm(band).add(geo, T3M(X, 0.12, Z, 1, 1, 1, 0, -Math.PI / 2, (x + y) % 2 ? 0.63 : 0), (x + y) % 2 ? '#FFD54F' : '#FFE27A');
   },
 
   domo(x, y, c, X, Z, band) {
     const R = wiiRect(this, x, y, 'domo');
     if (!R) return;
     const S = T3S;
-    const b = band.vc;
+    const b = wiiSm(band);
     const w = (R.x1 - R.x0 + 1) * S;
     const cx = (R.x0 + R.x1 + 1) * S / 2;
     const cz = (R.y0 + R.y1 + 1) * S / 2;
@@ -978,14 +1048,16 @@ const WII_T3 = {
     b.add(new THREE.BoxGeometry(0.5, r * 0.9, 0.3), T3M(cx, h + 1.9 + r * 0.5, cz + r * 0.82, 1, 1, 1, 0, -0.5), '#0D47A1');
     b.add(new THREE.CylinderGeometry(0.28, 0.32, r * 1.4, 10), T3M(cx, h + 1.9 + r * 0.75, cz + r * 0.5, 1, 1, 1, 0, 0.9), '#1E88E5');
     b.add(new THREE.BoxGeometry(0.9, 1.3, 0.1), T3M(cx, h + 0.65, cz + r + 0.12), '#5BC0EB');
+    wiiShadow(band, cx, h, cz, r + 0.7);
   },
 
   telescopio(x, y, c, X, Z, band) {
-    const b = band.vc;
+    const b = wiiSm(band);
     const h = c.h;
     [0, 2.1, 4.2].forEach((a) => b.add(new THREE.CylinderGeometry(0.05, 0.05, 1.5, 5), T3M(X + Math.cos(a) * 0.3, h + 0.7, Z + Math.sin(a) * 0.3, 1, 1, 1, 0, Math.sin(a) * 0.35, -Math.cos(a) * 0.35), '#AAB2BD'));
     b.add(new THREE.CylinderGeometry(0.22, 0.3, 1.9, 12), T3M(X, h + 1.75, Z - 0.2, 1, 1, 1, 0, -0.85), '#1E88E5');
     b.add(new THREE.CylinderGeometry(0.33, 0.33, 0.12, 12), T3M(X, h + 2.4, Z - 0.75, 1, 1, 1, 0, -0.85), '#FAFAFA');
+    wiiShadow(band, X, h, Z - 0.2, 0.8);
   },
 
   // El Canal Vacío: un marco blanco apagado. Con el final abierto, estática morada (no lleva a ningún lado
@@ -994,7 +1066,7 @@ const WII_T3 = {
     const R = wiiRect(this, x, y, 'canalVacio');
     if (!R) return;
     const S = T3S;
-    const b = band.vc;
+    const b = wiiSm(band);
     const w = (R.x1 - R.x0 + 1) * S;
     const cx = (R.x0 + R.x1 + 1) * S / 2;
     const cz = (R.y0 + R.y1 + 1) * S / 2;
@@ -1040,6 +1112,18 @@ const WII_FOE_MODELS = {
     band.rotation.x = Math.PI / 2;
     return g;
   },
+  // Dani Turbo, en versión muñequito de la ciudad: gorra azul con visera, como siempre.
+  daniwii(v) {
+    const g = WiiPoly.models.mii(v, { hair: WIIC.navy, shirt: WIIC.blue, pants: WIIC.navy });
+    const cap = v.s(new THREE.SphereGeometry(0.9, 20, 10, 0, Math.PI * 2, 0, Math.PI * 0.42), WIIC.blue, g);
+    cap.position.y = 1.42;
+    const brim = v.s(new THREE.CylinderGeometry(0.5, 0.5, 0.07, 16, 1, false, -Math.PI / 2, Math.PI), WIIC.navy, g);
+    brim.position.set(0, 1.62, 0.62);
+    brim.scale.set(1.15, 1, 0.9);
+    const dot = v.s(WiiPoly.sphere(0.13, 10, 8), WIIC.white, g);
+    dot.position.set(0, 2.05, 0.62);
+    return g;
+  },
 };
 
 // Modelo 3D de un personaje de la Ciudad Sensor (o null: entonces sale lo de siempre, un cartón).
@@ -1057,15 +1141,15 @@ function wiiBody(r3, e) {
     o = null;
   }
   if (!o) return null;
-  // Igual que town3d.js: tamaño parejo y los pies en el suelo.
-  const hgt = e.big ? 3.4 : 2.2;
+  // Igual que town3d.js (pies en el suelo), pero más grandes: muñequitos cabezones que se lean bien.
+  const hgt = e.big ? 3.8 : 2.65;
   const wrap = new THREE.Group();
   const lift = new THREE.Group();
   lift.add(o);
   wrap.add(lift);
   const box = new THREE.Box3().setFromObject(o);
   const size = box.max.y - box.min.y || 1;
-  const s = Math.max(0.35, Math.min(1.3, hgt / size));
+  const s = Math.max(0.35, Math.min(1.7, hgt / size));
   lift.scale.setScalar(s);
   lift.position.y = -box.min.y * s;
   return { o: wrap, model: o };
@@ -1078,7 +1162,7 @@ function wiiSky(r3, z) {
   const S = T3S;
   const cx = (W * S) / 2;
   const cz = (H * S) / 2;
-  v.scene.add(new THREE.AmbientLight(0xffffff, z.sky === 'space' ? 0.22 : 0.35));
+  v.scene.add(new THREE.AmbientLight(0xffffff, z.sky === 'space' ? 0.22 : 0.1));
   if (z.sky === 'space') {
     const pts = [];
     for (let i = 0; i < 700; i++) {
@@ -1089,7 +1173,7 @@ function wiiSky(r3, z) {
     }
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
-    v.scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: '#FFFFFF', size: 1.6, sizeAttenuation: false, fog: false })));
+    v.scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: '#FFFFFF', size: 2.6, sizeAttenuation: false, fog: false })));
     // Planetitas de adorno, girando despacio.
     [[-26, -4, cz - 10, 5], [W * S + 30, 6, cz - 30, 7], [cx + 10, -30, H * S + 30, 10], [cx - 40, 22, -40, 4]].forEach(([px, py, pz, r], i) => {
       const p = WiiPoly.models.planet(v, r);
@@ -1156,6 +1240,186 @@ function wiiSky(r3, z) {
   });
 }
 
+// ---------- Suelo, luz, cielo y orillas de las zonas de la ciudad (no del espacio) ----------
+
+// Qué suelo es cada casilla en 3D. Las que no salen aquí (madera, carriles, agua...) usan su sprite.
+const WII_GK = { '"': 'grass', ',': 'grass', '*': 'grass', T: 'grass', ':': 'path', '.': 'pave', g: 'court', f: 'field', w: 'line' };
+
+// Repinta la textura del suelo (la que town3d.js armó con los sprites): pasto verde, plaza gris
+// clarito, caminos blancos con orilla azul solo por fuera, cancha con rayas y líneas blancas.
+function wiiGround(r3) {
+  const sc = r3.sc;
+  const { W, H } = sc;
+  const map = r3.mats && r3.mats.g3 && r3.mats.g3.map;
+  if (!map || !map.image) return;
+  const g = map.image.getContext('2d');
+  const ch = (x, y) => (sc.rows[y] && sc.rows[y][x]) || null;
+  const gk = (x, y) => WII_GK[ch(x, y)] || null;
+  const N4 = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+  const N8 = [...N4, [1, 1], [1, -1], [-1, 1], [-1, -1]];
+  // Lo que va debajo de una casilla sólida (edificio, letrero...): lo que más hay alrededor.
+  const under = (x, y) => {
+    const cnt = {};
+    let best = null;
+    N8.forEach(([dx, dy], i) => {
+      const c = ch(x + dx, y + dy);
+      const t = c && sc.tiles[c];
+      if (!t || (t.solid && !WII_GK[c]) || WII_GK[c] === 'line') return;
+      cnt[c] = (cnt[c] || 0) + (i < 4 ? 2 : 1);
+      if (!best || cnt[c] > cnt[best]) best = c;
+    });
+    return best;
+  };
+  const dots = (px, py, x, y, col, n) => {
+    g.fillStyle = col;
+    for (let i = 0; i < n; i++) g.fillRect(px + Math.floor(T3Hash(x, y, 30 + i) * 15), py + Math.floor(T3Hash(x, y, 40 + i) * 15), 1, 1);
+  };
+  const paint = (kind, x, y) => {
+    const px = x * 16;
+    const py = y * 16;
+    if (kind === 'grass') {
+      g.fillStyle = ((x >> 1) + (y >> 1)) % 2 ? WII3.grass : WII3.grassL;
+      g.fillRect(px, py, 16, 16);
+      dots(px, py, x, y, WII3.grassD, 4);
+    } else if (kind === 'path') {
+      g.fillStyle = WII3.path;
+      g.fillRect(px, py, 16, 16);
+      g.fillStyle = WII3.pathSeam;
+      g.fillRect(px, py, 16, 1);
+      g.fillRect(px, py, 1, 16);
+      g.fillStyle = WII3.pathEdge;
+      N4.forEach(([dx, dy]) => {
+        const c = ch(x + dx, y + dy);
+        if (!c || gk(x + dx, y + dy) === 'path') return; // borde del mapa (salida) o más camino: sin orilla
+        g.fillRect(px + (dx === 1 ? 14 : 0), py + (dy === 1 ? 14 : 0), dx ? 2 : 16, dy ? 2 : 16);
+      });
+    } else if (kind === 'pave') {
+      g.fillStyle = WII3.pave;
+      g.fillRect(px, py, 16, 16);
+      g.fillStyle = WII3.paveSeam;
+      g.fillRect(px, py, 16, 1);
+      g.fillRect(px, py, 1, 16);
+    } else if (kind === 'court') {
+      g.fillStyle = (x + y) % 2 ? WII3.court : WII3.courtL;
+      g.fillRect(px, py, 16, 16);
+    } else if (kind === 'field') {
+      g.fillStyle = WII3.field[x % 2];
+      g.fillRect(px, py, 16, 16);
+    } else if (kind === 'line') {
+      // La raya blanca va hacia donde sigue la raya (o la red); sobre el verde de alrededor.
+      let base = 'pave';
+      N4.forEach(([dx, dy]) => { const k = gk(x + dx, y + dy); if (k === 'court' || k === 'field') base = k; });
+      paint(base, x, y);
+      const on = (dx, dy) => { const c = ch(x + dx, y + dy); return gk(x + dx, y + dy) === 'line' || c === 'n'; };
+      const lr = on(-1, 0) || on(1, 0);
+      const ud = on(0, -1) || on(0, 1);
+      g.fillStyle = WII3.line;
+      if (!lr && !ud) g.fillRect(px + 2, py + 2, 12, 12);
+      if (lr) g.fillRect(on(-1, 0) ? px : px + 6, py + 6, on(-1, 0) && on(1, 0) ? 16 : 10, 4);
+      if (ud) g.fillRect(px + 6, on(0, -1) ? py : py + 6, 4, on(0, -1) && on(0, 1) ? 16 : 10);
+    }
+  };
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const c = r3.cells[y] && r3.cells[y][x];
+      if (!c || c.h < -10 || c.kind === 'water' || c.kind === 'bridge' || !c.native) continue;
+      const k = gk(x, y);
+      if (k) { paint(k, x, y); continue; }
+      // Casillas con su propio dibujo: primero el suelo de alrededor (sin cuadros blancos), luego su sprite.
+      const u = under(x, y);
+      if (u && WII_GK[u]) paint(WII_GK[u], x, y);
+      else if (u) { const t = sc.tiles[u]; paintSprite(g, t.s, x * 16, y * 16, 1, sc.tileCols(t.s, t, null)); }
+      if (c.kind === 'ground' && !c.t.solid && c.t.s !== (sc.m.ground || 'grass')) paintSprite(g, c.t.s, x * 16, y * 16, 1, sc.tileCols(c.t.s, c.t, null));
+    }
+  }
+  map.needsUpdate = true;
+  if (r3.mats.g2 && r3.mats.g2.map) r3.mats.g2.map.needsUpdate = true;
+}
+
+// Luz de día limpio: menos "lavada" (antes todo se iba a blanco), con un lado en sombra suave.
+function wiiLights(r3) {
+  r3.v.scene.children.forEach((o) => {
+    if (o.isHemisphereLight) { o.color.set('#FFFFFF'); o.groundColor.set('#9AB4CB'); o.intensity = 0.62; }
+    else if (o.isDirectionalLight) { o.intensity = 0.6; o.position.set(-20, 60, 40); }
+  });
+  if (r3.v.scene.fog) r3.v.scene.fog.color.set('#D6EDFB');
+}
+
+// Cielo en degradado: azul fuerte arriba, clarito en el horizonte (como la pantalla de inicio).
+function wiiSkyDome(r3) {
+  const { W, H } = r3.sc;
+  const R = 240;
+  const geo = new THREE.SphereGeometry(R, 24, 14);
+  const pos = geo.attributes.position;
+  const top = new THREE.Color('#2A8FE4');
+  const mid = new THREE.Color('#86CCF5');
+  const hor = new THREE.Color('#D6EDFB');
+  const cols = [];
+  for (let i = 0; i < pos.count; i++) {
+    const k = pos.getY(i) / R;
+    const c = k <= 0 ? hor : k < 0.25 ? hor.clone().lerp(mid, k / 0.25) : mid.clone().lerp(top, Math.min(1, (k - 0.25) / 0.45));
+    cols.push(c.r, c.g, c.b);
+  }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+  const dome = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false, depthWrite: false }));
+  dome.position.set((W * T3S) / 2, 0, (H * T3S) / 2);
+  dome.renderOrder = -1;
+  r3.v.scene.add(dome);
+  r3.v.scene.background = hor.clone();
+}
+
+// Fuera del mapa: pasto verde, arbolitos de bolita y lomas redondas a lo lejos (isla de deportes).
+function wiiEdge(r3) {
+  const { W, H } = r3.sc;
+  const S = T3S;
+  const MW = W * S;
+  const MH = H * S;
+  const R = 160;
+  const flat = new T3Bake();
+  [[-R, -R, MW + R, 0], [-R, MH, MW + R, MH + R], [-R, 0, 0, MH], [MW, 0, MW + R, MH]].forEach(([x0, z0, x1, z1]) => {
+    flat.quad([x0, -0.02, z1], [x1, -0.02, z1], [x1, -0.02, z0], [x0, -0.02, z0], WII3.grassD);
+  });
+  const sm = new WiiBake();
+  for (let i = 0; i < 44; i++) {
+    const a = T3Hash(i, 7, 3) * Math.PI * 2;
+    const d = 2 + T3Hash(i, 8, 3) * 14;
+    const px = MW / 2 + Math.cos(a) * (MW / 2 + d * S * 0.6);
+    const pz = MH / 2 + Math.sin(a) * (MH / 2 + d * S * 0.6);
+    if (px > -1 && px < MW + 1 && pz > -1 && pz < MH + 1) continue;
+    const s = 1 + T3Hash(i, 5, 3) * 0.6;
+    sm.add(new THREE.CylinderGeometry(0.16 * s, 0.24 * s, 1.2 * s, 6, 1, true), T3M(px, 0.6 * s, pz), WII3.trunk);
+    sm.add(new THREE.SphereGeometry(1.0 * s, 8, 5), T3M(px, 1.8 * s, pz, 1, 0.92, 1), WII3.leaf[i % 3]);
+  }
+  const far = Math.max(MW, MH) * 0.5;
+  for (let i = 0; i < 9; i++) {
+    const a = (i / 9) * Math.PI * 2 + T3Hash(i, 1, 4);
+    const d = far + 55 + T3Hash(i, 2, 4) * 30;
+    const r = 16 + T3Hash(i, 3, 4) * 14;
+    sm.add(new THREE.SphereGeometry(r, 14, 6, 0, Math.PI * 2, 0, Math.PI / 2), T3M(MW / 2 + Math.cos(a) * d, -0.5, MH / 2 + Math.sin(a) * d, 1, 0.5, 1), i % 2 ? '#5DBE4A' : '#6FCB55');
+  }
+  [flat.mesh(r3.mats.vc), sm.mesh(r3.wiiSmMat)].forEach((m) => { if (m) r3.v.scene.add(m); });
+}
+
+// Matitas y flores redonditas (en vez de los conos verde oscuro de la N64).
+function wiiPlants(r3, x, y, c, X, Z, band) {
+  const b = wiiSm(band);
+  const h = c.h;
+  const j = (k) => T3Hash(x, y, k);
+  if (c.t.tall || c.t.s === 'tall') {
+    for (let i = 0; i < 6; i++) {
+      b.add(new THREE.ConeGeometry(0.16, 0.7 + j(i) * 0.35, 6), T3M(X + (j(i + 1) - 0.5) * 1.5, h + 0.36, Z + (j(i + 2) - 0.5) * 1.5), WII3.tuft[i % 3]);
+    }
+    return;
+  }
+  for (let i = 0; i < 3; i++) {
+    const fx = X + (j(i + 3) - 0.5) * 1.3;
+    const fz = Z + (j(i + 4) - 0.5) * 1.3;
+    b.add(new THREE.CylinderGeometry(0.035, 0.035, 0.42, 5), T3M(fx, h + 0.21, fz), WII3.tuft[1]);
+    b.add(new THREE.SphereGeometry(0.17, 8, 6), T3M(fx, h + 0.48, fz, 1, 0.7, 1), WII3.flower[(x + y + i) % WII3.flower.length]);
+    b.add(new THREE.SphereGeometry(0.07, 6, 4), T3M(fx, h + 0.56, fz), '#FFF3B0');
+  }
+}
+
 // Se envuelven los métodos de Town3D (sin modificar town3d.js): fuera de la Ciudad Sensor todo sigue igual.
 if (typeof Town3D !== 'undefined') {
   const P3 = Town3D.prototype;
@@ -1163,28 +1427,65 @@ if (typeof Town3D !== 'undefined') {
   const baseProp = P3.prop;
   const baseBody = P3.body;
   const baseEdge = P3.edge;
+  const baseAddEnt = P3.addEnt;
   P3.build = function (flat) {
     const z = wiiZone(this.sc);
     if (!z) return baseBuild.call(this, flat);
     wiiAdapt(this.v);
+    // Wii = 480 líneas y bordes suaves (un escalón arriba de la N64; igual de nítida que la GameCube).
+    this.v.renderer.setSize(640, 480, false);
+    this.v.canvas.style.imageRendering = 'auto';
+    this.v.canvas.classList.add('wii-hd');
+    // Material liso y brillante para los modelos propios (plástico blanco de consola, no facetado).
+    this.wiiSmMat = new THREE.MeshPhongMaterial({ vertexColors: true, shininess: 28, specular: 0x1c1c1c });
     // Sin montañas cafés (y sin nubes en el espacio): el cielo de la ciudad es limpio.
     const sky = Poly.sky;
     Poly.sky = function (v, o) { return sky.call(this, v, { ...o, mountains: 0, clouds: z.sky === 'space' ? 0 : 6, missing: 0 }); };
     try { baseBuild.call(this, flat); } finally { Poly.sky = sky; }
+    this.bands.forEach((b) => {
+      const m = b.wiiSm && b.wiiSm.mesh(this.wiiSmMat);
+      if (m) b.grp.add(m);
+      const sh = b.wiiSh && b.wiiSh.mesh(wiiShadowMat(this));
+      if (sh) { sh.renderOrder = 1; b.grp.add(sh); }
+    });
+    wiiGround(this);
+    if (z.sky !== 'space') {
+      wiiLights(this);
+      wiiSkyDome(this);
+    }
     wiiSky(this, z);
     return undefined;
   };
   P3.prop = function (x, y, c, X, Z, band) {
     const f = c && c.native && c.t.w3 && WII_T3[c.t.w3];
     if (f) { f.call(this, x, y, c, X, Z, band); return; }
+    if (c && c.native && c.kind === 'ground' && (c.t.tall || c.t.s === 'tall' || c.t.s === 'flower') && wiiZone(this.sc)) {
+      wiiPlants(this, x, y, c, X, Z, band);
+      return;
+    }
     baseProp.call(this, x, y, c, X, Z, band);
   };
   P3.body = function (e) {
     return (wiiZone(this.sc) && wiiBody(this, e)) || baseBody.call(this, e);
   };
+  // Cada personaje (y el héroe, y Bit, y los cofres) con su sombrita redonda debajo.
+  P3.addEnt = function (e) {
+    const r = baseAddEnt.call(this, e);
+    if (!r || !wiiZone(this.sc)) return r;
+    if (!this.wiiEntGeo) this.wiiEntGeo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
+    const sh = new THREE.Mesh(this.wiiEntGeo, wiiShadowMat(this));
+    const k = e.id === 'bit' ? 0.9 : e.kind === 'chest' ? 1.8 : e.big ? 2.8 : 1.8;
+    sh.scale.set(k, 1, k);
+    sh.position.y = 0.03;
+    sh.renderOrder = 1;
+    r.holder.add(sh);
+    this.anims.push(() => { sh.visible = !r.sink; });
+    return r;
+  };
   P3.edge = function (gnd) {
     const z = wiiZone(this.sc);
     if (z && z.sky === 'space') return; // en el espacio no hay nubes abajo: solo estrellas (wiiSky)
+    if (z) { wiiEdge(this); return; }
     baseEdge.call(this, gnd);
   };
 }
