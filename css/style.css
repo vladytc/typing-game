@@ -363,7 +363,6 @@ h1, h2 { margin: 0; font-weight: normal; }
 .cmd.sel { border-color: var(--c0); background: var(--c2); color: var(--c0); }
 .cmd.sel::before { content: '♥ '; }
 .hud.inactive .cmd { opacity: 0.4; }
-.hud.inactive .cmd.sel { background: transparent; }
 .pinfo { font-size: 9px; text-align: right; }
 .php { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
 .php .bar { width: 80px; }

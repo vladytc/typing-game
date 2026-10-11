@@ -17,6 +17,8 @@
   font-size: 8px;
   white-space: nowrap;
 }
+/* Cada escena pone su barra dentro de un div propio (.kg-hud, .mz-hud...): también va en fila. */
+.nesx-hud > div { display: flex; align-items: center; gap: 14px; min-width: 0; }
 .nb-label { margin-right: -8px; }
 .nb { display: inline-block; width: 70px; height: 10px; border: 2px solid #fcfcfc; }
 .nb i { display: block; height: 100%; background: #f83800; transition: width 0.3s; }

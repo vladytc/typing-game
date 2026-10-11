@@ -218,6 +218,8 @@
 }
 .fox-hud .bar { display: inline-block; vertical-align: middle; width: 110px; height: 10px; border-color: #fff; background: #1a1a2e; margin-left: 4px; }
 .fh-foe { text-align: right; }
+.fh-foe .bar { margin-right: 10px; }
+.fh-foe .bar:last-child { margin-right: 0; }
 .fh-php i { background: #3fbf3f; }
 .fh-ehp i { background: #e8393d; }
 .fh-mercy i { background: #ffd93d; }
