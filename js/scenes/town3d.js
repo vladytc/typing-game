@@ -400,7 +400,14 @@ class Town3D {
     const R = 160;
     const MW = W * S;
     const MH = H * S;
-    const col = this.sc.tileCols(this.sc.m.ground || 'grass', null, null).a || N64C.grass;
+    // Color del suelo del mapa: el de su casilla de piso si trae uno propio (los mundos GC y Wii
+    // pintan sus casillas con paletas propias), si no, el de la era.
+    const ground = this.sc.m.ground || 'grass';
+    const floor = Object.values(this.sc.tiles || {}).find((t) => t && t.s === ground);
+    const own = (floor && (floor.c3s || (floor.colors && floor.colors.a)))
+      || (SPRITES[ground] && SPRITES[ground].pal && SPRITES[ground].pal.a)
+      || (SPRITE_PALETTES[ground] && SPRITE_PALETTES[ground].a);
+    const col = own || this.sc.tileCols(ground, null, null).a || N64C.grass;
     [[-R, -R, MW + R, 0], [-R, MH, MW + R, MH + R], [-R, 0, 0, MH], [MW, 0, MW + R, MH]].forEach(([x0, z0, x1, z1]) => {
       bake.quad([x0, -0.02, z1], [x1, -0.02, z1], [x1, -0.02, z0], [x0, -0.02, z0], col);
     });
