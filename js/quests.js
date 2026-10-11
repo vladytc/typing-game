@@ -21,7 +21,9 @@ const QUESTS = {
     name: 'Amigos del pueblo',
     desc: 'Perdona a los monstruos en vez de vencerlos: se mudan al Pueblo Vitrina y te cuentan datos de su consola.',
     progress: () => {
-      const all = Object.keys(ENEMIES).filter((id) => !ENEMIES[id].mode || ENEMIES[id].friend);
+      // Los de combate normal, los que se marcan como amigos y los jefes que se mudan a un barrio.
+      const all = [...new Set([...Object.keys(ENEMIES).filter((id) => !ENEMIES[id].mode || ENEMIES[id].friend),
+        ...(typeof townFriendIds === 'function' ? townFriendIds() : [])])];
       return `${all.filter((id) => Save.data.spared[id]).length}/${all.length}`;
     },
   },

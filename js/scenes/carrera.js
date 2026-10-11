@@ -258,7 +258,7 @@ Scenes.carrera = {
     };
     if (p && p.z >= 50) drawFoe(); // va adelante: se dibuja detrás de tu nave
     const gap = Math.round((this.d - this.rd) * RACE.meters);
-    g.font = '8px "Press Start 2P", monospace';
+    g.font = '8px "Press Start 2P", TQSym, monospace';
     g.fillStyle = '#ffffff';
     if (this.phase === 'race' && gap > 6 && (!p || p.z <= 10)) g.fillText(`RAYO -${gap} M`, 8, 196);
     // Tu nave (se mece al teclear).

@@ -309,7 +309,7 @@ Scenes.caparazon = nesScene({
         for (let i = 0; i < 4; i++) if ((Math.floor(t * 12) + i) % 3) g.fillRect(bx - 6, by + 8 + i * 15 + ((t * 40) % 6), 76, 3);
       }
       if (this.mode === 'run' || this.mode === 'axe') {
-        g.font = '8px "Press Start 2P", monospace';
+        g.font = '8px "Press Start 2P", TQSym, monospace';
         g.fillStyle = NES.W;
         g.textAlign = 'center';
         g.fillText(this.bubble, bx + 32, by - 10);
@@ -331,7 +331,7 @@ Scenes.caparazon = nesScene({
     }
     if (this.cur && this.mode === 'run') {
       const left = Math.max(0, Math.ceil((this.cur.deadline - this.clock) / this.beatSec));
-      g.font = '10px "Press Start 2P", monospace';
+      g.font = '10px "Press Start 2P", TQSym, monospace';
       g.fillStyle = left <= 2 ? NES.F : NES.W;
       g.fillText(`${'♪'.repeat(Math.min(left, 12))}`, 16, 72);
     }

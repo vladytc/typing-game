@@ -13,8 +13,17 @@
   --c3: #5c94fc;
 }
 
+/* La Press Start 2P no trae flechas ← → ni símbolos (♪ ★ ♥ ▸ ▼ ● ...): sin esto el navegador
+   los dibuja con una letra de sistema diminuta. Se usan las del sistema, en negrita y más grandes. */
+@font-face {
+  font-family: 'TQSym';
+  src: local('Apple Symbols'), local('Segoe UI Symbol'), local('DejaVu Sans Bold'), local('Arial Bold'), local('Arial');
+  unicode-range: U+2190-21FF, U+2500-27BF, U+2B00-2BFF;
+  size-adjust: 140%;
+}
+
 :root {
-  --font: 'Press Start 2P', ui-monospace, Menlo, monospace;
+  --font: 'Press Start 2P', 'TQSym', ui-monospace, Menlo, monospace;
 }
 
 * { box-sizing: border-box; }
@@ -165,7 +174,7 @@ h1, h2 { margin: 0; font-weight: normal; }
   margin: 6px 0 14px;
 }
 .title .sub { color: var(--c1); font-size: 11px; margin: 0 0 22px; }
-.title-menu { width: 260px; text-align: left; font-size: 14px; }
+.title-menu { width: 340px; text-align: left; font-size: 14px; }
 .title .hint { font-size: 8px; color: var(--c1); margin-top: 22px; }
 .bounce { animation: bounce 0.9s ease-in-out infinite; }
 

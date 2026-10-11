@@ -503,7 +503,7 @@ Scenes.brotes = {
       g.fillStyle = '#C8CBD6'; g.fillRect(x - 14, y, 8, 4);
     }
     g.fillStyle = '#17162B';
-    g.font = '8px "Press Start 2P", monospace';
+    g.font = '8px "Press Start 2P", TQSym, monospace';
     g.textAlign = 'center';
     g.fillText(s.task, x, y + 42);
   },

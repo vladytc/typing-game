@@ -245,7 +245,7 @@ Scenes.wiigym = {
     else {
       wiiPaint(g, 'entrenadormi', 270, 60, 6);
       g.fillStyle = WIIC.navy;
-      g.font = '14px "Press Start 2P", monospace';
+      g.font = '14px "Press Start 2P", TQSym, monospace';
       g.textAlign = 'center';
       g.fillText('GIMNASIO SENSOR', W / 2, 40);
     }
@@ -254,7 +254,7 @@ Scenes.wiigym = {
     g.textAlign = 'center';
     this.msgs.forEach((m, i) => {
       g.globalAlpha = Math.max(0, 1 - m.t / 1.1);
-      g.font = `${m.cls === 'big' ? 22 : 12}px "Press Start 2P", monospace`;
+      g.font = `${m.cls === 'big' ? 22 : 12}px "Press Start 2P", TQSym, monospace`;
       g.fillStyle = WII_PAL.K;
       const y = 120 - m.t * 40 - i * 4;
       g.fillText(m.text, W / 2 + 2, y + 2);
@@ -467,7 +467,7 @@ class WiiBowling {
     g.beginPath(); g.arc(560, 214, 9, 0, Math.PI * 2); g.fill();
     if (ph < 0.02 && !this.ticked) { Sfx.text(); this.ticked = true; } else if (ph > 0.5) this.ticked = false;
     // Marcador de tiros.
-    g.font = '8px "Press Start 2P", monospace';
+    g.font = '8px "Press Start 2P", TQSym, monospace';
     g.textAlign = 'center';
     for (let i = 0; i < 10; i++) {
       const x = 30 + i * 20;
@@ -611,7 +611,7 @@ class WiiTennis {
       g.beginPath();
       g.moveTo(xAt(ny, f - 0.5), ny); g.lineTo(xAt(ny, f + 0.5), ny); g.lineTo(xAt(bot, f + 0.5), bot); g.lineTo(xAt(bot, f - 0.5), bot);
       g.fill();
-      g.font = '12px "Press Start 2P", monospace';
+      g.font = '12px "Press Start 2P", TQSym, monospace';
       g.textAlign = 'center';
       g.fillStyle = WIIC.navy;
       g.fillText(b.side === 'left' ? '← IZQUIERDA' : 'DERECHA →', xAt(260, f), 270);
@@ -788,7 +788,7 @@ class WiiBoxing {
       g.fillStyle = WIIC.red;
       g.beginPath(); g.moveTo(x, 214); g.lineTo(x - 8, 204); g.lineTo(x + 8, 204); g.fill();
       g.fillStyle = WIIC.navy;
-      g.font = '10px "Press Start 2P", monospace';
+      g.font = '10px "Press Start 2P", TQSym, monospace';
       g.textAlign = 'center';
       g.fillText(upper(c.text), x, 200);
       g.fillStyle = WIIC.orange;

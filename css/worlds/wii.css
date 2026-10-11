@@ -57,6 +57,7 @@
 .theme-wii .bar i { background: var(--c2); }
 .theme-wii .cmd, .theme-cometa .cmd { border-radius: 10px; }
 .theme-wii .cmd.sel { background: var(--c2); color: #ffffff; border-color: var(--c1); }
+.theme-wii .hud.inactive .cmd.sel, .theme-cometa .hud.inactive .cmd.sel { color: var(--c0); }
 .theme-wii .tt-ready { background: #ffffff; border-radius: 12px; }
 .theme-cometa .tt-ready { background: transparent; }
 .theme-wii .bullet, .theme-cometa .bullet { border-radius: 10px; border-width: 2px; }

@@ -745,7 +745,7 @@ Scenes.mario = {
     }
 
     // Números de puntos.
-    g.font = '12px "Press Start 2P", monospace';
+    g.font = '12px "Press Start 2P", TQSym, monospace';
     g.fillStyle = NES.W;
     this.pops.forEach((p) => g.fillText(p.text, X(p.x), Y(13 - p.y) - p.t * 30));
   },
