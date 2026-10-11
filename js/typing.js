@@ -153,6 +153,10 @@ class Dodge {
     Object.assign(this, { box, cfg, onHit, onDone });
     this.strict = strictOn(cfg.strict);
     this.match = pickMatch({ caps: cfg.caps, strict: this.strict });
+    // Las palabras largas no caen más seguido de lo que un niño de ~30 PPM alcanza a escribir:
+    // al menos 360 ms por letra (en Normal) entre una y otra.
+    const avg = cfg.pool.reduce((a, w) => a + w.length, 0) / cfg.pool.length;
+    this.gap = Math.max(cfg.interval, avg * 360);
   }
 
   start() {
@@ -178,7 +182,7 @@ class Dodge {
     this.elapsed += dt * 1000;
     if (this.spawned < this.cfg.count && this.elapsed >= this.nextSpawn) {
       this.spawn();
-      this.nextSpawn += this.cfg.interval / diff().speed;
+      this.nextSpawn += this.gap / diff().speed;
     }
     for (const b of [...this.bullets]) {
       b.y += this.cfg.speed * diff().speed * dt;

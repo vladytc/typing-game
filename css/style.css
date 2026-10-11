@@ -13,13 +13,12 @@
   --c3: #5c94fc;
 }
 
-/* La Press Start 2P no trae flechas ← → ni símbolos (♪ ★ ♥ ▸ ▼ ● ...): sin esto el navegador
-   los dibuja con una letra de sistema diminuta. Se usan las del sistema, en negrita y más grandes. */
+/* La Press Start 2P no trae flechas ← → ni símbolos (♪ ★ ♥ ▸ ▼ ● ✓ ...): sin esto el navegador
+   los dibuja con una letra de sistema diminuta. TQSym los trae dibujados en la misma rejilla de
+   8×8 píxeles (fuente hecha para el juego, ~1 KB). */
 @font-face {
   font-family: 'TQSym';
-  src: local('Apple Symbols'), local('Segoe UI Symbol'), local('DejaVu Sans Bold'), local('Arial Bold'), local('Arial');
-  unicode-range: U+2190-21FF, U+2500-27BF, U+2B00-2BFF;
-  size-adjust: 140%;
+  src: url(data:font/woff2;base64,d09GMgABAAAAAAQYAAoAAAAAEPAAAAPNAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAgWwKmSSTVQE2AiQDPAs8AAQgBVoHggQbNA3Iroc3xqAh2A9HaHiH0LVGNPSGtfN8qKnC6OOrlHj++4udu+99XSndmRZ0MQksykINEgk9oMBqsvWfTv3vbuff6OYNWqpgbHvOk1rZKlrAgNaiNZ2PjYzykQDkU+K9wm1hx7pagfsl9QeVm3nc9wpIZs8LdGUhcvdSYJJJApEHbcV3rYSidG5upiz56ECJwrSbmyE2Jm/xdCPab/z1nsdx1oCK/z8G93/p7CW/3Yr9PEpVOYzsyzWkK8dWY7kp5EpTxp1CIzRGrKEsRiOXMDyEQQk8ii23muz5V7hlDQnBKormX7uqFdWgOCP/HeByaaH1aai+nfAcBFROSpPNQo7QQTyg/H6ymzNlt/7jLmzl8cAxsrJz89MZLGXdSZFPMeUqDdhsh8yAH5pKwSsUT95w5fzu9u29W9fut2HiyK4tG5b5MtBSkZFQwWECnMqidLb3B/Um/RL5bg0B6DjqdQD7rBY4meYlQX3TY9YP7u8V29kcwlTD7phtlVynuFXq+XGzyTLJ8kV1Io3+RB0mzirwa5c+mTfNYzFTmev4VskyUVBNJV2DpWyF1vVkUPGw9IAxHzXHGtumWD0dMbUxI/b1ppsdqVs1EVOZqlA5TD9jVJN+qZvY4VgeMGTyHPumzYL2o2Zx9kvaPX4llv2xqhbDPJi5rW5ND2DM4qdnNT+W8XBmuoYnOWNmTJsLdfbrAgcLY0x1J57fyTFw8cwK92z+2b+QLIyJ0XhBTyPbIPHfioaOMRRvyyIDoXxj5Hz8t4Aw1iF9PeAf1NK/ewGRbFun1Q0Lm0eg3Q511SUmOfWoAG38pZSFs9GZ6ypoVJ7kMBg/fMWG0/5PQNELIdFmIBa0X6d0aFoeDC1F1Di6Jr9U7ZWNXJL2LDeQk9VACaiVZw5GZcNc9B9r4sk4JCOBBMlMO2GXozpvUnWW0D9LVqV9gTWTlB1wzoLXD58FxiSNZHc9lUzFGKSQYeOaGjXNZxH/fn4OBxBsfQHSr9TTXyI7sEr41Y5Xihnnmdhzbte05+TMuk0JQ4swL1eYa95FQi3gVaCrxTpV9VmHa86eMjOxo/E/4/qaQ359XeRK+Py2Et+91yoLKIIC34kJSWEU67CJk4BSrC4+92sHdtsTcLsayZtumndJaE9QCfkdQnK6vfXT1b+WfoHYYIk1nnCFFY5wggdcYg+3KN1+XzgTJBQ0DCwcPCowAiISMjbxCYlJySmpaekZmVnZ49uwIYReITzIgcqKuG2eO4RAnQsArrmYEDwcuEMCglpVDhIUd3UDeFDilHkMCvGuQdsAAA==) format('woff2');
 }
 
 :root {
