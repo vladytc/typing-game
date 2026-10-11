@@ -771,9 +771,14 @@ class Town3D {
   xray(model) {
     const mat = new THREE.MeshBasicMaterial({ color: '#FFFFFF', transparent: true, opacity: 0.45, depthWrite: false, fog: false });
     mat.depthFunc = THREE.GreaterDepth;
+    // El héroe marca sus píxeles en el stencil; la silueta no se pinta encima de él mismo
+    // (si no, sus propias piezas escondidas se verían a través de la cara).
+    Object.assign(mat, { stencilWrite: true, stencilRef: 1, stencilFunc: THREE.NotEqualStencilFunc });
     const meshes = [];
     model.traverse((m) => { if (m.isMesh) meshes.push(m); });
     meshes.forEach((m) => {
+      m.material = m.material.clone();
+      Object.assign(m.material, { stencilWrite: true, stencilRef: 1, stencilFunc: THREE.AlwaysStencilFunc, stencilZPass: THREE.ReplaceStencilOp });
       const g = new THREE.Mesh(m.geometry, mat);
       g.renderOrder = 999;
       m.add(g);
