@@ -111,7 +111,8 @@ Scenes.estadio = Object.assign(Object.create(Scenes.tecloides), {
     this.announce(rand(sel === '.foe-spr' ? LOCUTOR.hit : LOCUTOR.hurt));
   },
 
-  // Igual que en tecloides.js, pero con 0.3 s menos para esquivar (§7.4).
+  // Como en tecloides.js, con 0.3 s menos para esquivar (§7.4). Pero con 300 ms por letra en vez
+  // de 100: a ~30 PPM "pausa eterna" toma casi 5 s y con 100 ms por letra no se alcanzaba nunca.
   dodge(word) {
     return new Promise((done) => {
       this.phase = 'defend';
@@ -120,7 +121,7 @@ Scenes.estadio = Object.assign(Object.create(Scenes.tecloides), {
       this.ui = new TypingTask($('.mtext'), {
         label: '¡ESQUIVA! Escribe su ataque:',
         texts: [word],
-        timeLimit: 1700 + word.length * 100,
+        timeLimit: 1700 + word.length * 300,
         onDone: (res) => {
           this.st.chars += res.chars;
           this.st.errors += res.errors;
