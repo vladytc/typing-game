@@ -9,7 +9,7 @@
 //     y Marco (dentro de un cuadro que se mueve). Sin errores = ¡ECO LIMPIO! (90 de daño).
 //     Lluvia: palabras repetidas ("eco eco eco") que se escriben UNA vez. ACTUAR ya sirve.
 //   Fase 3 "NOMBRE" (GameCube → Wii, HP 300): el Glitch pregunta; RESPONDER es contestar
-//     escribiendo una de las frases que te dieron tus amigos (sin reloj). PERFECTA = PAZ +20.
+//     escribiendo una de las frases que te dieron tus amigos (sin reloj). PERFECTA = PAZ +25 (si no, +15).
 //     Lluvia de letras magenta que se vuelven del color del mundo al escribirlas.
 //   Decisión: con PAZ 100, PERDONAR cambia a NOMBRAR: escribes un nombre (sin tiempo, sin errores
 //     que cuenten, 2-12 letras) y se guarda en Save.data.glitchName. Si lo vences a 0 HP en la
@@ -88,7 +88,7 @@ class FinDodge extends Dodge {
     this.elapsed += dt * 1000;
     if (this.spawned < this.cfg.count && this.elapsed >= this.nextSpawn) {
       this.spawn();
-      this.nextSpawn += this.cfg.interval / diff().speed;
+      this.nextSpawn += this.gap / diff().speed; // como la lluvia normal: no más seguido de lo que alcanza un niño
     }
     for (const b of [...this.bullets]) {
       let v = this.cfg.speed * diff().speed;
@@ -224,6 +224,9 @@ Scenes.fin = Object.assign(Object.create(Scenes.battle), {
     if (n === 1) this.e.mercy = 0;
     if (n === 2) this.e.mercy = Math.min(this.e.mercy, 40);
     this.def.atk = F.atk;
+    // Cada fase empieza con la vida llena (igual que "Reintentar", que vuelve a la fase con todo el HP):
+    // con 100 HP para las tres fases seguidas, un niño de ~30 PPM casi nunca llegaba a la fase 3.
+    if (n > 1 && this.p.hp < this.p.max) { this.p.hp = this.p.max; Sfx.heal(); }
     this.setTheme(n === 2 ? FIN_ECOS[this.ecoIdx % 3].theme : F.theme);
     Music.play(F.music);
     const bt = $('.battle');
@@ -502,7 +505,7 @@ Scenes.fin = Object.assign(Object.create(Scenes.battle), {
         this.st.chars += o.frase.length;
         this.st.errors += errors;
         const perfect = errors === 0;
-        const gain = perfect ? 20 : 12;
+        const gain = perfect ? 25 : 15; // 4 o 5 respuestas (con 20/12 eran 7 turnos y la fase se hacía eterna)
         const dmg = perfect ? 40 : 20;
         const was = this.e.mercy;
         this.e.mercy = Math.min(100, this.e.mercy + gain);
@@ -748,7 +751,7 @@ Scenes.fin = Object.assign(Object.create(Scenes.battle), {
     const cfg = {
       1: { count: 10, interval: 1150, speed: 34, finMode: 'pausa', pool: this.def.bullets.pool },
       2: { count: 9, interval: 1300, speed: 32, finMode: 'rep', pool: ['nombre', 'pausa', 'igual', 'siempre', 'repite', 'eco', 'copia', 'otra', 'vez', 'nada'] },
-      3: { count: 9, interval: 1150, speed: 34, finMode: 'mag', pool: ['luz', 'casa', 'amigo', 'banca', 'pueblo', 'hola', 'juntos', 'vitrina', 'guardar', 'recuerdo', 'nombre'] },
+      3: { count: 7, interval: 1150, speed: 34, finMode: 'mag', pool: ['luz', 'casa', 'amigo', 'banca', 'pueblo', 'hola', 'juntos', 'vitrina', 'guardar', 'recuerdo', 'nombre'] },
     }[this.fase];
     this.dodge = new FinDodge(this.box, cfg, {
       onHit: () => {

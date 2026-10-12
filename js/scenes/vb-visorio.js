@@ -184,7 +184,7 @@ class VbDodge extends Dodge {
     }
     if (this.spawned < this.cfg.count && this.elapsed >= this.nextSpawn) {
       this.spawn();
-      this.nextSpawn += this.cfg.interval / diff().speed;
+      this.nextSpawn += this.gap / diff().speed; // como la lluvia normal: no más seguido de lo que alcanza un niño
     }
     for (const b of [...this.bullets]) {
       b.y += this.cfg.speed * diff().speed * dt * (b.r === this.front ? 1 : 0.8);
