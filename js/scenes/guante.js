@@ -2,8 +2,8 @@
 // Es la batalla normal (js/scenes/battle.js) cambiada a reglas de "torneo":
 //   - No hay HP: hay PORCENTAJE. Cada palabra bien escrita le sube el % (como el daño normal).
 //   - Con 100 % o más, LUCHAR se vuelve SMASH: una frase larga con mayúsculas y puntuación que hay
-//     que escribir PERFECTA (sin un solo error) en 12 s (más si es muy larga). Si sale: 1 CAIDA.
-//     Si fallas: su % baja a 60. Tres caídas y ganas.
+//     que escribir PERFECTA en 12 s (más si es muy larga). En Normal falla al 2º error (Fácil al 3º,
+//     Difícil al 1º). Si sale: 1 CAIDA. Si fallas: su % baja a 100 y puedes reintentar. Tres caídas y ganas.
 //   - Tu HP también es %: cada golpe te sube el %. Si tienes 100 % o más y te pegan otra vez, sales
 //     volando: escribe RECUPERAR rapidísimo para volver al borde (tu % baja a 50). Si no, pierdes
 //     una de tus 3 VIDAS. Sin vidas = GAME OVER.
@@ -14,7 +14,9 @@
 //   - PAZ: Chocar, Figuras y (en la 3ª fase, cuando atrapa a Bit) Suelta.
 // Al ganar se rescata la GameCube y aparece el Glitch con su pantalla de NOMBRE vacía.
 
-const GC_GUANTE = { pctGain: 1.15, hitPct: 2, recoverMs: 3000, lives: 3, falls: 3, smashMs: 12000 };
+// smashMiss: con cuántos errores falla el SMASH en Normal (1 = perfecta de verdad; se escala con la dificultad).
+// smashFailPct: a cuánto baja su % si el SMASH falla (100 = puedes reintentarlo el siguiente turno).
+const GC_GUANTE = { pctGain: 1.6, hitPct: 2, recoverMs: 4500, lives: 3, falls: 3, smashMs: 12000, smashMiss: 2, smashFailPct: 100 };
 const GC_GUANTE_FIGS = ['tetro', 'caparazon', 'nebula', 'marco'];
 const GC_GUANTE_FIG_NAMES = { tetro: 'TETRO REY', caparazon: 'LORD CAPARAZON', nebula: 'REINA NEBULA', marco: 'MARCO' };
 const GC_GUANTE_FIG_POOLS = {
@@ -266,24 +268,26 @@ Scenes.guante = Object.assign(Object.create(Scenes.battle), {
 
   smash() {
     this.smashing = true;
+    // Errores que tumban el SMASH según la dificultad: Fácil 3, Normal 2, Difícil 1 (perfecta).
+    this.smashMiss = Math.max(1, Math.floor(GC_GUANTE.smashMiss * diff().time));
     const phrase = pickWords(this.def.smash, 1)[0];
     [0, 90, 180, 270, 360].forEach((ms) => this.later(() => Sfx.bump(), ms)); // redoble
     this.runTask({
-      label: '¡GOLPE SMASH! Escríbela PERFECTA (un error y falla):',
+      label: this.smashMiss > 1 ? `¡GOLPE SMASH! Escríbela PERFECTA (al ${this.smashMiss}º error falla):` : '¡GOLPE SMASH! Escríbela PERFECTA (un error y falla):',
       texts: [phrase],
-      timeLimit: Math.max(GC_GUANTE.smashMs, phrase.length * 300 + 3000), // 12 s o más si la frase es larga
+      timeLimit: Math.max(GC_GUANTE.smashMs, phrase.length * 400 + 3000), // 12 s o más si la frase es larga (~30 PPM)
       onDone: (res) => {
         this.smashing = false;
-        if (res.completed && res.errors === 0) this.smashHit(); else this.smashFail(res.completed ? 'error' : 'tiempo');
+        if (res.completed && res.errors < this.smashMiss) this.smashHit(); else this.smashFail(res.completed ? 'error' : 'tiempo');
       },
     });
   },
 
-  // Un error en el SMASH lo cancela al instante (tiene que ser PERFECTA).
+  // Al llegar a smashMiss errores, el SMASH se cancela al instante.
   onKey(e) {
     if (this.phase === 'typing' && this.smashing) {
       this.task.key(e);
-      if (this.task.errors > 0 && !this.task.done) {
+      if (this.task.errors >= this.smashMiss && !this.task.done) {
         this.st.chars += this.task.chars;
         this.st.errors += this.task.errors;
         this.st.ms += performance.now() - (this.task.t0 || performance.now());
@@ -326,10 +330,11 @@ Scenes.guante = Object.assign(Object.create(Scenes.battle), {
   },
 
   smashFail(why) {
-    this.e.pct = 60;
+    this.e.pct = Math.min(this.e.pct, GC_GUANTE.smashFailPct);
     Sfx.lose();
     this.updateBars();
-    this.say([why === 'error' ? '* ¡Un error! El SMASH salió chueco.' : '* ¡Se acabó el tiempo del SMASH!', '* El Guante se recupera. Su porcentaje bajó a 60%.'], () => this.enemyTurn());
+    const left = this.e.pct >= 100 ? '\n* ¡Todavía puedes intentar otro SMASH!' : '';
+    this.say([why === 'error' ? '* ¡Muchos errores! El SMASH salió chueco.' : '* ¡Se acabó el tiempo del SMASH!', `* El Guante se recupera. Su porcentaje bajó a ${Math.round(this.e.pct)}%.${left}`], () => this.enemyTurn());
   },
 
   actMenu() {
