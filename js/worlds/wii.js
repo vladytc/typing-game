@@ -55,7 +55,7 @@ TRAINERS.daniwii = {
     const top = Math.max(5, ...(Save.data.team || []).map((t) => t.lv));
     const other = STARTERS.find((x) => x !== s && x !== COUNTER[s]);
     return [
-      { id: WII_FINAL_OF[COUNTER[s]], lv: top + 2 },
+      { id: WII_FINAL_OF[COUNTER[s]], lv: top + 1 }, // el que te gana por tipo, un nivel menos (con +2 la final se perdía 1 de cada 5)
       { id: WII_FINAL_OF[other], lv: top + 1 },
       { id: WII_FINAL_OF[s], lv: top + 2 },
     ];
@@ -632,7 +632,7 @@ addWorld({
       name: 'Capitán Cometa', sprite: 'cometa', model: 'cometa', boss: true, console: 'wii',
       mode: 'cometa',           // js/scenes/wii-cometa.js
       theme: 'cometa', music: 'wii_cometa', fightTime: 1,
-      hp: 380, atk: 7, def: 5, xp: 90,
+      hp: 340, atk: 7, def: 5, xp: 90,
       fightWords: 4,
       words: ['estrella', 'gravedad', 'planeta', 'órbita', 'cometa', 'galaxia', 'telescopio', 'capitán', 'satélite', 'meteoro', 'nebulosa', 'constelación', 'cráter', 'cósmico', 'brillo', 'lejano'],
       fallWords: ['estrella', 'cielo', 'noche', 'luna', 'planeta', 'órbita', 'cometa', 'galaxia', 'nave', 'viaje', 'rumbo', 'espacio', 'cosmos', 'sol', 'eclipse',
@@ -654,7 +654,7 @@ addWorld({
         { name: 'Estrellas', needStars: 1, costStar: true, text: 'le devuelves una estrellita en la mano', mercy: 40, reply: '* La estrellita brinca a su hombro.\n* "Las estrellas no se apagan. Se van lejos. No es lo mismo."' },
         { name: 'Observar', needStars: 3, text: 'miras el cielo con él en silencio', mercy: 50, reply: '* Se quedan callados, mirando las estrellas.\n* "...Ahí. Esa es mi casa."' },
       ],
-      bullets: { count: 12, interval: 1050, speed: 0.24, pool: ['luz', 'sol', 'luna', 'astro', 'polvo', 'nave', 'cielo', 'órbita', 'cometa', 'brillo', 'estrella', 'faro'] },
+      bullets: { count: 12, interval: 1050, speed: 0.2, pool: ['luz', 'sol', 'luna', 'astro', 'polvo', 'nave', 'cielo', 'órbita', 'cometa', 'brillo', 'estrella', 'faro'] },
       // Cada palabra PERFECTA en LUCHAR rescata una estrellita (js/scenes/wii-cometa.js).
       fightUnit(unit, dmg, battle) {
         if (!unit.errors && battle.rescueStar) battle.rescueStar();

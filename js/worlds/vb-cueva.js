@@ -353,7 +353,7 @@ Object.assign(ENEMIES, {
   visorio: {
     ...VB_BASE,
     name: 'Visorio', sprite: 'visorio', boss: true, friend: true, mode: 'visorio', console: 'virtualboy', drop: 'tripode',
-    music: 'vb_visorio', hp: 420, atk: 7, def: 6, xp: 100, fightWords: 8,
+    music: 'vb_visorio', hp: 340, atk: 6, def: 6, xp: 100, fightWords: 8,
     words: ['rojo', 'visor', 'lente', 'espejo', 'fondo', 'cerca', 'negro', 'brillo', 'profundo', 'tres', 'dimensión', 'ojos', 'mesa', 'gafas',
       'umbral', 'imagen', 'quieto', 'junto', 'abajo', 'hondo', 'kilo', 'yema', 'zona', 'vista', 'luz', 'nítido', 'ancho'],
     blurb: '¡JEFE SECRETO! Un visor rojo con patas que cree que nadie lo quiere.',
@@ -373,7 +373,7 @@ Object.assign(ENEMIES, {
       { name: 'Rojo', text: 'le dices que el rojo es tu color favorito', mercy: 30, reply: '* "¿...En serio? ¿El ROJO?"\n* Sus lentes brillan un poquito más.' },
       { name: 'Abuelo', text: 'le cuentas que su creador también hizo la game boy', mercy: 50, reply: '* "...¿En serio? ¿El mismo que hizo la Game Boy?"\n* "...Entonces soy familia."' },
     ],
-    bullets: { count: 13, interval: 900, speed: 46, pool: ['rojo', 'luz', 'capa', 'eco', 'foco', 'lente', 'ojo', 'visor', 'mesa', 'fondo', 'vista', 'negro'] },
+    bullets: { count: 10, interval: 900, speed: 38, pool: ['rojo', 'luz', 'capa', 'eco', 'foco', 'lente', 'ojo', 'visor', 'mesa', 'fondo', 'vista', 'negro'] },
     onWin(scene, { first, pages }) {
       const d = Save.data;
       for (let i = 0; i < pages.length; i++) pages[i] = pages[i].replace('RESCATASTE LA VIRTUAL BOY', 'RESCATASTE EL VIRTUAL BOY').replace('Lo encontrarás en la vitrina.', 'Vive en la Cueva Roja.');

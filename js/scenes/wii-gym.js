@@ -3,7 +3,8 @@
 //   1. BOLICHE: cada letra de la palabra cae en el metrónomo (90 BPM). Todas en ventana = ¡CHUZA!
 //      10 tiros; se pasa con 60 pinos o más.
 //   2. TENIS: cada golpe es una palabra de UNA sola mano (izquierda o derecha, según el lado de la
-//      cancha). Un error o llegar tarde = punto para Mi. Gana quien llegue a 7.
+//      cancha). Dos errores en el mismo golpe o llegar tarde = punto para Mi. Gana quien llegue a 7.
+//      (El primer error de cada golpe es un "¡uy!": con un solo error, un niño de ~30 PPM no ganaba ni en Fácil.)
 //   3. BOX: "izq", "der" y "agacha" llegan al compás (100 BPM). Escríbelas antes del golpe;
 //      si terminas justo en un tiempo, ¡vale doble! 20 golpes antes de recibir 5.
 // Con { arcade: 'boliche' | 'tenis' | 'box' } es el minijuego suelto (récord en Save.data.arcade).
@@ -505,7 +506,7 @@ class WiiTennis {
     return [
       '* PRUEBA 2: TENIS SENSOR.\n* ENTRENADOR MI: ¡Cada golpe usa UNA sola mano!',
       '* Si la pelota viene a la IZQUIERDA, la palabra es de la mano izquierda (casa, verde...).\n* Si viene a la DERECHA, de la mano derecha (pollo, kilo...).',
-      `* Escríbela antes de que llegue la pelota.\n* ¡UN error y el punto es mío! ${this.s.arcade ? 'Juega hasta que yo haga 3 puntos.' : 'Gana el primero que llegue a 7.'}`,
+      `* Escríbela antes de que llegue la pelota.\n* Un error se perdona... ¡pero DOS y el punto es mío! ${this.s.arcade ? 'Juega hasta que yo haga 3 puntos.' : 'Gana el primero que llegue a 7.'}`,
     ];
   }
 
@@ -516,9 +517,9 @@ class WiiTennis {
   serve(now) {
     const list = this.side === 'left' ? WII_TENIS_LEFT : WII_TENIS_RIGHT;
     const text = rand(list.filter((w) => !this.word || w !== this.word.text));
-    const speedup = Math.max(0.7, Math.pow(0.97, this.hits));
+    const speedup = Math.max(0.78, Math.pow(0.97, this.hits)); // se acelera, pero a 0.7 un niño de ~30 PPM ya no llegaba
     const dur = (1300 + text.length * 380) * diff().time * speedup;
-    this.word = { text, pos: 0, t0: now };
+    this.word = { text, pos: 0, t0: now, errors: 0 };
     this.ball = { from: now, dur, dir: 'in', side: this.side };
     this.render();
   }
@@ -533,7 +534,11 @@ class WiiTennis {
   key(k, now) {
     const w = this.word;
     if (!w || !this.ball || this.ball.dir !== 'in') return;
-    if (!this.s.check(w.text[w.pos], k)) { this.point('mi', now, '¡ERROR! Punto para Mi'); return; }
+    if (!this.s.check(w.text[w.pos], k)) {
+      if (++w.errors >= 2) { this.point('mi', now, '¡ERROR! Punto para Mi'); return; }
+      this.s.pop('¡uy!', 'bad'); // el primero se perdona
+      return;
+    }
     w.pos++;
     if (w.pos < w.text.length) { this.render(); return; }
     // ¡Golpe!
@@ -687,7 +692,7 @@ class WiiBoxing {
     if (whole !== this.lastBeat) { this.lastBeat = whole; Sfx.text(); }
     if (!this.cue && b >= this.nextCueBeat) {
       const text = rand(WII_BOX_CUES);
-      const beats = text === 'agacha' ? 4 : 3;
+      const beats = text === 'agacha' ? 5 : 3; // "agacha" tiene el doble de letras: con 4 tiempos casi nunca se alcanzaba
       const at = Math.ceil(this.nextCueBeat);
       this.cue = { text, pos: 0, beats, at, deadline: at + beats, t0: now };
       Sfx.move();
