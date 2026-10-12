@@ -339,7 +339,8 @@ Scenes.tecloides = {
       this.ui = new TypingTask($('.mtext'), {
         label: '¡ESQUIVA! Escribe su ataque:',
         texts: [word],
-        timeLimit: 2000 + word.length * 100,
+        // 300 ms por letra: con 100 las palabras largas ("raíces profundas") no se alcanzaban a 30 PPM.
+        timeLimit: 2000 + word.length * 300,
         onDone: (res) => {
           this.st.chars += res.chars;
           this.st.errors += res.errors;
