@@ -558,7 +558,7 @@ TRAINERS.dani3 = {
     return [
       { id: DANI_EVOLVED[c], lv: top + 1 },
       { id: SECOND_OF[TECLOIDES[c].type], lv: top },
-      { id: 'glitchon', lv: top + 2 },
+      { id: 'glitchon', lv: top + 1 },
     ];
   },
   intro: [
@@ -943,7 +943,7 @@ addWorld({
       theme: 'nebula',
       music: 'snes_nebula',
       strictAccents: true,
-      hp: 260, atk: 5, def: 3, xp: 60,
+      hp: 210, atk: 5, def: 3, xp: 60,
       fightWords: 3,
       words: ['medusa', 'océano', 'órbita', 'galaxia', 'estrellita', 'cometa', 'planeta', 'oscuro', 'brillo', 'núcleo', 'cría', 'nébula', 'eléctrico', 'tentáculo', 'burbuja', 'abismo'],
       longWords: ['electricidad', 'constelación', 'extraterrestre', 'transparente', 'luminiscencia', 'exploradora', 'profundidades', 'gravitación', 'interestelar', 'submarino gigante', 'medusa luminosa', 'dinosaurio'],
@@ -964,7 +964,7 @@ addWorld({
         { name: 'Limpiar', stage: 3, text: 'limpias la estática de su núcleo', mercy: 50, reply: '* La mancha magenta se borra.\n* "...Él me dijo que si el juego se pausaba, mis hijas nunca crecerían. Nunca se irían."' },
       ],
       // Las crías salen del centro en espiral (speed = cuánto avanzan por segundo, de 0 a 1).
-      bullets: { count: 12, interval: 950, speed: 0.2, pool: ['ña', 'mi', 'bu', 'blu', 'glu', 'ñu', 'pi', 'mú', 'té', 'ola', 'luz', 'sí'] },
+      bullets: { count: 12, interval: 1200, speed: 0.2, pool: ['ña', 'mi', 'bu', 'blu', 'glu', 'ñu', 'pi', 'mú', 'té', 'ola', 'luz', 'sí'] },
       keysHint: 'Memoria, palabras largas y acentos',
       onWin(scene, { first, pages }) {
         pages.splice(1, 0, '* REINA NEBULA: ...Pero crecer no es irse, ¿verdad?\n* Gracias por no llevártelas.');

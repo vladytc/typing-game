@@ -23,7 +23,7 @@ const FOX = {
     equipo: '* Le dices que su escuadrón lo necesita.\n* VULPINO: "...¿Mi equipo? kzzt... ¿Me están buscando?"',
     radio: '* "¡Vulpino, contesta!"\n* VULPINO: "...Aquí Vulpino. Te escucho, piloto."',
   },
-  hitDmg: 4,     // lo que te quita una palabra que llega
+  hitDmg: 3,     // lo que te quita una palabra que llega
   wordDmg: 2,    // lo que le quita a Vulpino cada palabra destruida
   phraseDmg: 40, // la frase cuando da la cara
 };
@@ -181,13 +181,14 @@ Scenes.vulpino = {
     this.phase = 'wave';
     this.wave++;
     this.damaged = false;
-    const size = this.arcade ? Math.min(7, 3 + Math.floor(this.wave / 3)) : Math.min(5, 3 + this.cycle);
-    const travel = (this.arcade ? Math.max(2.4, 5 - this.wave * 0.15) : Math.max(3, 5 - this.cycle)) / diff().speed;
+    // Contra Vulpino: hasta 4 palabras, más separadas y más lentas que en el arcade (para ~30 PPM).
+    const size = this.arcade ? Math.min(7, 3 + Math.floor(this.wave / 3)) : Math.min(4, 3 + this.cycle);
+    const travel = (this.arcade ? Math.max(2.4, 5 - this.wave * 0.15) : Math.max(4.5, 6 - this.cycle * 0.75)) / diff().speed;
     const words = pickWords(this.pool(), size);
     // De vez en cuando llega un mensaje de radio (verde) que llena la PAZ.
     const radioLeft = Object.keys(FOX.radio).filter((k) => !this.usedRadio[k]);
     if (!this.arcade && this.wave >= 2 && radioLeft.length && Math.random() < 0.6) words.push(rand(radioLeft));
-    this.queue = words.map((text, i) => ({ text, at: this.t + i * travel * 0.33, travel, special: !!FOX.radio[text] && !this.arcade }));
+    this.queue = words.map((text, i) => ({ text, at: this.t + i * travel * (this.arcade ? 0.33 : 0.4), travel, special: !!FOX.radio[text] && !this.arcade }));
     this.flash(`OLEADA ${this.wave}`);
     this.updateHud();
   },
