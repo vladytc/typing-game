@@ -350,7 +350,7 @@ addWorld({
         { name: 'Reverencia', text: 'haces una reverencia a su majestad', mercy: 30, reply: '* "Hmm... por fin alguien con modales."' },
       ],
       bullets: {
-        count: 12, interval: 1700, speed: 28,
+        count: 12, interval: 1900, speed: 28, // con 1700 un niño a ~30 PPM no alcanza a esquivar y pierde
         pool: ['rey', 'bloque', 'gira', 'cae', 'torre', 'linea', 'pieza', 'nivel', 'fila', 'caja', 'rapido', 'punto'],
       },
       drop: 'cable',
@@ -380,7 +380,7 @@ addWorld({
         { name: 'Flotar', text: 'inflas los cachetes y flotas', mercy: 35, reply: '* Flotan juntos. Chupín se ríe tanto que se desinfla.' },
         { name: 'Siesta', text: 'te acuestas a dormir con chupín', mercy: 45, reply: '* Zzz... Chupín ronca bajito. Es el mejor ronquido del mundo.' },
       ],
-      bullets: { count: 10, interval: 1250, speed: 32, pool: 'asdfghjklqwertyuiop'.split('') },
+      bullets: { count: 12, interval: 1000, speed: 32, pool: 'asdfghjklqwertyuiop'.split('') }, // letras sueltas, pero seguiditas
       drop: 'gameboy_lupa',
       keysHint: 'Leer y escribir rápido (¡ABSORBER!)',
       onWord: gbRacha,
