@@ -18,7 +18,7 @@ const KART_ITEMS = {
 const KART_RACERS = [
   { id: 'tu', name: 'TU', color: '#D64545', cap: '#D64545', lane: -0.9 },
   { id: 'sombra', name: 'SOMBRA', color: '#4B2F8A', cap: '#7E57C2', lane: 0.9, ppm: 33 },
-  { id: 'dani', name: 'DANI', color: '#F0953C', cap: '#D64545', lane: -2.7, ppm: 27 },
+  { id: 'dani', name: 'DANI', color: '#F0953C', cap: '#D64545', lane: -2.7, ppm: 22 }, // el que se deja alcanzar: 3º es posible a ~30 PPM
   { id: 'rayo', name: 'RAYO CERO', color: '#3C8DD6', cap: '#F4F4F4', lane: 2.7, ppm: 30 },
 ];
 
