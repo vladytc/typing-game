@@ -427,7 +427,7 @@ addWorld({
     tragabombas: {
       name: 'Tragabombas',
       sprite: 'tragabombas',
-      hp: 100, atk: 4, def: 1, xp: 30,
+      hp: 170, atk: 4, def: 1, xp: 30,
       caps: true, music: 'nes_battle',
       fightWords: 5,
       words: WORDS_NES.filter((w) => w !== 'Bomba'),
@@ -457,7 +457,7 @@ addWorld({
         { name: 'Cepillar', text: 'le cepillas los dientes', mercy: 40, reply: '* Huele a menta y a pólvora. Tragabombas sonríe.' },
         { name: 'Mapa', text: 'le muestras la salida del laberinto', mercy: 40, reply: '* "¿Había SALIDA? ¡Llevo años aquí adentro!"' },
       ],
-      bullets: { count: 12, interval: 900, speed: 36, pool: 'bombaexplotahumo'.split('').concat(['B', 'U', 'M']) },
+      bullets: { count: 14, interval: 640, speed: 52, pool: 'bombaexplotahumo'.split('').concat(['B', 'U', 'M']) },
       keysHint: 'Mayúsculas + la palabra "bomba" perfecta',
     },
 
