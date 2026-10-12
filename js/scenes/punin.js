@@ -5,7 +5,8 @@
 // También se puede ganar con PAZ (Guantes, Entrenar, Admirar) cuando está mareado.
 //
 // Simplificación: el lore pide 1.2 s por aviso, pero eso es imposible a 20-25 PPM; aquí el aviso
-// dura según sus letras (0.7 s + 0.3 s por letra) y se acorta en cada ronda (×1, ×0.85, ×0.7).
+// dura según sus letras (0.65 s + 0.45 s por letra) y se acorta en cada ronda (×1, ×0.88, ×0.78).
+// (Con 0.7 s + 0.3 s por letra un niño a 30 PPM no alcanzaba ni en la ronda 1.)
 
 const PUNIN_WARN = ['izquierda', 'derecha', 'gancho', 'abajo', 'arriba', 'jab'];
 const PUNIN_PUNCH = ['golpe', 'guante', 'ring', 'campana', 'esquiva', 'fuerza', 'toalla', 'rápido', 'Ring', 'Campeón', 'Puño', 'Round'];
@@ -19,7 +20,7 @@ const PUNIN_ACTS = [
 const PUNIN_DODGE = { izquierda: [-70, 0], derecha: [70, 0], abajo: [0, 26], gancho: [-60, 10], arriba: [60, 10], jab: [0, 26] };
 
 function puninWindow(word, round) {
-  return (0.7 + 0.3 * word.length) * [1, 0.85, 0.7][Math.min(3, round) - 1] * diff().time;
+  return (0.65 + 0.45 * word.length) * [1, 0.88, 0.78][Math.min(3, round) - 1] * diff().time;
 }
 
 Scenes.punin = nesScene({
@@ -117,7 +118,7 @@ Scenes.punin = nesScene({
     this.task({
       label: '¡A GOLPEAR! Cada palabra PERFECTA pega fuerte',
       texts: words,
-      timeLimit: words.join('').length * 450 + 1500,
+      timeLimit: words.join('').length * 600 + 3000,
       onUnit: (unit) => {
         const hit = unit.errors === 0 ? 12 : 6;
         this.dmg += hit;
