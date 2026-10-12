@@ -28,7 +28,7 @@ Scenes.chupin = Object.assign(Object.create(Scenes.battle), {
   // Tiempo para escribir la palabra inhalada (más letras = más tiempo).
   inhaleMs(text) {
     const lost = Math.min(3, Math.floor((1 - this.e.hp / this.def.hp) / 0.25));
-    return Math.max(1500, 2000 + text.length * 220 - lost * 300) * diff().time;
+    return Math.max(1500, 1900 + text.length * 220 - lost * 300) * diff().time;
   },
 
   // ---------- LUCHAR → ABSORBER ----------
@@ -120,7 +120,7 @@ Scenes.chupin = Object.assign(Object.create(Scenes.battle), {
     const unit = { text: f.text, ms, errors: f.errors };
     if (this.def.onWord) this.def.onWord(unit);
     const { dmg, perfect } = this.damageFor(unit);
-    const hit = Math.round(dmg * 1.4); // escupir duele más que un golpe normal
+    const hit = Math.round(dmg * 1.2); // escupir duele más que un golpe normal
     if (perfect) this.st.perfect++;
     this.e.hp = Math.max(0, this.e.hp - hit);
     this.dealt += hit;
