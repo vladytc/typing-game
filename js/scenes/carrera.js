@@ -69,9 +69,9 @@ Scenes.carrera = {
       pos: 0, errors: 0, chars: 0, errors20: 0, turboOk: true, boostT: 0, sparks: [],
       v: 0, d: 0, rv: 0, rd: 0,
     });
-    // Rayo va a 28 PPM (en el arcade, 32). Cada derrota lo hace 10 % más lento (hasta 3 veces).
+    // Rayo va a 24 PPM (en el arcade, 32). Cada derrota lo hace 10 % más lento (hasta 3 veces).
     const slow = Math.pow(0.9, Math.min(3, tries));
-    this.rivalRate = (((arcade ? 32 : 28) * 5) / 60) * diff().speed * slow;
+    this.rivalRate = (((arcade ? 32 : 24) * 5) / 60) * diff().speed * slow;
     Object.assign(this, buildRaceText());
     Game.root.innerHTML = `
       <div class="race">
@@ -154,7 +154,7 @@ Scenes.carrera = {
     if (!ok) {
       this.errors++;
       if (this.t < 20) this.errors20++;
-      this.v = Math.max(0, this.v - RACE.brake);
+      this.v = Math.max(0, this.v - RACE.brake * diff().dmg); // en Fácil el frenazo es más suave
       if (this.inTurbo(this.pos)) this.turboOk = false;
       Sfx.error();
       for (let i = 0; i < 8; i++) this.sparks.push({ x: 160, y: 150, vx: (Math.random() - 0.5) * 80, vy: -Math.random() * 60, t: 0 });

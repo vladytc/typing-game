@@ -93,7 +93,7 @@ class SpiralDodge extends Dodge {
     this.elapsed += dt * 1000;
     if (this.spawned < this.cfg.count && this.elapsed >= this.nextSpawn) {
       this.spawn();
-      this.nextSpawn += this.cfg.interval / diff().speed;
+      this.nextSpawn += this.gap / diff().speed; // el mismo espaciado mínimo que el Dodge normal
     }
     for (const b of [...this.bullets]) {
       b.r += this.cfg.speed * diff().speed * dt;
