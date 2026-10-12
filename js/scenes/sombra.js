@@ -11,7 +11,7 @@
 
 const GC_SOMBRA = { time: 30, hitsToWin: 7, hurt: 5 }; // time se multiplica por la dificultad (Fácil 45 s)
 const GC_SOMBRA_KINDS = {
-  tetro: { every: 1.25, speed: 38, label: '¡Escribe los bloques antes de que toquen el piso!' },
+  tetro: { every: 1.1, speed: 46, label: '¡Escribe los bloques antes de que toquen el piso!' },
   caparazon: { bpm: 96, label: '¡Al ritmo! Cada palabra dura unos golpes del metrónomo: ¡acábala antes!' },
   nebula: { every: 1.35, speed: 34, label: '¡Las medusitas suben! Escríbelas antes de que lleguen arriba.' },
   marco: { every: 1.6, label: '¡Lee los cuadros aunque giren!' },
