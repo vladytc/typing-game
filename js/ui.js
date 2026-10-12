@@ -56,6 +56,8 @@ class Dialog {
 class ListMenu {
   constructor(el, items, { cols = 1, onPick, onCancel, onMove, start = 0 } = {}) {
     Object.assign(this, { el, items, cols, onPick, onCancel, onMove, i: start });
+    // El cursor empieza en la primera opción que se puede escoger.
+    if (items[start] && items[start].disabled) { const k = items.findIndex((it) => !it.disabled); if (k >= 0) this.i = k; }
     this.render();
   }
   render() {

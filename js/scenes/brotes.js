@@ -161,7 +161,7 @@ Scenes.brotes = {
     if (e.key === 'Escape') { this.pause(); return; }
     if (e.key === 'Backspace') { this.buf = this.buf.slice(0, -1); this.renderOrder(); return; }
     if (e.repeat || e.key.length !== 1) return;
-    const match = pickMatch({ strict: true });
+    const match = pickMatch({ strict: strictOn(true) });
     const fits = (c, s) => c.length >= s.length && [...s].every((ch, i) => match(c[i], ch));
     const next = this.buf + e.key;
     const live = this.candidates().filter((c) => fits(c.text, next));
