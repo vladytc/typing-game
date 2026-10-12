@@ -949,6 +949,34 @@ if (typeof Town3D !== 'undefined' && !Town3D.gcHooked) {
   const body0 = P.body;
   const build0 = P.build;
   const pine0 = P.pine;
+  const cliffs0 = P.cliffs;
+
+  // Orillas de las plataformas del espacio: paredes de metal índigo (no roca café) y, colgando
+  // hacia el vacío, motorcitos redondos con contorno en vez de las estalactitas de la N64.
+  P.cliffs = function gcCliffs(x, y, c, bake) {
+    if (!(gcIsZone(this.sc) && this.opt.gcSpace)) return cliffs0.call(this, x, y, c, bake);
+    const r3 = this;
+    const S = T3S;
+    const X = x * S + S / 2;
+    const Z = y * S + S / 2;
+    const top = c.h;
+    cliffs0.call(this, x, y, c, {
+      quad(a, b, cc, d) {
+        // Franjas: lila arriba (el borde del piso), índigo, una raya lila y abajo índigo oscuro.
+        const at = (p, h) => [p[0], h, p[2]];
+        const cuts = [a[1], top - 3.2, top - 2.9, top - 0.45, top].filter((h, i, l) => i === 0 || i === l.length - 1 || (h > a[1] && h < top));
+        const cols = [GCC.indigoD, GCC.lila, GCC.indigo, GCC.lila];
+        for (let i = 0; i < cuts.length - 1; i++) bake.quad(at(a, cuts[i]), at(b, cuts[i]), at(cc, cuts[i + 1]), at(d, cuts[i + 1]), cols[i + 4 - cuts.length + 1] || GCC.indigo);
+      },
+      add(geo) {
+        geo.dispose();
+        const j = (k) => T3Hash(x, y, k + 90);
+        gcPut(r3, new THREE.CylinderGeometry(0.22, 0.22, 1.2, 6), T3M(X, top - 7.5, Z), GCC.indigoD);
+        gcPut(r3, new THREE.CylinderGeometry(0.8, 0.55, 0.9, 8), T3M(X, top - 8.5, Z, 1, 1, 1, j(1) * 6), GCC.silver);
+        gcPut(r3, new THREE.SphereGeometry(0.5, 10, 6), T3M(X, top - 9.2, Z, 1, 0.8, 1), j(2) < 0.5 ? GCC.orange : GCC.yellow);
+      },
+    });
+  };
 
   P.prop = function gcProp(x, y, c, X, Z, band) {
     const f = c && c.native && GC_PROPS[c.kind];
