@@ -7,11 +7,12 @@
 
 // TypingTask con reglas extra para los cuadros:
 //   strictCase: las MAYUSCULAS hay que escribirlas con SHIFT (acentos siguen siendo opcionales)
-//   noErrors:   un solo error y se acaba (Arcoíris)
+//   noErrors:   un error y te resbalas: la palabra vuelve a empezar (Arcoíris)
 //   freezeMs:   si tardas en EMPEZAR una palabra, se congela y hay que escribir "derretir"
 class PolyTask extends TypingTask {
   constructor(box, opts) {
-    super(box, { ...opts, texts: [...opts.texts] });
+    // caps: así TypingTask usa capsMatch (si no, su this.match tapaba al match de abajo y SHIFT no contaba).
+    super(box, { ...opts, texts: [...opts.texts], caps: !!opts.strictCase });
     this.strictCase = !!opts.strictCase;
     this.noErrors = !!opts.noErrors;
     this.freezeMs = opts.freezeMs ? opts.freezeMs * diff().time : 0;
@@ -55,8 +56,8 @@ class PolyTask extends TypingTask {
       this.errors++;
       this.unitErrors++;
       Sfx.error();
+      if (this.noErrors) this.pos = 0;
       this.render(true);
-      if (this.noErrors) this.finish(false);
       return;
     }
     Stats.record(expected, true);
@@ -314,8 +315,8 @@ Scenes.castillo = {
       case 'phrase': return [rand(P.phrases)];
       case 'freeze': return pickWords(P.ice, 6);
       case 'numbers': return shuffle(['64', '120', '1996', ...pickWords(P.numbers, 2), num(), num(), num()]);
-      case 'clock': return pickWords(WORDS.t1.filter((w) => w.length <= 4), 10);
-      case 'rainbow': return pickWords(P.accents, 8);
+      case 'clock': return pickWords(WORDS.t1.filter((w) => w.length <= 4), 8);
+      case 'rainbow': return pickWords(P.accents, 6);
       case 'mix': return shuffle([...pickWords(P.caps, 2), num(), '64', ...pickWords(P.accents, 2), rand(P.short)]);
       default: return pickWords(WORDS.t1, 6);
     }
@@ -326,7 +327,7 @@ Scenes.castillo = {
     const texts = this.makeTexts(p);
     const chars = texts.join('').length;
     this.phase = 'challenge';
-    const tickMs = 1500;
+    const tickMs = 2000; // un tic por palabra: a ~30 PPM una palabra corta (con reacción) tarda ~2 s
     const time = p.kind === 'clock' ? texts.length * tickMs + 1500 : Math.max(p.time || 25000, chars * 420 + 2500);
     this.box.innerHTML = '';
     this.ui = new PolyTask(this.box, {

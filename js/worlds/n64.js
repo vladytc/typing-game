@@ -31,7 +31,7 @@ addTecloide('broton', {
   moves: [move('Hojita', 'hoja', 20, 'brote'), TECLEO, move('Enredadera', 'enredadera', 40, 'brote'), move('Raíz', 'raíces profundas', 55, 'brote', 'curar')],
 });
 addTecloide('estatico64', {
-  name: '????', type: 'estatica', sprite: 'estatico', hp: 52,
+  name: '????', type: 'estatica', sprite: 'estatico', hp: 52, flaky: 0.3, // "No me hace caso. Pero es fuerte."
   desc: 'El ??? de Dani ya evolucionó. Ahora tiene un signo más.',
   moves: [move('Ruido', 'ruido', 26, 'estatica'), TECLEO, move('Interferencia', 'interferencia', 42, 'estatica'), move('Pausa Eterna', 'pausa eterna', 48, 'estatica', 'aturdir')],
 });
@@ -212,12 +212,12 @@ addWorld({
       name: 'Marco, Rey de los Cuadros', sprite: 'marco', boss: true, console: 'n64',
       mode: 'castillo',          // el mapa lleva al castillo; la pelea final es el combate normal (battle64)
       n64: true, model: 'marco', fx: 'frame', hpCutPerStar: 20,
-      hp: 300, atk: 6, def: 4, xp: 80,
+      hp: 220, atk: 5, def: 4, xp: 80,
       fightWords: 4, words: ['cuadro', 'pintura', 'castillo', 'estrella', 'pincel', 'galería', 'dorado', 'sótano', '1996', '120', '8 cuadros', '64 colores'],
       blurb: '¡JEFE! El Castillo de los Cuadros: 8 pinturas, 8 estrellas... y Marco, que guarda la Nintendo 64.',
       keysHint: 'De todo: mayúsculas, números, acentos y texto que gira',
       intro: '* ¡MARCO, REY DE LOS CUADROS se descuelga de la pared!\n* "Toda pintura es un mundo. Todo mundo es una pausa."',
-      check: '* MARCO - ATQ 6 DEF 4\n* Un marco dorado con cara. Lleva 30 años colgado chueco.',
+      check: '* MARCO - ATQ 5 DEF 4\n* Un marco dorado con cara. Lleva 30 años colgado chueco.',
       idle: ['* Marco se ladea 15 grados. Luego 30.', '* Huele a óleo y a castillo viejo.', '* "Trescientas ventanas... bueno, ocho cuadros. Presupuesto."'],
       calm: '* Marco se queda derechito por primera vez en años.',
       taunts: ['¡PINCELADAS!', '¡Toda pintura es una pausa!', '¡Léeme aunque esté CHUECO!'],
@@ -226,7 +226,7 @@ addWorld({
         { name: 'Admirar', text: 'admiras su arte en silencio', mercy: 30, reply: '* Marco se sonroja. Bueno, se pone más dorado.' },
         { name: 'Pausa', text: 'un cuadro ya es una pausa', mercy: 50, reply: '* "...Eso es cierto. No necesito al morado para eso."' },
       ],
-      bullets: { count: 13, interval: 1300, speed: 34, pool: ['pincel', 'óleo', 'marco', '64', 'color', 'cuadro', 'arte', '8', 'rojo', 'azul'] },
+      bullets: { count: 11, interval: 1300, speed: 34, pool: ['pincel', 'óleo', 'marco', '64', 'color', 'cuadro', 'arte', '8', 'rojo', 'azul'] },
       // Los 8 cuadros del castillo (js/scenes/castillo.js). kind = tipo de reto.
       paintings: [
         { name: 'Campo de Bob', word: 'bob', theme: 'bob', kind: 'words', label: 'Calentamiento: escribe las 6 palabras', intro: 'Colinas verdes y una bola negra que salta.\n* ¡Para calentar los dedos!' },
@@ -235,7 +235,7 @@ addWorld({
         { name: 'Montaña Fría', word: 'montaña', theme: 'montana', kind: 'freeze', time: 30000, label: 'Empieza cada palabra en menos de 2 segundos', intro: 'Hace tanto frío que si tardas en EMPEZAR una palabra, se congela.\n* Escribe DERRETIR para salvarla.' },
         { name: 'Caverna de Números', word: 'caverna', theme: 'caverna', kind: 'numbers', label: 'Fila de números: escribe los 8', intro: 'En la oscuridad brillan números.\n* ¡Usa la fila de arriba del teclado!' },
         { name: 'Reloj Tic-Tac', word: 'reloj', theme: 'reloj', kind: 'clock', label: 'Al ritmo del reloj: una palabra por tic', intro: 'Todo aquí se mueve al ritmo del reloj.\n* Una palabra por cada tic-tac.' },
-        { name: 'Arcoíris', word: 'arcoiris', theme: 'arcoiris', kind: 'rainbow', time: 30000, label: '¡8 palabras sin UN SOLO error!', intro: 'Un camino de arcoíris en el cielo.\n* Un solo error... y te resbalas.' },
+        { name: 'Arcoíris', word: 'arcoiris', theme: 'arcoiris', kind: 'rainbow', time: 30000, label: '¡6 palabras! Un error y la palabra vuelve a empezar', intro: 'Un camino de arcoíris en el cielo.\n* Un solo error... y te resbalas al principio de la palabra.' },
         { name: 'Cuadro del Sótano', word: 'sotano', theme: 'sotano', kind: 'mix', time: 30000, label: 'De todo un poco (mayúsculas con SHIFT)', intro: '¡Aquí está la Nintendo 64, pintada!\n* Un reto con un poco de todo.' },
       ],
       pools: {
