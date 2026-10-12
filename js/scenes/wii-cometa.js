@@ -6,8 +6,9 @@
 //      DE CABEZA o EN ESPEJO (solo se ve así; se escribe normal). ACTUAR > Estabilizar lo evita.
 //   3. Estrellitas: 7 orbitan al Capitán. Cada palabra PERFECTA en LUCHAR rescata una (la lluvia
 //      baja 5 % por cada una). Con las 7: "...Ya tienes mi gravedad. Úsala."
-//   4. Caída libre (fase final, una vez): 40 palabras seguidas mientras el cielo gira.
-//      Cada 10 palabras sin error = 30 de daño; un error reinicia la cuenta (no quita HP).
+//   4. Caída libre (fase final, una vez): 20 palabras seguidas mientras el cielo gira.
+//      Cada 5 palabras sin error = 30 de daño; un error reinicia la cuenta (no quita HP).
+//      (Con 10 seguidas un niño de ~30 PPM casi nunca llegaba: eran 2 minutos sin hacer daño.)
 // La música se invierte mientras la gravedad está al revés (pista wii_cometa_rev).
 
 // Las palabras caen hacia el planeta desde arriba, la derecha, abajo y la izquierda.
@@ -69,7 +70,7 @@ class WiiGravityDodge extends Dodge {
     this.elapsed += dt * 1000;
     if (this.spawned < this.cfg.count && this.elapsed >= this.nextSpawn) {
       this.spawn();
-      this.nextSpawn += this.cfg.interval / diff().speed;
+      this.nextSpawn += this.gap / diff().speed; // como la lluvia normal: no más seguido de lo que alcanza un niño
     }
     for (const b of [...this.bullets]) {
       // Gravedad: más rápido mientras más cerca del planeta.
@@ -84,20 +85,23 @@ class WiiGravityDodge extends Dodge {
   };
 }
 
-// Caída libre: un párrafo de 40 palabras; se ven de 10 en 10 (un bloque por cada 30 de daño).
+// Caída libre: un párrafo de COMETA_FALL.words palabras; se ven de COMETA_FALL.streak en COMETA_FALL.streak
+// (un bloque por cada 30 de daño).
+const COMETA_FALL = { words: 20, streak: 5, dmg: 30 };
 class WiiFallTask extends TypingTask {
   render(err = false) {
     const all = this.texts;
-    const start = Math.floor(Math.min(this.i, all.length - 1) / 10) * 10;
+    const n = COMETA_FALL.streak;
+    const start = Math.floor(Math.min(this.i, all.length - 1) / n) * n;
     const keep = this.texts;
     const offI = this.i;
     // Se dibuja solo el bloque actual con el mismo render de TypingTask.
-    this.texts = all.slice(start, start + 10);
+    this.texts = all.slice(start, start + n);
     this.i = offI - start;
     super.render(err);
     this.texts = keep;
     this.i = offI;
-    this.wordsEl.insertAdjacentHTML('afterbegin', `<span class="cm-block">BLOQUE ${Math.floor(start / 10) + 1}/${Math.ceil(all.length / 10)}</span> `);
+    this.wordsEl.insertAdjacentHTML('afterbegin', `<span class="cm-block">BLOQUE ${Math.floor(start / n) + 1}/${Math.ceil(all.length / n)}</span> `);
   }
 }
 
@@ -218,21 +222,22 @@ Object.assign(Scenes.cometa, {
     $('.battle').classList.add('freefall');
     const pool = this.def.fallWords || this.def.words;
     const texts = [];
-    while (texts.length < 40) texts.push(...pickWords(pool, Math.min(pool.length, 40 - texts.length)));
+    const { words: total, streak: need, dmg } = COMETA_FALL;
+    while (texts.length < total) texts.push(...pickWords(pool, Math.min(pool.length, total - texts.length)));
     let dealt = 0;
     this.runTask({
-      label: 'CAIDA LIBRE: 10 palabras sin error = 30 de daño',
+      label: `CAIDA LIBRE: ${need} palabras sin error = ${dmg} de daño`,
       texts,
       timeLimit: texts.join(' ').length * 520 + 6000,
       onUnit: (unit) => {
         if (unit.errors === 0) this.streak++; else { this.streak = 0; this.floatText('cuenta: 0', ''); }
         if (unit.errors === 0) this.st.perfect++;
-        if (this.streak >= 10) {
+        if (this.streak >= need) {
           this.streak = 0;
-          dealt += 30;
-          this.e.hp = Math.max(0, this.e.hp - 30);
+          dealt += dmg;
+          this.e.hp = Math.max(0, this.e.hp - dmg);
           Sfx.crit();
-          this.floatText('¡10 SEGUIDAS! -30', 'crit');
+          this.floatText(`¡${need} SEGUIDAS! -${dmg}`, 'crit');
           this.shake('.esprite');
           this.updateBars();
         }
@@ -274,7 +279,7 @@ Object.assign(Scenes.cometa, {
       Quests.complete('wii_estrellitas');
       pages.push('* Las 7 estrellitas brillan a tu alrededor.',
         '* CAPITAN COMETA: ...Ya tienes mi gravedad. Úsala.',
-        '* (Tu siguiente LUCHAR será la CAIDA LIBRE: 40 palabras seguidas.)');
+        `* (Tu siguiente LUCHAR será la CAIDA LIBRE: ${COMETA_FALL.words} palabras seguidas.)`);
     }
     this.turns++;
     if (this.turns % 2 === 0 && !this.finalDone && this.e.hp > 0) {
