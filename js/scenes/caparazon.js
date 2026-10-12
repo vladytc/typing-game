@@ -7,10 +7,11 @@
 // (palabras repetidas y franjas moradas). La acción "Pausa" lo destraba y quita la fase 3.
 //
 // Simplificación: los tiempos de cada palabra se cuentan en tiempos del metrónomo (mínimo un
-// compás de 4), alargándose si la palabra es larga, para que se pueda a 20-25 PPM.
+// compás de 4), alargándose si la palabra es larga: 0.55 s + 0.36 s por letra, justo para ~30 PPM
+// (con más margen nadie caía a la lava y el jefe no hacía nada).
 
 const CAP_BLOCKS = 6;
-const CAP_HP = 200;
+const CAP_HP = 160;
 const CAP_AXE_PHRASE = 'cortas la cuerda del puente';
 const CAP_W1 = ['salto', 'fuego', 'llama', 'calor', 'lava', 'puente', 'hacha', 'rey', 'torre', 'bloque', 'nube', 'paso', 'brinco', 'salta', 'sol', 'fuerte'];
 const CAP_W2 = ['Martillo', 'Corona', 'Castillo', 'Puente', 'Hacha', 'Cuerda', 'Bandera', 'Princesa', 'Tortuga', 'Escudo', 'Rey', 'Lava'];
@@ -30,7 +31,7 @@ const CAP_BRIDGE = { x0: 760, x1: 960, y: 200 };
 // Tiempos del metrónomo que dura una palabra: mínimo 4 (un compás), de 2 en 2.
 function capBeatsFor(word, bpm) {
   const beatSec = 60 / bpm;
-  const need = ((0.9 + word.length * 0.42) * diff().time) / beatSec;
+  const need = ((0.55 + word.length * 0.36) * diff().time) / beatSec;
   return Math.max(4, 2 * Math.ceil(need / 2));
 }
 // Fase según el HP del jefe (0, 1 o 2). Si ya se destrabó, nunca llega a la 3.

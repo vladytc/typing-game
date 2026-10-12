@@ -1,13 +1,13 @@
 // MINIJUEGO — PATOS DE LETRAS (guiño a Duck Hunt, NES 1984). Bosque Oscuro, con Toby.
 // Vuelan patos de izquierda a derecha con una letra. Escribir la letra = pato atrapado con la
 // RED DE LETRAS (nada de disparos: Toby lo trae y lo suelta). 3 patos por ronda, 10 rondas;
-// cada ronda vuelan 8 % más rápido. Desde la ronda 7 traen MAYUSCULAS (SHIFT).
+// cada ronda vuelan 12 % más rápido. Desde la ronda 7 traen MAYUSCULAS (SHIFT).
 // Fallar en una ronda = Toby se ríe (termina la ronda, no el juego). Turbo: sílabas de 2 letras.
 // En el mapa hay que atrapar PATOS_GOAL para abrir el camino; en el arcade solo cuenta el récord.
 
 const PATOS_ROUNDS = 10;
 const PATOS_PER_ROUND = 3;
-const PATOS_GOAL = 18;
+const PATOS_GOAL = 21;
 const PATOS_CAPS_FROM = 7;
 const PATOS_LETTERS = 'abcdefghijklmnopqrstuvwxyz'.split('');
 const PATOS_SYL = ['pa', 'to', 'me', 'lo', 'su', 'ra', 'ni', 'ca', 'de', 'fi', 'go', 'ju', 'ke', 'vi', 'ze', 'bo', 'qu', 'ya', 'wi', 'he'];
@@ -58,7 +58,7 @@ Scenes.patos = nesScene({
     this.roundCaught = 0;
     this.ducks = [];
     this.target = null;
-    this.dur = 4.4 / Math.pow(1.08, this.round - 1) / diff().speed; // segundos para cruzar la pantalla
+    this.dur = 4.4 / Math.pow(1.12, this.round - 1) / diff().speed; // segundos para cruzar la pantalla
     this.spawnT = 0.9;
     this.panel.innerHTML = `<div class="pt-msg">RONDA ${this.round}${this.round >= PATOS_CAPS_FROM ? ' · ¡MAYUSCULAS!' : ''}<br><span>Escribe ${this.turbo ? 'la sílaba' : 'la letra'} de cada pato.</span></div>`;
     this.renderHud();
