@@ -71,3 +71,31 @@ diario de misiones.
 - El anciano de la cueva, Champi, Toby (reto: "pato" ×3 sin errores) y el Roncatón son
   guiños a Zelda, Mario, Duck Hunt y Pokémon.
 - Si te quedas quieto un rato en el pueblo, Bit dice algo conocido.
+
+## Publicarlo en Railway
+
+`server.js` sirve el juego (solo `index.html`, `css/` y `js/`) detrás de una contraseña.
+Tras 5 intentos fallidos desde una IP, esa IP queda bloqueada 15 minutos; si entre todas
+las IPs suman 20 fallos, se bloquea la entrada para todos 15 minutos. Quien ya entró sigue
+jugando (la sesión dura 30 días). Los bloqueos viven en memoria: se reinician al redesplegar.
+
+La infraestructura está en `.railway/railway.ts` (Infrastructure as Code de Railway). La
+contraseña **no** está en el repositorio: se pone en Railway como variable `APP_PASSWORD`.
+
+Primera vez:
+
+```sh
+npm install                      # instala el SDK de Railway (solo para la IaC)
+npx @railway/cli login
+npx @railway/cli init            # crea el proyecto "tecla-quest" (o `link` si ya existe)
+npx @railway/cli config plan     # muestra lo que va a crear
+npx @railway/cli config apply    # crea el servicio conectado a GitHub
+npx @railway/cli variables --service tecla-quest --set "APP_PASSWORD=..."
+npx @railway/cli domain --service tecla-quest   # genera la URL pública
+```
+
+Después, cada `git push` a `main` redespliega solo. Los cambios a `.railway/` se hacen por
+pull request: `.github/workflows/railway.yml` muestra el plan en el PR y lo aplica al hacer
+merge (necesita el secreto `RAILWAY_TOKEN` en GitHub con un token del proyecto).
+
+Probar en local: `APP_PASSWORD=algo-largo npm start` y abrir http://localhost:8080.
