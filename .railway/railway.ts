@@ -4,7 +4,7 @@
 import { defineRailway, github, preserve, project, service } from "railway/iac";
 
 export default defineRailway(() => {
-  const web = service("tecla-quest", {
+  const web = service("typing-game", {
     source: github("vladytc/typing-game", { branch: "main" }),
     start: "node server.js",
     healthcheck: "/health",
@@ -26,5 +26,5 @@ export default defineRailway(() => {
     },
   });
 
-  return project("tecla-quest", { resources: [web] });
+  return project("dante-typing-game", { resources: [web] });
 });
