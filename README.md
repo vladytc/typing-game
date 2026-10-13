@@ -87,11 +87,11 @@ Primera vez:
 ```sh
 npm install                      # instala el SDK de Railway (solo para la IaC)
 npx @railway/cli login
-npx @railway/cli init            # crea el proyecto "tecla-quest" (o `link` si ya existe)
+npx @railway/cli init            # crea el proyecto "dante-typing-game" (o `link` si ya existe)
 npx @railway/cli config plan     # muestra lo que va a crear
 npx @railway/cli config apply    # crea el servicio conectado a GitHub
-npx @railway/cli variables --service tecla-quest --set "APP_PASSWORD=..."
-npx @railway/cli domain --service tecla-quest   # genera la URL pública
+npx @railway/cli variables --service typing-game --set "APP_PASSWORD=..."
+npx @railway/cli domain --service typing-game   # genera la URL pública
 ```
 
 Después, cada `git push` a `main` redespliega solo. Los cambios a `.railway/` se hacen por
