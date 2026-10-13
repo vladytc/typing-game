@@ -33,7 +33,10 @@ Scenes.title = {
   },
   // Guiño al código más famoso de los videojuegos (Gradius, Contra...).
   onKey(e) {
-    if (this.secret) { if (isConfirm(e)) { this.secret = false; this.enter(); } return; }
+    if (this.secret) {
+      if (isConfirm(e)) { this.secret = false; findSecret('pueblo_konami').then(() => this.enter()); }
+      return;
+    }
     const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
     this.seq = (this.seq || []).concat(k).slice(-KONAMI.length);
     if (this.seq.join() === KONAMI.join()) { this.seq = []; this.unlockKonami(); return; }

@@ -879,7 +879,8 @@ function pickNext(ctx, key, list) {
 
 // Recuadro con la ilustración grande, el título y el dato. Se cierra con ENTER.
 // Usa su propio DOM sobre #game y se queda con las teclas mientras está abierto.
-function showCuriosity(ctx, id) {
+// opts.tag reemplaza la etiqueta de arriba (los secretos dicen "★ SECRETO 3/13").
+function showCuriosity(ctx, id, opts = {}) {
   syncCuriosities();
   const c = CURIOSIDADES[id];
   if (!c) return Promise.resolve();
@@ -890,7 +891,7 @@ function showCuriosity(ctx, id) {
     el.className = `curio-view curio-${c.console}`;
     el.innerHTML = `
       <div class="curio-card">
-        <div class="curio-tag">${esc(upper(cons ? `${cons.name} · ${cons.year}` : c.console))}</div>
+        <div class="curio-tag">${esc(opts.tag || upper(cons ? `${cons.name} · ${cons.year}` : c.console))}</div>
         <canvas width="${CURIO_W}" height="${CURIO_H}"></canvas>
         <div class="curio-title">${esc(upper(c.title))}</div>
         <div class="curio-text">${esc(c.caption).replace(/\n/g, '<br>')}</div>
