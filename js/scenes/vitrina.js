@@ -8,6 +8,8 @@ Scenes.vitrina = {
   enter({ back = 'map' }) {
     this.back = back;
     this.rooms = [...WORLDS.filter(worldUnlocked).map((w) => w.id), 'pueblo'];
+    // La Sala de Secretos aparece hasta que encuentras el primero.
+    if (secretCount()) this.rooms.push('secretos');
     if (!this.rooms.includes(this.room)) this.room = this.rooms[0];
     this.r = 1;
     this.c = 0;
@@ -18,6 +20,7 @@ Scenes.vitrina = {
 
   roomName(id) {
     if (id === 'pueblo') return 'PUEBLO';
+    if (id === 'secretos') return '★ SECRETOS';
     const w = WORLDS.find((x) => x.id === id);
     const c = CONSOLES.find((x) => x.id === w.console);
     return upper(c ? c.name : w.name);
@@ -31,6 +34,17 @@ Scenes.vitrina = {
     const era = w ? w.theme : hubEra();
     const look = (sprite) => charColors(sprite, era);
     const rows = [{ tabs: true }];
+    if (id === 'secretos') {
+      // Los que faltan se ven como cartuchos apagados: ni su nombre ni su forma.
+      const all = Object.entries(SECRETOS).map(([sid, s]) => ({
+        secret: sid, sprite: secretFound(sid) ? s.sprite : 'cartucho', got: secretFound(sid), name: s.name,
+        desc: 'ENTER: ver la tarjeta del secreto.', colors: look(s.sprite),
+      }));
+      for (let i = 0; i < all.length; i += PER_ROW) rows.push({ title: i ? '' : 'SECRETOS ENCONTRADOS', slots: all.slice(i, i + PER_ROW) });
+      this.rows = rows;
+      this.r = Math.min(this.r, rows.length - 1);
+      return;
+    }
     if (w && w.console) {
       const c = CONSOLES.find((x) => x.id === w.console);
       if (c) rows.push({ title: 'CONSOLA', slots: [{ sprite: c.id, got: !!d.consoles[c.id], name: `${c.name} (${c.year})`, facts: c.facts, colors: look(c.id) }] });
@@ -112,7 +126,11 @@ Scenes.vitrina = {
     else if (e.key === 'ArrowLeft' && row.slots) this.c = (this.c - 1 + row.slots.length) % row.slots.length;
     else if (e.key === 'ArrowDown') this.r = Math.min(this.rows.length - 1, this.r + 1);
     else if (e.key === 'ArrowUp') this.r = Math.max(0, this.r - 1);
-    else if (isConfirm(e)) { this.fact++; Sfx.move(); this.render(); return; }
+    else if (isConfirm(e)) {
+      const s = row.slots && row.slots[this.c];
+      if (s && s.secret && s.got) { findSecret(s.secret).then(() => this.render()); return; }
+      this.fact++; Sfx.move(); this.render(); return;
+    }
     else return;
     this.fact = 0;
     if (this.rows[this.r].slots) this.c = Math.min(this.c, this.rows[this.r].slots.length - 1);

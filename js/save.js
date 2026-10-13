@@ -13,6 +13,7 @@ function defaultSave() {
     tutorialDone: false,
     muted: false,
     konami: false,
+    secrets: {},   // secretos jugables encontrados (js/secretos.js)
     difficulty: 'normal', // ver DIFFICULTIES
     team: [],      // Tecloides: [{ id, lv, xp }]
     flags: {},
