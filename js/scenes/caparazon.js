@@ -68,7 +68,7 @@ Scenes.caparazon = nesScene({
     ], () => this.startRun(), 'BIT'), 'LORD CAPARAZON');
   },
 
-  get bpm() { return CAP_PHASES[this.phase].bpm; },
+  get bpm() { return Math.round(CAP_PHASES[this.phase].bpm / pace('caparazon')); }, // en Experto el metrónomo va más rápido
   get beatSec() { return 60 / this.bpm; },
 
   renderHud() {

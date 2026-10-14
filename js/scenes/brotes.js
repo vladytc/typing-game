@@ -142,7 +142,7 @@ Scenes.brotes = {
     } else {
       const sq = rand(this.alive());
       const verb = rand(twoWords ? sq.verbs2 : sq.verbs);
-      this.order = { squad: sq, verb, text: `${sq.id}: ${verb}`, t: 0, limit: ((sq.id.length + verb.length) * 340 + 2400) * diff().time };
+      this.order = { squad: sq, verb, text: `${sq.id}: ${verb}`, t: 0, limit: ((sq.id.length + verb.length) * 340 + 2400) * diff().time * pace('brotes') };
     }
     this.orderT0 = performance.now();
     this.renderOrder();
