@@ -821,39 +821,100 @@ const TRACKS = {
     ],
   },
 
-  // Reto de Tecloides (la pista "de batalla de monstruos"): La menor, urgente, 160 BPM.
-  // Abre con 4 golpes y una subida cromática como sirena; bajo de tónica-octava-séptima.
-  tecloides: {
-    bpm: 160,
-    voices: [
-      {
-        wave: 'square', vol: 0.032,
-        intro: '-/4 E5 F5 F#5 G5 G#5 A5 A#5 B5 C6/4',
-        notes: 'A5/2 E5 A5 C6/2 B5/2 A5 G5 E5/2 G5/2 A5/2 B5/2 C6/2 D6/2 B5/2 A5/8 ' +
-          'C6/2 B5 A5 G5/2 E5/2 F5 G5 A5/2 F5/2 E5/2 D5/2 E5/2 F5/2 G#5/2 A5/8',
-      },
-      {
-        wave: 'triangle', vol: 0.11,
-        intro: '-/8 E2/8',
-        notes: rep('A2 A3 G3 A3', 4) + ' ' + rep('F2 F3 E3 F3', 4) + ' ' + rep('C3 C4 B3 C4', 4) + ' ' + rep('D2 D3 C3 D3', 2) + ' ' + rep('E2 E3 D3 E3', 2),
-      },
-      { wave: 'noise', vol: 0.028, intro: 'x x x x -/12', notes: rep('x - x x', 16) },
-    ],
-  },
+  // Reto de Tecloides (batalla contra entrenador del Valle Game Boy): ORIGINAL, al estilo de las
+  // batallas de los RPG de monstruos de Game Boy. Intro tensa de semicorcheas (5 compases) y loop
+  // de 32 compases en La menor a 160 (≈ 48 s): A, A', B con el clímax y C con el bajo corriendo.
+  // OJO: js/worlds/snes.js (snes_arena) le suma cuerdas de 4 compases (Lam | Fa | Do | Re-Mi) que
+  // entran tras 16 pasos. Por eso aquí todo va con `notes` (sin `form`), la intro dura 16 + 64
+  // pasos, y la armonía repite ese ciclo de 4 compases en todo el loop.
+  tecloides: (() => {
+    const CH = { Am: 'A4+C5+E5', F: 'A4+C5+F5', C: 'G4+C5+E5', D: 'F#4+A4+D5', E: 'G#4+B4+E5' };
+    const RT = { Am: 'A2', F: 'F2', C: 'C3', D: 'D3', E: 'E2' };
+    const up = (n) => n.replace(/\d/, (o) => Number(o) + 1);
+    // Recorre el ciclo de 4 compases (el 4.º es Re y Mi, medio y medio) n veces.
+    const cyc = (full, half, n = 2) => rep(`${full('Am')} ${full('F')} ${full('C')} ${half('D')} ${half('E')}`, n);
+    const melA = 'A5/4 E5/2 A5/2 C6/3 B5/1 A5/2 E5/2 | F5/2 A5/2 C6/4 A5/2 F5/2 C5/4 | E5/2 G5/2 C6/2 E6/2 D6/3 C6/1 G5/4 | ' +
+      'F#5/2 A5/2 D6/4 G#5/2 B5/2 E6/4 | E6/4! D6/2 C6/2 B5/2 A5/2 E5/4 | F5/2 G5/2 A5/2 C6/2 F6/4 E6/2 C6/2 | ' +
+      'E6/2 D6/2 C6/2 G5/2 E5/2 G5/2 C6/4 | D6/2 C6/2 A5/2 F#5/2 G#5/4 B5/4';
+    const melA2 = 'A5/2 B5/2 C6/2 A5/2 E6/4 C6/4 | F6/4 E6/2 C6/2 A5/4 F5/4 | G5/2 C6/2 E6/2 G6/2 E6/3 D6/1 C6/4 | D6/4 A5/4 E6/4! B5/4 | ' +
+      'C6/6 B5/2 A5/2 G5/2 A5/2 C6/2 | A5/4 F5/2 A5/2 C6/2 F6/2 E6/2 C6/2 | D6/2 E6/2 C6/4 G5/4 E5/4 | F#5/2 A5/2 D6/2 F#6/2 E6/8';
+    const melB = 'E6/6 C6/2 -/2 E6/2 A6/4 | A6/2 G6/2 F6/4 C6/4 A5/4 | G6/6 E6/2 -/2 G6/2 C6/4 | F#6/2 E6/2 D6/2 A5/2 B5/2 E6/2 G#6/4 | ' +
+      'A6/8! E6/4 C6/4 | F6/4 E6/2 F6/2 C6/4 A5/4 | G5/2 C6/2 E6/2 G6/2 F6/2 E6/2 D6/2 C6/2 | D6/2 F#6/2 A6/4 G#6/4! E6/4';
+    const c4 = 'A5/1. -/1 A5/1. -/1 C6/2. E6/2. -/2 D6/2 C6/2 B5/2 | A5/2. F5/2. -/12 | ' +
+      'G5/1. -/1 G5/1. -/1 C6/2. E6/2. -/2 F6/2 E6/2 D6/2 | F#6/2. D6/2. -/4 E6/2. G#5/2. -/4';
+    const melC = `${c4} | ${c4.split(' | ').slice(0, 3).join(' | ')} | D6/2 E6/2 F#6/2 A6/2 G#6/2 F#6/2 E6/2 D6/2`;
+    // Segundo pulso: golpes a contratiempo, notas largas, arpegio rápido y respuestas en C.
+    const offH = (c) => `(-/2 ${CH[c]}/2.)*2`;
+    const off = (c) => `${offH(c)} ${offH(c)}`;
+    const longA2 = rep('E5/8 C5/8 C5/8 A4/8 E5/8 G5/8 F#5/8 G#5/8', 2);
+    const ansF = '-/4 C5/2 D5/2 F5/2 A5/2 G5/2 F5/2';
+    const v2 = [cyc(off, offH), longA2, cyc((c) => `${CH[c]}/16`, (c) => `${CH[c]}/8`),
+      `${off('Am')} ${ansF} ${off('C')} -/4 A4/2 D5/2 -/4 B4/2 E5/2 ${off('Am')} ${ansF} ${off('C')} ${CH.D}/8 ${CH.E}/8`].join(' ');
+    // Bajo: octavas en corcheas (A), con repiques (B) y semicorcheas que corren (C).
+    const octH = (c) => `(${RT[c]}/2 ${up(RT[c])}/2)*2`;
+    const oct = (c) => `${octH(c)} ${octH(c)}`;
+    const pas = (c) => `(${RT[c]}/2 ${up(RT[c])}/2)*3 ${RT[c]}/1 ${RT[c]}/1 ${up(RT[c])}/2`;
+    const runH = (c) => `(${RT[c]}/1 ${RT[c]}/1 ${up(RT[c])}/1 ${RT[c]}/1)*2`;
+    const run = (c) => `${runH(c)} ${runH(c)}`;
+    const bass = [cyc(oct, octH, 4), cyc(pas, octH), cyc(run, runH)].join(' ');
+    // Batería: A y A' con groove, B con hi-hat abierto, C con bombo a medio tiempo; redoble cada 8.
+    const fill = 's/1 s/1 s/1 s/1 s/2 s/2 t/2 t/2 T/2 T/2';
+    const sec = (beat) => `c+${beat} (${beat})*6 ${fill}`;
+    const groove = sec('k/2 h/2 s/2 h/2 k/2 k/2 s/2 h/2');
+    const drums = [groove, groove, sec('k/2 h/1 h/1 s/2 h/2 k/1 k/1 o/2 s/2 o/2'), sec('k/4 s/4 k/2 k/2 s/4')].join(' ');
+    return {
+      bpm: 160, era: 'gb',
+      voices: [
+        {
+          wave: 'square', vol: 0.033, vib: { rate: 6, depth: 0.2, delay: 0.2 },
+          // Intro: nota pedal que sube cromática, arpegios que bajan y tres golpes.
+          intro: 'A5/1! E5/1 A5/1 E5/1 A5/1! E5/1 A5/1 E5/1 Bb5/1! E5/1 Bb5/1 E5/1 Bb5/1! E5/1 Bb5/1 E5/1 | ' +
+            'B5/1! E5/1 B5/1 E5/1 C6/1! E5/1 C6/1 E5/1 C#6/1! E5/1 D6/1 E5/1 D#6/1! E5/1 E6/1 E5/1 | ' +
+            '(E6/1 C6/1 A5/1 E5/1)*2 (F6/1 C6/1 A5/1 F5/1)*2 | (E6/1 C6/1 G5/1 E5/1)*2 (D6/1 B5/1 G#5/1 E5/1)*2 | ' +
+            'E5/2! -/2 E5/2! -/2 E5/1 E5/1 E5/2! G#5/2 B5/2',
+          notes: [melA, melA2, melB, melC].join(' | '),
+        },
+        { wave: 'square', vol: 0.014, intro: 'E4/8 F4/8 F#4/8 G4/8 C5/8 C5/8 C5/8 B4/8 G#4/16', notes: v2 },
+        {
+          wave: 'triangle', vol: 0.09, fx: 0, notes: bass,
+          intro: '(A2/1 A3/1)*16 (A2/2 A3/2)*2 (F2/2 F3/2)*2 (C3/2 C4/2)*2 (E2/2 E3/2)*2 E2/2! -/2 E2/2! -/2 E2/1 E2/1 E2/2! E3/2 E2/2',
+        },
+        { wave: 'noise', vol: 0.026, intro: '(k/4 s/4)*2 (s/1 s/1 s/2)*4 (k/2 h/2 s/2 h/2)*4 c+k/2 -/2 k/2 -/2 s/1 s/1 s/2 t/2 T/2', notes: drums },
+      ],
+    };
+  })(),
 
-  // "¡Casi!": puente a Do mayor cuando al rival le queda poca vida.
-  tecloides_casi: {
-    bpm: 168,
-    voices: [
-      {
-        wave: 'square', vol: 0.032,
-        notes: 'C6/2 G5 C6 E6/2 D6/2 C6 B5 G5/2 B5/2 C6/2 D6/2 E6/2 F6/2 D6/2 C6/8 ' +
-          'E6/2 D6 C6 B5/2 G5/2 A5 B5 C6/2 A5/2 G5/2 F5/2 G5/2 A5/2 B5/2 C6/8',
-      },
-      { wave: 'triangle', vol: 0.11, notes: rep('C3 C4 B3 C4', 4) + ' ' + rep('A2 A3 G3 A3', 4) + ' ' + rep('F2 F3 E3 F3', 4) + ' ' + rep('G2 G3 F3 G3', 4) },
-      { wave: 'noise', vol: 0.03, notes: rep('x x x x', 16) },
-    ],
-  },
+  // "¡Casi!" (al rival le queda poca vida): ORIGINAL, Do mayor a 168, marcha triunfal de 32
+  // compases (≈ 46 s). Las cuerdas de snes_arena_casi hacen Do | Lam | Fa | Sol: mismo ciclo.
+  tecloides_casi: (() => {
+    const CH = { C: 'E4+G4+C5', Am: 'E4+A4+C5', F: 'F4+A4+C5', G: 'D4+G4+B4' };
+    const RT = { C: 'C3', Am: 'A2', F: 'F2', G: 'G2' };
+    const up = (n) => n.replace(/\d/, (o) => Number(o) + 1);
+    const cyc = (f, n = 2) => rep(['C', 'Am', 'F', 'G'].map(f).join(' '), n);
+    const head = 'C6/4 G5/2 C6/2 E6/4 D6/2 C6/2 | A5/4 C6/2 E6/2 A6/4 G6/2 E6/2 | F6/6 E6/2 C6/2 A5/2 C6/2 F6/2 | G6/4 D6/2 B5/2 G5/4 B5/4';
+    const melA = `${head} | C6/2 E6/2 G6/4 F6/2 E6/2 C6/4 | E6/2 C6/2 A5/4 B5/2 C6/2 E6/4 | F6/2 E6/2 D6/2 C6/2 A5/2 C6/2 F6/4 | G6/2 F6/2 D6/2 B5/2 G5/8`;
+    const melA2 = `${head} | E6/6 D6/2 C6/2 E6/2 G6/4 | A6/4 G6/2 E6/2 C6/4 A5/4 | C6/2 D6/2 F6/2 A6/2 G6/4 F6/4 | D6/2 F6/2 G6/4! B5/2 D6/2 G6/4`;
+    const melB = 'G6/2 G6/1 G6/1 E6/2 C6/2 -/2 C6/2 E6/2 G6/2 | A6/4 E6/4 C6/4 E6/4 | F6/2 F6/1 F6/1 C6/2 A5/2 -/2 A5/2 C6/2 F6/2 | G6/6 F6/2 D6/4 B5/4 | ' +
+      'G5/2 C6/2 E6/2 G5/2 C6/2 E6/2 G6/4! | A6/6 G6/2 E6/4 C6/4 | F6/4 A6/4 G6/2 F6/2 E6/2 D6/2 | D6/2 B5/2 G5/2 B5/2 D6/2 F6/2 G6/4';
+    const brk = (c) => { const t = CH[c].split('+'); return rep(`${t[0]}/2 ${t[2]}/2 ${t[1]}/2 ${t[2]}/2`, 2); };
+    const off = (c) => `(-/2 ${CH[c]}/2.)*4`;
+    const v2 = [cyc(brk), cyc(off), cyc((c) => `${CH[c]}/16`), cyc(off)].join(' ');
+    const oct = (c) => `(${RT[c]}/2 ${up(RT[c])}/2)*4`;
+    const run = (c) => `(${RT[c]}/1 ${RT[c]}/1 ${up(RT[c])}/1 ${RT[c]}/1)*4`;
+    const bass = [cyc(oct), cyc(oct), cyc(run), cyc(oct)].join(' ');
+    const fill = 's/1 s/1 s/1 s/1 s/2 s/2 t/2 t/2 T/2 T/2';
+    const sec = (beat) => `c+${beat} (${beat})*6 ${fill}`;
+    const a = sec('k/2 h/2 s/2 h/2 k/2 k/2 s/2 h/2');
+    return {
+      bpm: 168, era: 'gb',
+      voices: [
+        { wave: 'square', vol: 0.033, vib: { rate: 6, depth: 0.2, delay: 0.2 }, notes: [melA, melA2, melB, melA2].join(' | ') },
+        { wave: 'square', vol: 0.014, notes: v2 },
+        { wave: 'triangle', vol: 0.09, fx: 0, notes: bass },
+        { wave: 'noise', vol: 0.026, notes: [a, a, sec('k/2 o/2 s/2 o/2 k/2 o/2 s/1 s/1 o/2'), a].join(' ') },
+      ],
+    };
+  })(),
 
   // Minijuegos de arcade: alegre y rápida.
   arcade: {
