@@ -81,7 +81,7 @@ nebula: {
 | `battle` (por defecto) | `js/scenes/battle.js` | Combate estilo Deltarune: LUCHAR/ACTUAR/OBJETO/PERDONAR + lluvia de letras | `hp, atk, def, fightWords, words, intro, check, idle, calm, taunts, acts[], bullets{count, interval, speed, pool}, drop, console` (copia a Pixelito en `worlds/gb.js`) |
 | `tecloides` | `js/scenes/tecloides.js` | Batalla de Tecloides contra un entrenador de `TRAINERS` (`js/tecloides.js`) | El id del nodo = id del entrenador |
 | `mario` | `js/scenes/mario.js` | Nivel de plataformas por tecleo (Mundo 1-1) | — (el nivel está en `L11` dentro de la escena) |
-| `tetrorey` | `js/scenes/tetrorey.js` | Jefe en 3 fases: batalla → lluvia de bloques → palabras en vertical | Los de `battle` + `blockWords`, `tallWords` |
+| `tetrorey` | `js/scenes/tetrorey.js` | Jefe en 3 fases: batalla → TETRIS VS (dos pozos con Cable Link) → palabras en vertical | Los de `battle` + `vsWords`, `vsLong`, `vsJunk`, `tallWords` |
 | `chupin` | `js/scenes/chupin.js` | Batalla donde LUCHAR es ABSORBER (escribe la palabra inhalada) | Los de `battle` (`words` = palabras que flotan) |
 
 Una escena puede **heredar de la batalla** con `Object.assign(Object.create(Scenes.battle), {...})` y cambiar

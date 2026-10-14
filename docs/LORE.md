@@ -436,11 +436,14 @@ Ya existe. Se agrega una fase especial que usa el minijuego **Bloques** para que
 sienta distinta a las normales:
 
 - **Fase 1 (actual):** LUCHAR/ACTUAR normales; lluvia de palabras completas (ya definido).
-- **Fase 2 (al 50 % de HP):** *"¡LLUEVEN BLOQUES!"* La pantalla cambia al minijuego Bloques
-  por 45 segundos: caen palabras-bloque; cada palabra escrita se "coloca" y cada 4 colocadas
-  seguidas sin error se limpia una línea (= 15 de daño). Si la pila llega al tope, recibes 8
-  de daño y se reinicia la pila.
-- **Fase 3 (al 20 %):** vuelve a la batalla normal, pero las palabras de LUCHAR giran 90°
+- **Fase 2 (al 50 % de HP):** *"¡TETRIS VS!"* (idea del niño). Dos pozos de Tetris lado a lado,
+  como dos Game Boy con el Cable Link. Cada pieza trae una palabra: al escribirla cae sola en un
+  buen lugar (en el mejor si no hubo errores). Las líneas mandan basura al rival con las reglas
+  del Tetris de Game Boy a 2 jugadores (2 → 1 fila, 3 → 2, Tetris → 4); cada fila de basura que
+  te llega trae una palabra y escribirla la borra. Si tu pila llega al tope te duele (8) y se
+  limpia; si llega la del rey, pierde mucho HP y pasa a la fase 3. Suena Korobeiniki (arreglo
+  propio) y la primera vez sale la tarjeta "Tetris por cable".
+- **Fase 3 (al llenarse la torre del rey):** vuelve a la batalla normal, pero las palabras de LUCHAR giran 90°
   (se muestran en vertical, una letra por renglón) para que leas "como bloque".
 - Al terminar: suelta la **Game Boy** y el Cable Link (ya existe).
 
@@ -1627,7 +1630,7 @@ soporta; si no, se usa `W`).
 | Batalla normal GB | 150 | 4/4 | Mi menor → Sol mayor en el estribillo | Riff de 2 compases en P1, N marcando corchea, bajo en octavas. |
 | **Reto de Tecloides** (GB; es la pista "Pokémon") | 160 | 4/4 | La menor, urgente | Empieza con 4 golpes de N + un "subidón" cromático en P1 (como una sirena), luego riff de bajo T muy rítmico (tónica, octava, séptima) y melodía en P1 con frases de 2 compases que terminan en nota larga con vibrato. Puente a Do mayor cuando el rival tiene poca vida ("¡casi!"). Variación "estadio" en N64 con pads W. |
 | Chupín (minijefe) | 138 | 4/4 | Fa mayor, dulce y traviesa | Melodía redonda, staccato; un "inhalar" = glissando descendente en P2. |
-| **Tetro Rey (jefe)** | 140 → 160 → 180 | 4/4 | Re menor, marcial y "de Europa del Este" por el estilo (sin citar nada) | Ritmo de marcha en N; melodía en P1 con saltos de octava; en fase 2 (Bloques) la pista se acelera cada 20 segundos; fase 3 añade arpegios de P2 en tresillos. |
+| **Tetro Rey (jefe)** | 140 → 160 → 180 | 4/4 | Re menor, marcial y "de Europa del Este" por el estilo (sin citar nada) | Ritmo de marcha en N; melodía en P1 con saltos de octava; en fase 2 (TETRIS VS) suena un arreglo propio de Korobeiniki (folclor ruso, dominio público) que se acelera si tu pila está alta; fase 3 añade arpegios de P2 en tresillos. |
 | Castillo 8-Bit (overworld) | 150 | 4/4 | Do mayor, muy "brincadora" | Bajo T sincopado (como caminar), melodía con muchas síncopas y notas de adorno, N solo en hi-hat. |
 | Batalla normal NES | 165 | 4/4 | Sol menor | Riff de 1 compás, cambios de acorde cada 2 compases. |
 | Mazmorra de Llaves | 100 | 4/4 | La menor, misteriosa | Solo P1 con eco (repetición en P2 un tiempo después a −6 dB), bajo largo, N como "gotas" cada 4 tiempos. |
