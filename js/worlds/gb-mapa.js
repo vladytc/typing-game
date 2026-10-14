@@ -18,6 +18,7 @@ const GB_FACTS = CONSOLES.find((c) => c.id === 'gameboy').facts;
 // Leyenda extra (se mezcla con TILES de js/town-data.js):
 //   B  bloque de la torre   O  puerta de la torre   =  puente   r  rocas (tapan la cueva)
 //   K  entrada a la cueva   L  puerta del laboratorio
+//   U  puerta de la tienda de herramientas (la casilla y la tienda están en js/secretos/gb.js)
 const GB_VALLE_MAP = [
   'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
   'T.######..TT........TT.......BBBBBBB..TT',
@@ -39,8 +40,8 @@ const GB_VALLE_MAP = [
   'T.....:::::.T.T...:...T,,,,,,,,,,:,,,,,T',
   'T,,.......:...TTTT:TTTTTTTTTTTTTT:TTTTTT',
   'TTTTTTTTTT:TTTT,,,:,,,,,,,,,,,,,,:,,,,,T',
-  'T.........:...T,,S:,,,TTT,,,,,,,,:,,,,,T',
-  'T,,,..TT..:...T,,,:,,,,,,,,TT,,,,:,,,,,T',
+  'T....SRRR.:...T,,S:,,,TTT,,,,,,,,:,,,,,T',
+  'T,,,..WUW.:...T,,,:,,,,,,,,TT,,,,:,,,,,T',
   'T,,,......:.T.T,,,:,,,,,,,,,,,,,,:,,T,,T',
   'T,,,......:...T,,,:,,,,,,,,,,,,,,:,,,,,T',
   'T.........:...T,,,::::::::::::::::,,,,,T',
@@ -330,6 +331,7 @@ addMaps('gb', {
               '* Soy una PIEZA L.\n* Llevo desde 1989 buscando un hueco de mi forma.',
               '* Una vez casi encajo en una casa.\n* Pero era un perro.',
               '* Si ves al Tetro Rey, dile que no estoy perdida.\n* Solo estoy... girando para pensar.',
+              '* Allá arriba, detrás de la torre, en la esquina, sobró un hueco.\n* Algo flotaba ahí... pero de lejos no se ve nada.',
             ];
             await ctx.say([lines[ctx.counter('piezaL') % lines.length]], 'PIEZA L');
           },
