@@ -453,20 +453,35 @@ Object.assign(TREASURES, {
   cristal_paleta: { room: 'snes', name: 'Cristal de paleta', desc: 'Guarda 16 colores. Cada paleta de la Super Nintendo tenía 16: quince colores y uno transparente.' },
 });
 
-// Planeta Oscuro (zona): Do menor, lenta, con gotas y eco. (La pelea usa snes_nebula.)
-const SNES_PLANETA_MEL = 'C4/8 D#4/4 G4/4 F4/8 D#4/4 D4/4 C4/8 G3/8 G#3/8 C4/4 D4/4 D#4/8 D4/8';
-Object.assign(TRACKS, {
-  snes_planeta: {
-    bpm: 80,
+// Planeta Oscuro (zona): ambiente de exploración en Do menor, lento (80 BPM), 20 compases (~60 s).
+// A: flauta sola con gotas de campanita, pad y latido de tambor, al estilo de las cavernas
+// alienígenas de los juegos de 16 bits. B: una cajita de música toca "Ah! vous dirai-je, maman"
+// (la melodía de "Estrellita, ¿dónde estás?") en MENOR, con nuestro propio arreglo.
+// Dominio público: canción francesa publicada en 1761 (https://en.wikipedia.org/wiki/Twinkle,_Twinkle,_Little_Star).
+// Nintendo la usó en Mario Paint (SNES, 1992) como una de las canciones de ejemplo del modo de
+// música (https://www.mariowiki.com/Mario_Paint). La pelea usa snes_nebula.
+const SNES_PLANETA = (() => {
+  const pA = 'Cm Cm Ab Ab Fm Fm G G';
+  const pB = 'Cm Ab|Cm Fm|Cm G|Cm Cm|Fm Cm|G Cm|Fm Cm|G Cm Ab|Cm Fm|Cm G|Cm';
+  const melA = 'C5/8 G4/4 Eb5/4 D5/12 -/4 C5/4 Eb5/4 G5/8 Ab5/12 G5/4 F5/6 Eb5/2 C5/8 Ab4/4 C5/4 F5/4 Eb5/4 D5/8 B4/8 G4/16';
+  // La canción, en Do menor: dos frases, la del medio dos veces y otra vez las dos primeras.
+  const l1 = 'C5/4 C5/4 G5/4 G5/4 Ab5/4 Ab5/4 G5/8 F5/4 F5/4 Eb5/4 Eb5/4 D5/4 D5/4 C5/8';
+  const l2 = 'G5/4 G5/4 F5/4 F5/4 Eb5/4 Eb5/4 D5/8';
+  const caja = [l1, l2, l2, l1].join(' ');
+  const counter = '-/64 Eb6/8 C6/8 Eb6/8 D6/8 G5/8 Ab5/8 G5/8 B5/8 -/64';
+  const gotas = s16Bars(pA, 16, (c) => { const t = s16Chord(c, 72); return `${s16n(t[2])}/2? -/6 ${s16n(t[1])}/2? -/6`; });
+  return {
+    bpm: 80, era: 'snes', fx: { echo: { steps: 4, feedback: 0.5, mix: 0.33, tone: 2000 }, filter: { type: 'lowpass', freq: 6000 }, comp: true },
     voices: [
-      { wave: 'sine', vol: 0.045, notes: SNES_PLANETA_MEL },
-      { wave: 'sine', vol: 0.016, notes: echoVoice(SNES_PLANETA_MEL, 3) },
-      { wave: 'triangle', vol: 0.1, notes: 'C2/16 G#1/16 F1/16 G1/16 C2/16' },
-      { wave: 'sine', vol: 0.018, notes: 'D#4/20 C4/20 G#3/20 B3/20' },
-      { wave: 'noise', vol: 0.006, notes: rep('-/7 x/1', 10) },
+      { wave: 'flute', vol: 0.04, vib: 'slow', notes: `${melA} ${counter}` },
+      { wave: 'bell', vol: 0.04, env: 'bell', pan: 0.3, notes: `${gotas} ${caja}` },
+      { wave: 'strings', vol: 0.016, env: 'pad', poly: true, pan: -0.3, notes: [pA, pB].map((p) => s16Bars(p, 16, S16P.pad(55))).join(' ') },
+      { wave: 'warmbass', vol: 0.07, fx: 0, notes: [pA, pB].map((p) => s16Bars(p, 16, S16P.long)).join(' ') },
+      { wave: 'noise', vol: 0.012, fx: 0.5, notes: `${Array(8).fill('T/2? -/2 T/2? -/6 h/1? -/3').join(' ')} ${Array(12).fill('-/12 h/1? -/3').join(' ')}` },
     ],
-  },
-});
+  };
+})();
+Object.assign(TRACKS, { snes_planeta: SNES_PLANETA });
 
 // ---------- Mapas ----------
 // Leyenda de las Colinas (además de TILES):
