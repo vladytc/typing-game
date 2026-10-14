@@ -189,13 +189,6 @@ addCuriosities({
   },
 });
 
-// Las tarjetas de los secretos no salen en "enséñame algo" ni con Don Chip: solo al encontrarlos.
-if (typeof curiositiesFor === 'function' && !curiositiesFor.sinSecretos) {
-  const conSecretos = curiositiesFor;
-  curiositiesFor = (ids) => conSecretos(ids).filter((id) => !id.startsWith('secreto_')); // eslint-disable-line no-global-assign
-  curiositiesFor.sinSecretos = true;
-}
-
 // ---------- gc_nes: Nuez y la grieta junto al farol ----------
 // Prende la NES del jardín: BARRILES (kongo.js) y de regreso a Bellota. Game.go cambia de escena;
 // la plática se queda esperando para siempre (igual que BROTITOS en gc-pueblo.js).
