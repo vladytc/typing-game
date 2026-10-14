@@ -72,7 +72,7 @@
 }
 
 /* Museo por salas (js/scenes/vitrina.js). */
-.vtabs { display: flex; gap: 8px; align-items: center; margin: 6px 0 4px; padding: 4px; border: 3px solid transparent; }
+.vtabs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 6px 0 4px; padding: 4px; border: 3px solid transparent; }
 .vtabs.sel { border-color: var(--c0); }
 .vtab { font-size: 9px; padding: 5px 8px; border: 2px solid var(--c1); color: var(--c1); cursor: pointer; }
 .vtab.on { background: var(--c0); color: var(--c3); border-color: var(--c0); }
