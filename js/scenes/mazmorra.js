@@ -9,6 +9,10 @@
 //   [Llave 2] - [Puerta triple] - [Llave 3]
 //                     |
 //              [TRAGABOMBAS]
+//
+// Segunda Misión (secreto nes_zelda, js/secretos/nes.js): enter({ second: true }). Misma mazmorra
+// pero remezclada: todas las puertas tienen cerradura, las frases son más largas, hay menos tiempo
+// y duele más. Al fondo no está Tragabombas: está el premio.
 
 const MZ_ROOMS = {
   '0,0': { name: 'Entrada', sign: '* Un letrero viejo:\n* "Es peligroso ir solo."\n* ...Menos mal que vienes con Bit.' },
@@ -43,18 +47,19 @@ const mzDoorId = (d) => `${d.a}|${d.b}`;
 function mzDoorBetween(a, b) { return MZ_DOORS.find((d) => (d.a === a && d.b === b) || (d.a === b && d.b === a)); }
 
 Scenes.mazmorra = nesScene({
-  enter({ enemyId, back = 'map' } = {}) {
+  enter({ enemyId, back = 'map', second = false } = {}) {
     const fresh = !!enemyId || !this.run;
     if (fresh) {
       Object.assign(this, { id: enemyId || 'mazmorra', back });
       const hpMax = playerMaxHp();
-      this.run = { room: '0,0', visited: { '0,0': true }, open: {}, keys: {}, guards: true, gold: false, hp: hpMax, hpMax, bossAt: 0 };
+      this.run = { room: '0,0', visited: { '0,0': true }, open: {}, keys: {}, guards: true, gold: false, hp: hpMax, hpMax, bossAt: 0, second };
     }
     this.backParams = undefined;
     this.mount('mz-scene', '<div class="mz-hud"></div>');
     Object.assign(this, { mode: 'explore', endMenu: null, pauseMenu: null, bumpT: 0, flashT: 0 });
     this.playMusic('mazmorra');
     this.renderHud();
+    if (fresh && second) { this.say(MZ2_INTRO, () => this.explore(), 'BIT'); return; }
     if (fresh) {
       this.say([
         '* ¡El Castillo 2 es una MAZMORRA!\n* Muévete con las flechas. ENTER revisa lo que hay en el cuarto.',
@@ -77,7 +82,7 @@ Scenes.mazmorra = nesScene({
     const hud = $('.mz-hud');
     if (!hud) return;
     const keys = [1, 2, 3].map((n) => (this.run.keys[n] ? '♦' : '◇')).join('');
-    hud.innerHTML = `${nesBar('HP', this.run.hp, this.run.hpMax)}<span>LLAVES ${keys}</span><span>${esc(upper(MZ_ROOMS[this.run.room].name))}</span>`;
+    hud.innerHTML = `${nesBar('HP', this.run.hp, this.run.hpMax)}${this.run.second ? '<span>2ª MISION</span>' : ''}<span>LLAVES ${keys}</span><span>${esc(upper(MZ_ROOMS[this.run.room].name))}</span>`;
   },
 
   // Texto del panel mientras exploras: qué hay en el cuarto.
@@ -113,7 +118,7 @@ Scenes.mazmorra = nesScene({
       this.say(['* ¡Los Ladrillines se ponen enfrente de la puerta!\n* "¡No pasarás! ...Bueno, a menos que nos asustes."'], () => this.explore());
       return;
     }
-    if (door.lock && !this.run.open[mzDoorId(door)]) { this.unlock(door); return; }
+    if ((door.lock || this.run.second) && !this.run.open[mzDoorId(door)]) { this.unlock(door); return; }
     this.goTo(target);
   },
 
@@ -127,13 +132,15 @@ Scenes.mazmorra = nesScene({
   },
 
   hurt(n) {
-    this.run.hp = Math.max(0, this.run.hp - scaledDmg(n));
+    this.run.hp = Math.max(0, this.run.hp - scaledDmg(this.run.second ? n + 1 : n));
     Sfx.hurt();
     this.renderHud();
     if (this.run.hp > 0) return false;
     this.mode = 'over';
     Music.stop();
     Sfx.lose();
+    // En la Segunda Misión no hay "reintentar": vuelves al castillo y la puedes empezar otra vez.
+    if (this.run.second) { this.after(0.8, () => { this.run = null; Game.go(this.back); }); return true; }
     this.after(0.8, () => { this.run = null; Game.go('gameover', { enemyId: this.id, back: this.back, scene: 'mazmorra' }); });
     return true;
   },
@@ -153,7 +160,7 @@ Scenes.mazmorra = nesScene({
       this.say(['* ¡Tienes las tres llaves! Escribe la frase para girarlas.'], () => this.doorTask(door, 'Tres llaves, tres cerraduras.'));
       return;
     }
-    if (door.lock === 'madera') {
+    if (door.lock === 'madera' && !this.run.second) {
       const sword = !!Save.data.treasures.espada;
       this.say([sword
         ? '* Una puerta de madera vieja.\n* ¡Tu ESPADA DE MADERA puede cortarla! (Frase corta.)'
@@ -161,14 +168,14 @@ Scenes.mazmorra = nesScene({
       () => this.doorTask(door, sword ? 'Corto la madera.' : 'Empujo la puerta de madera con fuerza.'));
       return;
     }
-    this.doorTask(door, rand(MZ_DOOR_PHRASES));
+    this.doorTask(door, rand(this.run.second ? MZ2_DOOR_PHRASES : MZ_DOOR_PHRASES));
   },
 
   doorTask(door, phrase) {
     this.task({
       label: 'PUERTA CERRADA: escribe la llave (con mayúscula y punto)',
       texts: [phrase],
-      timeLimit: phrase.length * 650 + 3000,
+      timeLimit: (phrase.length * 650 + 3000) * (this.run.second ? MZ2_TIME : 1),
       onDone: (res) => {
         if (res.completed) {
           this.open(door);
@@ -192,11 +199,11 @@ Scenes.mazmorra = nesScene({
   },
 
   guards() {
-    const words = pickWords(ENEMIES.ladrillin.words, 4);
+    const words = pickWords(ENEMIES.ladrillin.words, this.run.second ? 6 : 4);
     this.task({
       label: '¡ASUSTA A LOS LADRILLINES! (con mayúsculas)',
       texts: words,
-      timeLimit: words.join('').length * 600 + 2500,
+      timeLimit: (words.join('').length * 600 + 2500) * (this.run.second ? MZ2_TIME : 1),
       onDone: (res) => {
         if (res.completed) {
           this.run.guards = false;
@@ -211,11 +218,11 @@ Scenes.mazmorra = nesScene({
   },
 
   chest(n) {
-    const phrases = pickWords(MZ_KEY_PHRASES, 3);
+    const phrases = pickWords(this.run.second ? MZ2_KEY_PHRASES : MZ_KEY_PHRASES, 3);
     this.task({
       label: 'COFRE: escribe las 3 frases para sacar la llave',
       texts: phrases,
-      timeLimit: phrases.join('').length * 600 + 4000,
+      timeLimit: (phrases.join('').length * 600 + 4000) * (this.run.second ? MZ2_TIME : 1),
       onDone: (res) => {
         if (res.completed) {
           this.run.keys[n] = true;
@@ -249,6 +256,7 @@ Scenes.mazmorra = nesScene({
   },
 
   boss() {
+    if (this.run.second) { mz2Prize(this); return; }
     this.mode = 'boss';
     this.say([
       '* Una sombra enorme se mueve en la oscuridad...\n* Huele a pólvora y a zanahoria.',
@@ -290,7 +298,7 @@ Scenes.mazmorra = nesScene({
     g.save();
     g.translate(shake, 0);
     // Muros de ladrillo y piso de baldosas.
-    g.fillStyle = NES.O;
+    g.fillStyle = run.second ? NES.F : NES.O; // la Segunda Misión se pinta de otro color
     g.fillRect(0, 0, 640, 300);
     g.fillStyle = NES.K;
     for (let y = 0; y < 300; y += 12) {
@@ -307,14 +315,15 @@ Scenes.mazmorra = nesScene({
     const [x, y] = mzXY(run.room);
     [[0, -1, 'top'], [0, 1, 'bottom'], [-1, 0, 'left'], [1, 0, 'right']].forEach(([dx, dy, side]) => {
       const door = mzDoorBetween(run.room, mzKey(x + dx, y + dy));
-      if (door) this.door(side, door.lock && !run.open[mzDoorId(door)] ? door.lock : null);
+      if (door) this.door(side, (door.lock || (run.second && 'frase')) && !run.open[mzDoorId(door)] ? door.lock || 'frase' : null);
     });
     // Cosas del cuarto.
     if (r.sign) this.sign(90, 70);
     if (r.key) this.chestAt(300, 70, !!run.keys[r.key]);
     if (r.gold && !run.gold) paintNes(g, NES_SPRITES.sprites.cartucho_dorado.map((row) => row.replace(/[bcd]/g, (c) => ({ b: 'W', c: 'Y', d: 'K' }[c]))), 500, 190 + Math.sin(performance.now() / 200) * 3, 2);
     if (r.guards && run.guards) [200, 300, 400].forEach((gx, i) => paintNes(g, NES_ART.ladrillin, gx, 90 + Math.sin(performance.now() / 150 + i) * 3, 3));
-    if (r.boss) paintNes(g, NES_ART.tragabombas, 272, 70, 6);
+    if (r.boss && !run.second) paintNes(g, NES_ART.tragabombas, 272, 70, 6);
+    if (r.boss && run.second) paintNes(g, MZ2_PRIZE, 272, 70 + Math.sin(performance.now() / 300) * 4, 6);
     // Héroe en el centro.
     paintTones(g, 'heroe', 304, 168, 2);
     g.restore();
