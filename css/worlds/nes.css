@@ -85,3 +85,8 @@
 .pt-msg, .mz-msg { font-size: 12px; line-height: 2; }
 .pt-msg span, .mz-msg span { font-size: 8px; color: #bcbcbc; }
 .mz-msg b { font-weight: normal; color: #f8b800; }
+
+/* Secretos del Castillo 8-Bit (js/secretos/nes.js): el libro de registro y el Mundo -1. */
+.nn-name { font-size: 20px; letter-spacing: 4px; margin: 12px 0 8px; }
+.nn-keys { font-size: 8px; opacity: 0.7; }
+.m1-hud { display: flex; gap: 40px; }
