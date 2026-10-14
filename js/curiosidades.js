@@ -866,7 +866,8 @@ function syncCuriosities() {
 function curiositiesFor(consoleIds) {
   syncCuriosities();
   const ids = [].concat(consoleIds || []);
-  return Object.keys(CURIOSIDADES).filter((id) => ids.includes(CURIOSIDADES[id].console));
+  // Las tarjetas de los secretos (secreto_*) solo salen al encontrarlos: no las cuentan los amigos.
+  return Object.keys(CURIOSIDADES).filter((id) => ids.includes(CURIOSIDADES[id].console) && !id.startsWith('secreto_'));
 }
 
 // El siguiente de una lista sin repetir hasta agotarla. again = ya dio la vuelta completa.
