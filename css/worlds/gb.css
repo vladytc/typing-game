@@ -153,3 +153,29 @@
 .chl-word.pop { animation: pop 0.25s forwards; }
 .chl-help { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; font-size: 8px; color: var(--c1); }
 .chl-over { left: 150px; width: 340px; top: 140px; }
+
+/* ---------- Secretos del valle (js/secretos/gb.js) ---------- */
+
+/* Mew: en el rincón que sobró no se ve nada... hasta que llegas a la esquina. */
+.ent.gb-mew canvas { opacity: 0; transition: opacity 0.9s; }
+.ent.gb-mew.visto canvas { opacity: 1; animation: bob 1.6s ease-in-out infinite; }
+
+/* La pala arriba de la cabeza y el tendero tarareando de espaldas. */
+.gb-carga { position: absolute; left: 0; top: -22px; pointer-events: none; }
+.gb-tarareo {
+  position: absolute;
+  left: -14px;
+  top: -20px;
+  background: var(--c3);
+  border: 2px solid var(--c0);
+  padding: 2px 4px;
+  font-size: 6px;
+  white-space: nowrap;
+  z-index: 70;
+  animation: bob 1s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* El rayo del tendero: la pantalla parpadea en negativo. */
+.town.gb-rayo { animation: gbRayo 0.16s steps(1) 8; }
+@keyframes gbRayo { 50% { filter: invert(1); } }
