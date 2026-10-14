@@ -220,7 +220,7 @@ Scenes.ocarin = {
     [...pads].forEach((k, i) => {
       const c = v.mesh(new THREE.OctahedronGeometry(0.55, 0), MELODY_NOTES[k].color, { emissive: '#000000' });
       c.position.set((i - 3) * 1.7, 1.6, 3);
-      c.visible = 'sdfjk'.includes(k) || Save.data.difficulty === 'dificil';
+      c.visible = 'sdfjk'.includes(k) || ['dificil', 'experto'].includes(Save.data.difficulty);
       this.crystals[k] = c;
     });
     this.notes = [];
@@ -393,7 +393,7 @@ Scenes.ocarin = {
 
   // Minijuego Melodías: secuencias cada vez más largas, de memoria (4 → 12 notas).
   async minigame() {
-    const turbo = Save.data.difficulty === 'dificil';
+    const turbo = ['dificil', 'experto'].includes(Save.data.difficulty);
     const pads = turbo ? 'asdfjkl' : 'sdfjk';
     await this.talk([`* ¡Melodías! Yo toco, tú repites... de memoria.\n* Empezamos con 4 notas y cada vez una más, hasta 12.${turbo ? '\n* (Modo Turbo: también A y L.)' : ''}`]);
     let n = 4;

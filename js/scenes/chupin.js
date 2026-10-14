@@ -28,7 +28,7 @@ Scenes.chupin = Object.assign(Object.create(Scenes.battle), {
   // Tiempo para escribir la palabra inhalada (más letras = más tiempo).
   inhaleMs(text) {
     const lost = Math.min(3, Math.floor((1 - this.e.hp / this.def.hp) / 0.25));
-    return Math.max(1500, 1900 + text.length * 220 - lost * 300) * diff().time;
+    return Math.max(1500, 1900 + text.length * 220 - lost * 300) * diff().time * pace('chupin');
   },
 
   // ---------- LUCHAR → ABSORBER ----------

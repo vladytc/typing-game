@@ -58,7 +58,7 @@ Scenes.patos = nesScene({
     this.roundCaught = 0;
     this.ducks = [];
     this.target = null;
-    this.dur = 4.4 / Math.pow(1.12, this.round - 1) / diff().speed; // segundos para cruzar la pantalla
+    this.dur = 4.4 / Math.pow(1.12, this.round - 1) / diff().speed * pace('patos'); // segundos para cruzar la pantalla
     this.spawnT = 0.9;
     this.panel.innerHTML = `<div class="pt-msg">RONDA ${this.round}${this.round >= PATOS_CAPS_FROM ? ' · ¡MAYUSCULAS!' : ''}<br><span>Escribe ${this.turbo ? 'la sílaba' : 'la letra'} de cada pato.</span></div>`;
     this.renderHud();

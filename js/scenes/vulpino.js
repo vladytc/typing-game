@@ -183,7 +183,7 @@ Scenes.vulpino = {
     this.damaged = false;
     // Contra Vulpino: hasta 4 palabras, más separadas y más lentas que en el arcade (para ~30 PPM).
     const size = this.arcade ? Math.min(7, 3 + Math.floor(this.wave / 3)) : Math.min(4, 3 + this.cycle);
-    const travel = (this.arcade ? Math.max(2.4, 5 - this.wave * 0.15) : Math.max(4.5, 6 - this.cycle * 0.75)) / diff().speed;
+    const travel = (this.arcade ? Math.max(2.4, 5 - this.wave * 0.15) : Math.max(4.5, 6 - this.cycle * 0.75)) / diff().speed * pace('vulpino');
     const words = pickWords(this.pool(), size);
     // De vez en cuando llega un mensaje de radio (verde) que llena la PAZ.
     const radioLeft = Object.keys(FOX.radio).filter((k) => !this.usedRadio[k]);
