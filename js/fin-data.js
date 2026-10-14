@@ -302,53 +302,126 @@ Object.assign(QUESTS, {
 });
 
 // ---------- Música ORIGINAL (lore §14.2). Cada voz de cada pista suma los mismos pasos. ----------
-// Credits: 2 compases de cada mundo (tocados dos veces) y al final el tema del pueblo.
+// Ojo: fin_nombre y fin_creditos usan las voces del tema del pueblo (TRACKS.town, js/music.js) tal cual:
+// 0 melodía, 1 bajo, 2 arpegios, 3 pad, 4 batería. Aquí solo cambia el timbre o lo que va antes.
+// Créditos: 2 compases de cada mundo (tocados dos veces) y al final el tema del pueblo.
+// Por mundo: [melodía, bajo, batería, acordes]; cada uno suma 32 pasos.
 const FIN_CRED = {
-  gb: ['G5/2 B5/2 D6/2 B5/2 A5/2 F#5/2 D5/4 E5/2 G5/2 B5/2 G5/2 A5/8', 'G2/4 D3/4 G2/4 D3/4 C3/4 G3/4 D3/4 A2/4', 'x/2 -/6 x/2 -/6 x/2 -/6 x/2 -/6'],
-  nes: ['C5/1 E5/1 G5/2 E5/1 G5/3 A5/2 G5/2 E5/2 C5/2 D5/2 E5/2 D5/4 G4/4 C5/4', 'C3/2 G3/2 C3/2 G3/2 C3/2 G3/2 C3/2 G3/2 F2/2 C3/2 F2/2 C3/2 G2/2 D3/2 G2/2 D3/2', rep('x/2 -/2', 8)],
-  snes: ['D5/4 F#5/4 A5/4 D6/4 C#6/2 B5/2 A5/4 F#5/4 A5/4', 'D3/8 B2/8 G2/8 A2/8', rep('-/4 x/4', 4)],
-  n64: ['A5/6 E5/2 C#6/8 B5/4 A5/2 G#5/2 A5/8', 'A2/16 E2/8 E3/8', 'x/8 -/8 x/8 -/8'],
-  gc: ['-/2 E5/2 G5/2 C6/4 B5/2 A5/2 G5/2 -/2 E5/2 F5/2 G5/2 E5/4 D5/4', 'C3/3 G3/3 C3/2 A2/3 E3/3 A2/2 F2/3 C3/3 F2/2 G2/3 D3/3 G2/2', rep('x/3 x/3 x/2', 4)],
-  wii: ['C6/2 G5/2 E5/2 G5/2 A5/2 G5/2 E5/4 D5/2 E5/2 G5/2 E5/2 C5/8', 'C3/4 C3/4 A2/4 A2/4 F2/4 F2/4 G2/4 G2/4', rep('x/1 -/1 x/1 -/1 x/2 -/2', 4)],
+  gb: ['G5/2 B5/2 D6/2 B5/2 A5/2 F#5/2 D5/4 E5/2 G5/2 B5/2 G5/2 A5/8', 'G2/4 D3/4 G2/4 D3/4 C3/4 G3/4 D3/4 A2/4',
+    'k/4 h/4 s/4 h/4 k/4 h/4 s/4 h/2 h/2', 'G4+B4+D5/16 C4+E4+G4/8 D4+F#4+A4/8'],
+  nes: ['C5/1 E5/1 G5/2 E5/1 G5/3 A5/2 G5/2 E5/2 C5/2 D5/2 E5/2 D5/4 G4/4 C5/4', 'C3/2 G3/2 C3/2 G3/2 C3/2 G3/2 C3/2 G3/2 F2/2 C3/2 F2/2 C3/2 G2/2 D3/2 G2/2 D3/2',
+    rep('k/2 h/2 s/2 h/2', 4), 'C4+E4+G4/16 F4+A4+C5/8 G4+B4+D5/8'],
+  snes: ['D5/4 F#5/4 A5/4 D6/4 C#6/2 B5/2 A5/4 F#5/4 A5/4', 'D3/8 B2/8 G2/8 A2/8',
+    rep('k/4 h/2 h/2 s/4 h/4', 2), 'D4+F#4+A4/8 B3+D4+F#4/8 G3+B3+D4/8 A3+C#4+E4/8'],
+  n64: ['A5/6 E5/2 C#6/8 B5/4 A5/2 G#5/2 A5/8', 'A2/16 E2/8 E3/8',
+    'k/6 h/2 s/8 k/6 h/2 s/4 t/2 T/2', 'A3+C#4+E4/16 E4+G#4+B4/16'],
+  gc: ['-/2 E5/2 G5/2 C6/4 B5/2 A5/2 G5/2 -/2 E5/2 F5/2 G5/2 E5/4 D5/4', 'C3/3 G3/3 C3/2 A2/3 E3/3 A2/2 F2/3 C3/3 F2/2 G2/3 D3/3 G2/2',
+    rep('k/3 h/3 s/2', 3) + ' k/3 h/3 s/1 s/1', 'C4+E4+G4/8 A3+C4+E4/8 F3+A3+C4/8 G3+B3+D4/8'],
+  wii: ['C6/2 G5/2 E5/2 G5/2 A5/2 G5/2 E5/4 D5/2 E5/2 G5/2 E5/2 C5/8', 'C3/4 C3/4 A2/4 A2/4 F2/4 F2/4 G2/4 G2/4',
+    `${rep('k/2 h/2 s/2 h/2', 2)} k/2 h/2 s/2 s/1 s/1 t/2 t/2 T/2 T/2`, 'C4+E4+G4/8 A3+C4+E4/8 F3+A3+C4/8 G3+B3+D4/8'],
 };
+const FIN_ERAS = ['gb', 'nes', 'snes', 'n64', 'gc', 'wii'];
 const FIN_PAD_A = 'C4/16 A3/16 F3/16 G3/16 C4/16 E3/16 F3/8 G3/8 C4/16';
-const finCredVoice = (k) => ['gb', 'nes', 'snes', 'n64', 'gc', 'wii'].map((w) => rep(FIN_CRED[w][k], 2)).join(' ');
+const finCredVoice = (k) => FIN_ERAS.map((w) => rep(FIN_CRED[w][k], 2)).join(' ');
+// La melodía de un solo mundo (silencio en los demás): cada consola con su propio timbre.
+const finCredOnly = (era) => FIN_ERAS.map((w) => (w === era ? rep(FIN_CRED[w][0], 2) : `-/${Music.steps(rep(FIN_CRED[w][0], 2))}`)).join(' ');
+const FIN_CRED_LEN = Music.steps(finCredVoice(0));
+// Sube o baja semitonos un texto de fichas (la segunda vuelta de fin_repe sale medio tono "chueca").
+function finUp(s, n) {
+  const PCS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  return s.replace(/([A-G])([#b]?)(\d)/g, (x, l, acc, o) => {
+    const m = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[l] + (acc === '#' ? 1 : acc === 'b' ? -1 : 0) + Number(o) * 12 + n;
+    return `${PCS[((m % 12) + 12) % 12]}${Math.floor(m / 12)}`;
+  });
+}
+
+// Fase 2: cada pedazo de jefe [melodía, bajo, acordes] (32 pasos) y la nota donde "se traba".
+const FIN_REPE = [
+  // Marcha
+  ['C5/2 C5/2 G4/2 C5/2 D#5/4 D5/4 C5/2 G4/2 C5/2 D#5/2 G5/8', rep('C3/4 G2/4', 4), 'C4+D#4+G4/32', 'G5', 'G2'],
+  // Mar profundo
+  ['D#5/6 D5/6 C5/4 D#5/6 G4/10', 'C2/16 G#1/16', 'C4+D#4+G4/16 G#3+C4+D#4/16', 'G4', 'G#1'],
+  // Vals de cuadro
+  ['G5/4 B5/2 A5/2 G5/4 D5/4 E5/4 F#5/2 G5/2 A5/8', 'G2/4 D3/4 D3/4 G2/4 C3/4 G3/4 D3/4 D3/4', 'G4+B4+D5/16 C4+E4+G4/8 D4+F#4+A4/8', 'A5', 'D3'],
+  // Torneo
+  ['E5/1 E5/1 G5/2 E5/1 B5/3 A5/2 G5/2 F#5/2 E5/2 D5/2 E5/4 B4/2 E5/8', rep('E2/2 E3/2', 8), 'E4+G4+B4/32', 'E5', 'E2'],
+];
+const FIN_REPE_DRUMS = [rep('k/2 h/2 s/2 h/2', 4), 'k/8 -/8 k/8 s/8', 'k/4 h/4 h/4 k/4 h/4 h/4 k/4 s/4', rep('k/1 h/1 s/1 h/1', 8)];
+// Un pedazo + un compás "trabado": su última nota repetida en semicorcheas, que se apaga de golpe.
+function finRepeVoice(k, up) {
+  return FIN_REPE.map((p, i) => {
+    let body;
+    if (k === 0) body = `${p[0]} ${rep(`${p[3]}/1`, 8)} ${rep(`${finUp(p[3], -12)}/1`, 4)} -/4`;
+    else if (k === 1) body = `${p[1]} ${rep(`${p[4]}/2`, 4)} -/8`;
+    else if (k === 2) body = `${p[2]} -/16`;
+    else body = `${FIN_REPE_DRUMS[i]} ${rep('s/1', 12)} -/4`;
+    return k === 3 ? body : finUp(body, up);
+  }).join(' ');
+}
 
 Object.assign(TRACKS, {
-  // Fase 1 "Pausa": una sola nota que se corta. Silencios incómodos.
+  // Fase 1 "Pausa": una sola nota que se corta, con silencios incómodos. Game Boy con el crush a 5 bits,
+  // un dron que desafina y, de vez en cuando, el tema del pueblo que se "salta" como disco rayado.
+  // 3 vueltas de 64 pasos a 60 BPM (~48 s).
   fin_pausa: {
-    bpm: 60,
+    bpm: 60, era: 'gb',
+    fx: { crush: 5, echo: { steps: 3, feedback: 0.45, mix: 0.25, tone: 1500 } },
     voices: [
-      { wave: 'square', vol: 0.03, notes: 'C5/2 -/6 C5/1 -/1 C5/1 -/5 C#5/2 -/14 C5/4 -/4 B4/1 -/7 C5/2 -/14' },
-      { wave: 'triangle', vol: 0.08, notes: 'C2/16 -/8 C2/8 C#2/16 -/16' },
-      { wave: 'noise', vol: 0.02, notes: 'x/1 -/15 x/1 -/3 x/1 -/11 x/1 -/1 x/1 -/29' },
+      { wave: 'square', vol: 0.032, notes: [
+        'C5/2 -/6 C5/1 -/1 C5/1 -/5 C#5/2 -/14 C5/4 -/4 B4/1 -/7 C5/2 -/14',
+        'C5/1 C5/1 C5/1 -/5 C5/1 -/7 C#5/1 C5/1 -/14 C5/1 -/3 C5/1 C5/1 C5/1 C5/1 -/8 B4/2 -/14',
+        'C5/2 -/14 F#4/4 -/12 C5/1 -/1 C5/1 -/1 C5/1 -/11 B4/8 -/8'] },
+      { wave: 'sawtooth', vol: 0.016, notes: '-/24 E5/1 G5/1 A5/1 -/13 -/8 E5/1 G5/1 A5/1 G5/1 E5/1 -/11 -/32 -/16 E5/1 G5/1 E5/1 G5/1 E5/1 G5/1 -/10 -/40 E5/1 G5/1 A5/1 G5/1 E5/1 D5/1 C5/1 -/1 -/16' },
+      { wave: 'triangle', vol: 0.08, notes: 'C2/16 -/8 C2/8 C#2/16 -/16 C2/24 -/8 C#2/8 C2/8 -/16 C2/16 F#1/16 -/16 C2/16' },
+      { wave: 'noise', vol: 0.02, notes: 'x/1 -/15 x/1 -/3 x/1 -/11 x/1 -/1 x/1 -/29 ' +
+        'x/1 x/1 x/1 -/13 x/1 -/15 x/1 -/1 x/1 -/1 x/1 -/1 x/1 -/9 k/1 -/15 ' +
+        'x/1 -/31 c/1 -/15 x/1 -/1 x/1 -/13' },
     ],
   },
-  // Fase 2 "Repetición": collage de 2 compases por jefe (marcha, mar profundo, vals de cuadro, torneo).
+  // Fase 2 "Repetición": collage de NES con 2 compases por jefe (marcha, mar profundo, vals de cuadro,
+  // torneo); cada pedazo se TRABA un compás. La segunda vuelta se repite medio tono arriba, como un
+  // cartucho mal puesto. 24 compases a 120 BPM (~48 s).
   fin_repe: {
-    bpm: 120,
+    bpm: 120, era: 'nes',
     voices: [
-      { wave: 'square', vol: 0.03, notes: 'C5/2 C5/2 G4/2 C5/2 D#5/4 D5/4 C5/2 G4/2 C5/2 D#5/2 G5/8 ' + 'D#5/6 D5/6 C5/4 D#5/6 G4/10 ' + 'G5/4 B5/2 A5/2 G5/4 D5/4 E5/4 F#5/2 G5/2 A5/8 ' + 'E5/1 E5/1 G5/2 E5/1 B5/3 A5/2 G5/2 F#5/2 E5/2 D5/2 E5/4 B4/2 E5/8' },
-      { wave: 'triangle', vol: 0.1, notes: 'C3/4 G2/4 C3/4 G2/4 C3/4 G2/4 C3/4 G2/4 ' + 'C2/16 G#1/16 ' + 'G2/4 D3/4 D3/4 G2/4 C3/4 G3/4 D3/4 D3/4 ' + rep('E2/2 E3/2', 8) },
-      { wave: 'noise', vol: 0.024, notes: rep('x/2 -/2', 8) + ' -/32 ' + 'x/4 -/4 -/4 x/4 -/4 -/4 x/4 -/4 ' + rep('x/1 -/1 x/1 x/1', 8) },
+      { wave: 'pulse25', vol: 0.032, vib: 'light', notes: `${finRepeVoice(0, 0)} ${finRepeVoice(0, 1)}` },
+      { wave: 'pulse12', vol: 0.016, env: 'stab', arp: 0.033, notes: `${finRepeVoice(2, 0)} ${finRepeVoice(2, 1)}` },
+      { wave: 'triangle', vol: 0.1, fx: 0, notes: `${finRepeVoice(1, 0)} ${finRepeVoice(1, 1)}` },
+      { wave: 'noise', vol: 0.024, notes: `${finRepeVoice(3, 0)} ${finRepeVoice(3, 1)}` },
     ],
   },
-  // Fase 3 "Nombre": el tema del pueblo tocado lento. Siempre fue parte del pueblo.
+  // Fase 3 "Nombre": el tema del pueblo tocado lento, al estilo GameCube. Siempre fue parte del pueblo.
+  // Mismas notas (voces 0 a 3 del pueblo), otro timbre: flauta, bajo cálido, campanitas y cuerdas.
   fin_nombre: {
-    bpm: 80,
+    bpm: 80, era: 'gc', vol: 1.2,
     voices: [
-      ...TRACKS.town.voices.filter((v) => v.wave !== 'noise'),
+      ...TRACKS.town.voices.filter((v) => v.wave !== 'noise').map((v, i) => ({ ...v, ...[
+        { wave: 'flute', vol: 0.045, env: 'soft', vib: 'slow' },
+        { wave: 'warmbass', vol: 0.085, env: 'bass' },
+        { wave: 'bell', vol: 0.014, env: 'pluck', arp: 0.09, fx: 0.8 },
+        { wave: 'strings', vol: 0.016, env: 'pad', filter: 2600 },
+      ][i] })),
       // Pad que sigue los acordes del pueblo (A A' B A).
-      { wave: 'sine', vol: 0.05, notes: [FIN_PAD_A, FIN_PAD_A, 'F3/16 C4/16 D4/16 G3/16 A3/16 F3/16 D4/8 G3/8 G3/16', FIN_PAD_A].join(' ') },
+      { wave: 'strings', vol: 0.03, env: 'pad', filter: 1800, notes: [FIN_PAD_A, FIN_PAD_A, 'F3/16 C4/16 D4/16 G3/16 A3/16 F3/16 D4/8 G3/8 G3/16', FIN_PAD_A].join(' ') },
     ],
   },
-  // Créditos: popurrí de todas las eras, terminando en el pueblo.
+  // Créditos: popurrí de todas las eras (cada una con su timbre: pulso de Game Boy, pulso de NES, SNES,
+  // ocarina, flauta y campanita), terminando en el tema del pueblo completo con todas sus voces.
   fin_creditos: {
     bpm: 112,
+    fx: { echo: { steps: 3, feedback: 0.28, mix: 0.18 } },
     voices: [
-      { wave: 'square', vol: 0.032, notes: `${finCredVoice(0)} ${TRACKS.town.voices[0].notes}` },
-      { wave: 'triangle', vol: 0.1, notes: `${finCredVoice(1)} ${TRACKS.town.voices[1].notes}` },
-      { wave: 'noise', vol: 0.02, notes: `${finCredVoice(2)} -/${Music.steps(TRACKS.town.voices[0].notes)}` },
+      { wave: 'pulse50', vol: 0.03, env: 'chip', vib: { rate: 6, depth: 0.15, delay: 0.2 }, notes: `${finCredOnly('gb')} -/${Music.steps(TRACKS.town.voices[0].notes)}` },
+      // La del pueblo va en esta voz: es el mismo pulso 25 % con vibrato.
+      { wave: 'pulse25', vol: 0.034, env: 'chip', vib: { rate: 5.5, depth: 0.18, delay: 0.22 }, notes: `${finCredOnly('nes')} ${TRACKS.town.voices[0].notes}` },
+      { wave: 'snes', vol: 0.036, env: 'soft', vib: 'light', filter: 6000, notes: `${finCredOnly('snes')} -/${Music.steps(TRACKS.town.voices[0].notes)}` },
+      { wave: 'ocarina', vol: 0.04, env: 'soft', vib: 'slow', notes: `${finCredOnly('n64')} -/${Music.steps(TRACKS.town.voices[0].notes)}` },
+      { wave: 'flute', vol: 0.04, env: 'soft', vib: 'light', notes: `${finCredOnly('gc')} -/${Music.steps(TRACKS.town.voices[0].notes)}` },
+      { wave: 'bell', vol: 0.03, env: { a: 0.002, d: 0.5, s: 0.3, r: 0.3 }, notes: `${finCredOnly('wii')} -/${Music.steps(TRACKS.town.voices[0].notes)}` },
+      { wave: 'triangle', vol: 0.1, fx: 0, notes: `${finCredVoice(1)} ${TRACKS.town.voices[1].notes}` },
+      { wave: 'pulse12', vol: 0.018, env: 'stab', arp: 0.035, fx: 0.6, notes: `${finCredVoice(3)} ${TRACKS.town.voices[2].notes}` },
+      { wave: 'pulse25', vol: 0.016, env: 'pad', poly: true, filter: 2200, vib: 'light', notes: `-/${FIN_CRED_LEN} ${TRACKS.town.voices[3].notes}` },
+      { wave: 'noise', vol: 0.02, kit: 'full', fx: 0.15, notes: `${finCredVoice(2)} ${TRACKS.town.voices[4].notes}` },
     ],
   },
 });

@@ -262,35 +262,113 @@ Object.assign(TREASURES, {
 });
 
 // ---------- Música ORIGINAL (§14.2). Cada voz suma los mismos pasos. ----------
+// Sonido "Virtual Boy" propio (no hay era 'vb' en el motor): el aparato tenía 5 canales de onda
+// programable y uno de ruido, en estéreo de verdad. Aquí: ondas propias con armónicos, batería lofi,
+// paneo izquierda/derecha como los dos ojos, eco largo y oscuro, pasa bajos y un poco de crush.
+const VB_ONDA = [1, 0.62, 0.45, 0.3, 0.2, 0.12, 0.08]; // zumbona (la voz de adelante)
+const VB_HUECA = [1, 0, 0.35, 0, 0.2, 0, 0.1]; // hueca y opaca (la voz de atrás)
+const VB_BAJO = [1, 0.45, 0.12];
+const VB_FX = {
+  filter: [{ type: 'highpass', freq: 70 }, { type: 'lowpass', freq: 4800 }],
+  echo: { steps: 3, feedback: 0.42, mix: 0.24, tone: 1600 }, reverb: { time: 2.2, mix: 0.18 }, crush: 7, comp: true,
+};
+// Sube o baja semitonos un texto de fichas (la capa oscura de Visorio es la brillante una octava abajo).
+const VB_PCS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+function vbUp(s, n) {
+  return s.replace(/([A-G])([#b]?)(\d)/g, (x, l, acc, o) => {
+    const m = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[l] + (acc === '#' ? 1 : acc === 'b' ? -1 : 0) + Number(o) * 12 + n;
+    return `${VB_PCS[((m % 12) + 12) % 12]}${Math.floor(m / 12)}`;
+  });
+}
+
 Object.assign(TRACKS, {
-  // Cueva Roja: Do# menor, mono y grave; la segunda voz es un eco un paso atrás. Latido en el ruido.
-  vb_cueva: {
-    bpm: 72,
-    voices: [
-      { wave: 'square', vol: 0.03, notes: 'C#5/8 E5/4 D#5/4 C#5/8 G#4/8 A4/8 G#4/4 E4/4 C#4/16' },
-      { wave: 'square', vol: 0.012, notes: '-/1 C#5/8 E5/4 D#5/4 C#5/8 G#4/8 A4/8 G#4/4 E4/4 C#4/15' },
-      { wave: 'noise', vol: 0.03, notes: rep('x/1 -/3 x/1 -/11', 4) },
-    ],
-  },
-  // Batallas de la cueva.
-  vb_batalla: {
-    bpm: 140,
-    voices: [
-      { wave: 'square', vol: 0.03, notes: 'C#5/2 C#5/1 E5/1 G#5/2 E5/2 F#5/2 E5/1 D#5/1 C#5/4 B4/2 C#5/2 E5/2 D#5/2 C#5/8' },
-      { wave: 'triangle', vol: 0.1, notes: `${rep('C#2/2 C#3/2', 4)} ${rep('A1/2 A2/2', 2)} ${rep('B1/2 B2/2', 2)}` },
-      { wave: 'noise', vol: 0.024, notes: rep('x/2 -/1 x/1', 8) },
-    ],
-  },
-  // Visorio: dos capas que se turnan, una brillante (arriba) y una oscura (una octava abajo).
-  vb_visorio: {
-    bpm: 126,
-    voices: [
-      { wave: 'square', vol: 0.032, notes: 'C#6/2 E6/2 G#6/4 F#6/2 E6/2 D#6/4 C#6/2 D#6/2 E6/2 F#6/2 G#6/8 -/32' },
-      { wave: 'square', vol: 0.03, notes: '-/32 C#4/4 E4/4 G#4/4 F#4/4 E4/8 C#4/8' },
-      { wave: 'triangle', vol: 0.1, notes: `${rep('C#2/2 C#3/2', 8)} ${rep('A1/2 A2/2', 4)} ${rep('B1/2 B2/2', 4)}` },
-      { wave: 'noise', vol: 0.026, notes: rep('x/2 -/1 x/1', 16) },
-    ],
-  },
+  // Cueva Roja: lamento oscuro en Do# menor, 72 BPM. La voz de adelante suena a la izquierda y su eco
+  // dos pasos atrás a la derecha (profundidad falsa); dron grave, gotitas con eco y un latido en la
+  // batería. A (grave) y B (sube y se rompe en el acorde napolitano de Re). 16 compases (~53 s).
+  vb_cueva: (() => {
+    const melA = 'C#5/4 E5/4 G#5/6 F#5/2 | E5/8 C#5/4 A4/4 | F#4/4 A4/4 C#5/6 B4/2 | C5/8 D#5/4 G#4/4 | ' +
+      'C#5/4 G#5/4 C#6/6 B5/2 | A5/6 G#5/2 E5/4 C#5/4 | D5/8 F#5/4 A5/4 | G#5/12 -/4 |';
+    const melB = 'E6/8 C#6/4 A5/4 | B5/6 C#6/2 E6/8 | F#6/8 E6/4 C#6/4 | D#6/8 C#6/4 A5/4 | ' +
+      'G#5/6 A5/2 G#5/4 E5/4 | E5/4 D#5/4 C#5/8 | D5/4 F#5/4 A5/4 D6/4 | C6/4 D#6/4 G#5/7';
+    const mel = `${melA} ${melB}`;
+    const prog = ['C#2', 'A1', 'F#1', 'G#1', 'C#2', 'A1', 'D2', 'G#1', 'A1', 'A1', 'F#1', 'F#1', 'C#2', 'C#2', 'D2', 'G#1'];
+    const dron = prog.map((r) => `${r}+${vbUp(r, 7)}/16`).join(' ');
+    const bajo = prog.map((r) => `${r}/6 ${r}/2? ${vbUp(r, 12)}/4. ${r}/4`).join(' ');
+    const gotas = `${rep('-/16', 3)} -/10 G#6/1 -/5 ${rep('-/16', 3)} -/4 C#7/1 -/11 ` +
+      `-/8 E6/1 -/7 ${rep('-/16', 2)} -/12 G#6/1 -/3 ${rep('-/16', 3)} -/2 C#7/1 -/13`;
+    return {
+      bpm: 72, vol: 1.3, fx: VB_FX,
+      voices: [
+        { wave: VB_ONDA, vol: 0.05, env: 'soft', vib: 'slow', pan: -0.45, filter: 3200, notes: `${mel} -/1` },
+        { wave: VB_HUECA, vol: 0.016, env: 'soft', pan: 0.45, filter: 2200, notes: `-/2 ${mel.replace(/G#5\/7$/, 'G#5/6')}` },
+        { wave: VB_ONDA, vol: 0.012, env: 'swell', poly: true, filter: 900, fx: 0.5, notes: dron },
+        { wave: VB_BAJO, vol: 0.068, env: 'bass', fx: 0, notes: bajo },
+        { wave: 'sine', vol: 0.024, env: 'bell', fx: 1, notes: gotas },
+        { wave: 'noise', vol: 0.03, kit: 'lofi', fx: 0.3, notes: rep('k/1 -/2 k/1? -/12', 16) },
+      ],
+    };
+  })(),
+  // Batallas de la cueva: rock industrial oscuro en Do# menor, 140 BPM. Bajo en corcheas, la voz
+  // zumbona al frente, arpegios huecos y un puente que baja cromático. A B A C (32 compases, ~55 s).
+  vb_batalla: (() => {
+    const melA = 'C#5/2! C#5/1 E5/1 G#5/2 E5/2 F#5/2 E5/1 D#5/1 C#5/4 | B4/2 C#5/2 E5/2 D#5/2 C#5/8 | ' +
+      'A4/2 C#5/2 E5/2 A5/2 G#5/3 F#5/1 E5/4 | F#5/2 D#5/2 B4/2 D#5/2 F#5/4 A5/4 | ' +
+      'G#5/2! G#5/1 B5/1 C#6/2 B5/2 A5/2 G#5/1 F#5/1 E5/4 | D#5/2 E5/2 G#5/2 B5/2 C#6/8 | ' +
+      'A5/2 G#5/2 F#5/2 E5/2 D#5/2 E5/2 F#5/2 D#5/2 | C#5/8 -/4 G#4/2 B4/2';
+    const melB = 'E6/6 D#6/2 B5/4 G#5/4 | F#6/6 E6/2 D#6/4 B5/4 | G#6/6 F#6/2 E6/4 C#6/4 | A5/4 C#6/4 E6/6 D#6/2 | ' +
+      'E6/4 G#6/4 B6/6! A6/2 | F#6/4 D#6/4 B5/8 | C#6/2 E6/2 A6/4 G#6/2 F#6/2 E6/4 | D#6/4 C6/4 G#5/8';
+    const melC = 'C#5/4 G#4/4 C#5/4 E5/4 | D#5/4 E5/4 F#5/8 | E5/4 C#5/4 A#4/8 | A4/4 C#5/4 E5/8 | ' +
+      'F#5/4 A5/4 C#6/8 | C6/4 D#6/4 G#6/8 | A6/4 G#6/4 F#6/4 E6/4 | D#6/2 C6/2 G#5/2 D#5/2 C5/2 D#5/2 G#5/2 C6/2';
+    const R = { 'C#m': 'C#2', A: 'A1', B: 'B1', E: 'E2', 'G#': 'G#1', 'F#m': 'F#2', 'C#m/B': 'B1', 'C#m/A#': 'A#1' };
+    const CH = { 'C#m': 'C#4+E4+G#4', A: 'C#4+E4+A4', B: 'D#4+F#4+B4', E: 'E4+G#4+B4', 'G#': 'C4+D#4+G#4',
+      'F#m': 'C#4+F#4+A4', 'C#m/B': 'C#4+E4+G#4', 'C#m/A#': 'C#4+E4+G#4' };
+    const pA = ['C#m', 'C#m', 'A', 'B', 'C#m', 'C#m', 'A', 'C#m'];
+    const pB = ['E', 'B', 'C#m', 'A', 'E', 'B', 'A', 'G#'];
+    const pC = ['C#m', 'C#m/B', 'C#m/A#', 'A', 'F#m', 'G#', 'A', 'G#'];
+    const bajo = (p) => p.map((c) => rep(`${R[c]}/2 ${vbUp(R[c], 12)}/2.`, 4)).join(' ');
+    const arp = (p) => p.map((c) => `${CH[c]}/6 ${CH[c]}/6 ${CH[c]}/4`).join(' ');
+    const beat = 'k/2 h/2 s/2 h/2 k/2 k/2 s/2 h/2';
+    const fill = 'k/2 s/1 s/1 s/2 s/2 t/2 t/2 T/2 T/2';
+    return {
+      bpm: 140, vol: 1.3, fx: VB_FX, form: ['A', 'B', 'A', 'C'],
+      voices: [
+        { wave: VB_ONDA, vol: 0.05, env: 'chip', vib: 'light', pan: -0.2, parts: { A: melA, B: melB, C: melC } },
+        { wave: VB_HUECA, vol: 0.016, env: 'stab', arp: 0.045, pan: 0.4, parts: { A: arp(pA), B: arp(pB), C: arp(pC) } },
+        { wave: VB_BAJO, vol: 0.07, env: 'bass', fx: 0, parts: { A: bajo(pA), B: bajo(pB), C: bajo(pC) } },
+        { wave: 'noise', vol: 0.026, kit: 'lofi', fx: 0.2, parts: {
+          A: `c+${rep(beat, 7)} ${fill}`, B: `c+${rep('k/2 h/2 s/2 k/2 k/2 h/2 s/2 h/2', 7)} ${fill}`,
+          C: `${rep('k/4 -/4 s/4 -/2 k/2', 6)} ${rep('s/2', 4)} ${rep('s/1', 8)} k/2 -/6 s/1 s/1 s/1 s/1 t/2 T/2` } },
+      ],
+    };
+  })(),
+  // Visorio (jefe): dos capas que se turnan, como su mecánica. ADELANTE (F) es brillante y aguda, a la
+  // izquierda; ATRÁS (K) es la misma melodía una octava abajo con la voz hueca, a la derecha y a medio
+  // tiempo. En la última sección (X) las dos capas suenan juntas. Do# menor, 126 BPM, 32 compases (~61 s).
+  vb_visorio: (() => {
+    const mel = 'C#6/2 E6/2 G#6/4 F#6/2 E6/2 D#6/4 | B5/2 D#6/2 F#6/4 E6/2 D#6/2 B5/4 | ' +
+      'C#6/2 E6/2 A6/4 G#6/2 F#6/2 E6/4 | D#6/4 F#6/4 C6/4 G#5/4 | C#6/2 D#6/2 E6/2 F#6/2 G#6/8 | ' +
+      'F#6/2 E6/2 D#6/2 B5/2 F#6/8 | E6/2 F#6/2 A6/4 G#6/4 E6/4 | C6/4 D#6/4 G#6/4 F#6/4';
+    const prog = ['C#2', 'B1', 'A1', 'G#1', 'C#2', 'B1', 'A1', 'G#1'];
+    const CH = { 'C#2': 'C#5+E5+G#5', B1: 'B4+D#5+F#5', A1: 'A4+C#5+E5', 'G#1': 'G#4+C5+D#5' };
+    const arpF = prog.map((r) => `${CH[r]}/4. ${CH[r]}/4. ${CH[r]}/2. ${CH[r]}/2. ${CH[r]}/4.`).join(' ');
+    const bajoF = prog.map((r) => rep(`${r}/2 ${vbUp(r, 12)}/2`, 4)).join(' ');
+    const bajoK = prog.map((r) => `${r}/6 ${r}/2 ${r}/4 ${vbUp(r, 7)}/4`).join(' ');
+    const beatF = 'k/2 h/2 s/2 h/2 k/2 h/1 h/1 s/2 h/2';
+    const beatK = 'k/4 -/4 s/4 -/2 k/2';
+    const fill = 'k/2 s/1 s/1 s/2 s/2 t/2 t/2 T/2 T/2';
+    const low = vbUp(mel, -12);
+    return {
+      bpm: 126, vol: 1.3, fx: VB_FX, form: ['F', 'K', 'F', 'X'],
+      voices: [
+        { wave: VB_ONDA, vol: 0.05, env: 'chip', vib: 'light', pan: -0.4, parts: { F: mel, K: '-/128', X: mel } },
+        { wave: VB_HUECA, vol: 0.042, env: 'soft', vib: 'slow', pan: 0.4, filter: 1800, parts: { F: '-/128', K: low, X: low } },
+        { wave: VB_HUECA, vol: 0.02, env: 'stab', arp: 0.04, pan: -0.2, parts: { F: arpF, K: '-/128', X: arpF } },
+        { wave: VB_BAJO, vol: 0.07, env: 'bass', fx: 0, parts: { F: bajoF, K: bajoK, X: bajoF } },
+        { wave: 'noise', vol: 0.026, kit: 'lofi', fx: 0.2, parts: {
+          F: `c+${rep(beatF, 7)} ${fill}`, K: `${rep(beatK, 7)} ${fill}`, X: `c+${rep(beatF, 7)} ${fill}` } },
+      ],
+    };
+  })(),
 });
 
 // ---------- Enemigos ----------
