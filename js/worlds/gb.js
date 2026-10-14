@@ -155,20 +155,50 @@ const GB_TETRO_MEL = 'D5/2 D6/2 A5/2 F5/2 D5/2 D6/2 C6/2 A5/2 A#4/2 A#5/2 F5/2 D
   'D5/2 D6/2 A5/2 F5/2 G5/2 A5/2 A#5/2 A5/2 G5/2 F5/2 E5/2 C#5/2 D5/8';
 const GB_TETRO_BASS = rep('D2/2 D3/2', 4) + ' A#1/2 A#2/2 A#1/2 A#2/2 C2/2 C3/2 C2/2 C3/2 ' +
   'D2/2 D3/2 D2/2 D3/2 G1/2 G2/2 G1/2 G2/2 ' + rep('A1/2 A2/2', 4);
-const GB_BLOQUES_TRACK = {
-  bpm: 160,
-  voices: [
-    {
-      wave: 'square', vol: 0.03,
-      notes: 'D5 F5 A5 D6 C6 A5 F5 A5 D5 F5 A5 D6 E6/2 D6/2 ' +
-        'A#4 D5 F5 A#5 A5 F5 D5 F5 C5 E5 G5 C6 A#5/2 A5/2 ' +
-        'D5 F5 A5 D6 C6 A5 F5 A5 D5 F5 A5 D6 E6/2 D6/2 ' +
-        'A4 C#5 E5 A5 G5 E5 C#5 E5 A5/4 -/4',
-    },
-    { wave: 'triangle', vol: 0.11, notes: rep('D2 D3', 8) + ' ' + rep('A#1 A#2', 4) + ' ' + rep('C2 C3', 4) + ' ' + rep('D2 D3', 8) + ' ' + rep('A1 A2', 8) },
-    { wave: 'noise', vol: 0.028, notes: rep('x - x x', 16) },
-  ],
-};
+// TETRIS VS (fase 2 de Tetro Rey): arreglo PROPIO de Korobeiniki, la canción folclórica rusa
+// del siglo XIX (dominio público) que Tetris usó como "Tipo A". Solo la melodía es la del pueblo:
+// el bajo de polka, los acordes a contratiempo, la segunda voz, las variaciones y el puente B
+// son nuestros (nada del arreglo de Game Boy). La menor, forma A A' B A.
+const GB_KORO_TRACK = (() => {
+  // La melodía folclórica, 8 compases.
+  const melA = 'E5/4! B4/2 C5/2 D5/4 C5/2 B4/2 | A4/4 A4/2 C5/2 E5/4 D5/2 C5/2 | B4/6 C5/2 D5/4 E5/4 | C5/4 A4/4 A4/8 | ' +
+    '-/2 D5/4! F5/2 A5/4 G5/2 F5/2 | E5/6 C5/2 E5/4 D5/2 C5/2 | B4/4 B4/2 C5/2 D5/4 E5/4 | C5/4 A4/4 A4/4 -/4';
+  // A': la misma, pero adornada (mordentes y rellenos donde había notas largas).
+  const melA2 = 'E5/2! F5/1 E5/1 B4/2 C5/2 D5/2 E5/1 D5/1 C5/2 B4/2 | A4/4 A4/2 C5/2 E5/4 D5/2 C5/2 | ' +
+    'B4/2 A4/1 B4/1 C5/2. C5/2 D5/4 E5/4 | C5/4 A4/2 E4/2 A4/2 C5/2 E5/4 | ' +
+    '-/2 D5/4! F5/2 A5/4 G5/2 F5/2 | E5/2 D5/1 E5/1 F5/2 C5/2 E5/4 D5/2 C5/2 | B4/4 B4/2 C5/2 D5/2 E5/2 G#5/4 | A5/4! E5/2 C5/2 A4/4 -/4';
+  // B: puente original en Do mayor que vuelve a Mi para caer otra vez en La menor.
+  const melB = 'G5/4! E5/2 G5/2 C6/4 G5/4 | B5/4 G5/2 D5/2 G5/8 | A5/4! F5/2 A5/2 C6/4 A5/4 | G5/6 E5/2 C5/8 | ' +
+    'D5/2 F5/2 A5/4 F5/2 A5/2 D6/4 | C6/2 B5/2 A5/4 E5/4 A5/4 | B4/2 C5/2 D5/2 E5/2 G#5/4 B5/4 | E6/8! D6/2 C6/2 B5/2 G#5/2';
+  const CH = { Am: 'C4+E4+A4', E: 'B3+E4+G#4', Dm: 'D4+F4+A4', C: 'C4+E4+G4', G: 'B3+D4+G4', F: 'C4+F4+A4' };
+  const harmA = ['Am', 'Am', 'E', 'Am', 'Dm', 'C', 'E', 'Am'];
+  const harmB = ['C', 'G', 'F', 'C', 'Dm', 'Am', 'E', 'E'];
+  // Bajo de polka: raíz y quinta con un paso que lleva al siguiente acorde.
+  const BAS = { Am: ['A2', 'E3'], E: ['E2', 'B2'], Dm: ['D3', 'A2'], C: ['C3', 'G2'], G: ['G2', 'D3'], F: ['F2', 'C3'] };
+  const PASO = { Am: 'G#2', E: 'D#2', Dm: 'C#3', C: 'B2', G: 'F#2', F: 'E2' };
+  const bassOf = (harm) => harm.map((c, i) => {
+    const [r, f] = BAS[c];
+    const sig = harm[(i + 1) % harm.length];
+    return `${r}/2! -/2 ${f}/2. -/2 ${r}/2 -/2 ${f}/2. ${PASO[sig]}/2.`;
+  }).join(' ');
+  const stabs = (harm) => harm.map((c) => `(-/2 ${CH[c]}/2.)*4`).join(' ');
+  const beat = 'k/2 h/2 s/2 h/2 k/2 k/2 s/2 h/2';
+  const fill = 'k/2 s/1 s/1 s/2 s/2 t/2 t/2 T/2 T/2';
+  const drums = `(${beat})*7 ${fill}`;
+  return {
+    bpm: 150, era: 'gb', intro: ['I'], form: ['A', 'A2', 'B', 'A'],
+    voices: [
+      { wave: 'pulse25', vol: 0.034, vib: 'light', parts: { A: melA, A2: melA2, B: melB } },
+      // Segunda voz: notas largas del acorde abajo de la melodía (en A va callada).
+      { wave: 'pulse50', vol: 0.014, env: 'soft', parts: {
+        A2: 'C5/8 A4/8 E4/8 A4/8 G#4/8 B4/8 A4/8 E4/8 F4/8 A4/8 G4/8 E4/8 G#4/8 B4/8 A4/16',
+        B: 'E4/16 D4/16 C4/16 E4/16 F4/16 E4/16 G#4/16 B4/16' } },
+      { wave: 'pulse12', vol: 0.011, arp: 0.03, parts: { A: stabs(harmA), A2: stabs(harmA), B: stabs(harmB) } },
+      { wave: 'triangle', vol: 0.1, fx: 0, parts: { I: 'A2/2! -/2 E3/2. -/2 A2/2 -/2 E3/2. G#2/2.', A: bassOf(harmA), A2: bassOf(harmA), B: bassOf(harmB) } },
+      { wave: 'noise', vol: 0.026, parts: { I: fill, A: drums, A2: drums, B: drums } },
+    ],
+  };
+})();
 const GB_CHUPIN_TRACK = {
   bpm: 138,
   voices: [
@@ -332,18 +362,24 @@ addWorld({
       friend: true,     // aunque tenga mode propio, se puede perdonar y sale en la vitrina
       hp: 120, atk: 4, def: 2, xp: 40,
       fightWords: 4, words: WORDS.t2,
-      // Fase 2: palabras-bloque (cortas, para que quepan en su columna).
-      blockWords: ['rey', 'bloque', 'gira', 'cae', 'torre', 'linea', 'pieza', 'nivel', 'fila', 'caja', 'rapido',
-        'punto', 'cubo', 'forma', 'encaja', 'baja', 'suelo', 'alto', 'muro', 'giro', 'lado', 'tope'],
+      // Fase 2 (TETRIS VS): palabras de las piezas, las largas de la barra I y las cortitas de la
+      // basura. Muchas primeras letras distintas (y ninguna con q o w): la primera letra decide qué escribes.
+      vsWords: ['bloque', 'pieza', 'linea', 'torre', 'gira', 'cubo', 'caja', 'forma', 'nivel', 'punto', 'muro', 'suelo',
+        'barra', 'cable', 'fila', 'rey', 'verde', 'pila', 'boton', 'jugar', 'salto', 'turbo', 'encaja', 'llave', 'dedo',
+        'mapa', 'nube', 'tecla', 'union', 'hueco', 'zeta', 'ganar', 'rapido', 'alto', 'once', 'vamos', 'idea', 'yoyo'],
+      vsLong: ['pantalla', 'cartucho', 'columnas', 'velocidad', 'torreones', 'tetromino', 'apilados', 'escaleras',
+        'derribar', 'cuadritos', 'campeones', 'aventura', 'consolas', 'bloqueado'],
+      vsJunk: ['sol', 'mar', 'pan', 'oso', 'uva', 'ajo', 'fin', 'gol', 'kilo', 'luz', 'dia', 'eco', 'hoy', 'isla',
+        'nido', 'rio', 'tren', 'vaso', 'yate', 'zoo', 'jugo', 'bote', 'cola', 'taza'],
       // Fase 3: se leen en vertical, así que van cortitas.
       tallWords: ['torre', 'pieza', 'bloque', 'nivel', 'linea', 'cubo', 'caja', 'gira', 'fila', 'rey', 'muro', 'alto', 'tope', 'barra'],
       blurb: '¡JEFE! El rey de los bloques que caen. Tiene la Game Boy guardada en su torre.',
       intro: '* ¡EL TETRO REY baja girando desde lo alto!\n* "¿Quieres la Game Boy? ¡Tendrás que ganártela!"',
-      check: '* TETRO REY - ATQ 4 DEF 2\n* Rey de los bloques que caen. Guarda la Game Boy en su torre.\n* Dicen que si se enoja... llueven bloques.',
+      check: '* TETRO REY - ATQ 4 DEF 2\n* Rey de los bloques que caen. Guarda la Game Boy en su torre.\n* Dicen que si se enoja... saca su Cable Link.',
       idle: ['* El Tetro Rey gira 90 grados. Se ve igual.', '* Una línea completa desaparece a lo lejos.', '* La música se pone más rápida...',
         '* En lo alto de la torre parpadea un puntito de un color... raro.'],
       calm: '* El Tetro Rey tararea una melodía muy famosa.',
-      taunts: ['¡TODO ENCAJA EN MI REINO!', '¡LLUEVEN BLOQUES!', '¡LA GAME BOY ES MIA!'],
+      taunts: ['¡TODO ENCAJA EN MI REINO!', '¡CONECTA TU CABLE!', '¡LA GAME BOY ES MIA!'],
       acts: [
         { name: 'Girar', text: 'giras en el sentido del reloj', mercy: 30, reply: '* El Tetro Rey se marea un poquito. "¡Eso es trampa!"' },
         { name: 'Hacer línea', text: 'completas una línea perfecta', mercy: 35, reply: '* ¡LINEA! El Tetro Rey aplaude sin querer.' },
@@ -406,10 +442,9 @@ addWorld({
         { wave: 'noise', vol: 0.03, notes: rep('x/2 -/2 x x -/2', 8) }, // ritmo de marcha
       ],
     },
-    // Fase 2 (¡LLUEVEN BLOQUES!): se acelera cada 20 segundos.
-    gb_tetrorey2: GB_BLOQUES_TRACK,
-    gb_tetrorey2b: { ...GB_BLOQUES_TRACK, bpm: 172 },
-    gb_tetrorey2c: { ...GB_BLOQUES_TRACK, bpm: 186 },
+    // Fase 2 (TETRIS VS): Korobeiniki; se acelera cuando tu pila está alta.
+    gb_tetrisvs: GB_KORO_TRACK,
+    gb_tetrisvs_rapido: { ...GB_KORO_TRACK, bpm: 178 },
     // Fase 3: la marcha a 180 con arpegios de P2 "en tresillos".
     gb_tetrorey3: {
       bpm: 180,

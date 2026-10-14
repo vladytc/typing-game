@@ -233,6 +233,31 @@ TREASURES.pala_robada = { room: 'gb', sprite: 'pala', name: 'Pala (sin pagar)', 
 const gbSpr = (p, x, y, name) => p.rows(x, y, SPRITES[name], GB4);
 
 addCuriosities({
+  // La tarjeta de TETRIS VS (fase 2 de Tetro Rey). No es secreto: sale al terminar esa fase.
+  gb_tetris_vs: {
+    console: 'gameboy',
+    title: 'Tetris por cable',
+    caption: 'En el Tetris de Game Boy (1989) podían jugar 2 personas con el Cable Link. Si borrabas 2 líneas juntas, al otro le subía 1 fila de basura; con 3, le subían 2, ¡y con un TETRIS, 4!',
+    draw(g, w, h) {
+      const P = GB4;
+      const p = pixelArt(g, w, h, 64, 40, P.a);
+      p.r(15, 1, 34, 1, P.c).r(15, 1, 1, 3, P.c).r(48, 1, 1, 3, P.c); // el cable
+      // Tu pantalla: una barra I a punto de hacer TETRIS.
+      drawGameBoy(p, 5, 4, P, { screen: (q, sx, sy) => {
+        for (let r = 0; r < 4; r++) q.r(sx + 1, sy + 6 + r, 9, 1, r % 2 ? P.c : P.d);
+        q.r(sx + 10, sy + 1, 1, 4, P.d);
+      } });
+      // La del otro: le suben 4 filas de basura con el hueco alineado.
+      drawGameBoy(p, 37, 4, P, { screen: (q, sx, sy) => {
+        for (let r = 0; r < 4; r++) q.r(sx + 1, sy + 6 + r, 10, 1, P.c).r(sx + 7, sy + 6 + r, 1, 1, P.a);
+        q.r(sx + 3, sy + 4, 3, 1, P.d).r(sx + 4, sy + 3, 1, 1, P.d);
+      } });
+      p.r(14, 3, 3, 2, P.d).r(47, 3, 3, 2, P.d); // conectores
+      // La basura viaja de una a la otra.
+      p.rows(28, 14, ARROWS.right, { x: P.d }).rows(28, 21, ARROWS.right, { x: P.d });
+      for (let k = 0; k < 4; k++) p.r(28 + k * 2, 28, 1, 1, P.d);
+    },
+  },
   secreto_gb_mew: {
     console: 'gameboy',
     title: 'El Pokémon escondido',

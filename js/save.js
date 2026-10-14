@@ -52,7 +52,7 @@ const DIFFICULTIES = {
   dificil: { name: 'Difícil', desc: 'Menos tiempo, todo más rápido y los golpes duelen más. ¡Para dedos turbo!', time: 0.75, speed: 1.3, dmg: 1.4 },
   experto: { name: 'Experto', desc: 'Para dedos de 80 palabras por minuto. Aquí los jefes sí pegan.', time: 0.5, speed: 2, dmg: 1.2, hit: 0.55,
     pace: { chupin: 0.98, kongo: 0.95, patos: 0.55, mazmorra: 0.7, caparazon: 0.65, punin: 0.99, vulpino: 1.03, nebula: 0.92, castillo: 0.7,
-      brotes: 0.8, sombra_tetro: 0.9, sombra_nebula: 0.75, sombra_marco: 0.8, guante: 0.7, boliche: 0.5, tenis: 0.93, box: 0.93 } },
+      brotes: 0.8, sombra_tetro: 0.9, tetrorey: 0.7, sombra_nebula: 0.75, sombra_marco: 0.8, guante: 0.7, boliche: 0.5, tenis: 0.93, box: 0.93 } },
 };
 const diff = () => DIFFICULTIES[Save.data.difficulty] || DIFFICULTIES.normal;
 // pace('escena'): multiplicador de esa escena en diff().pace (1 si no está; Fácil, Normal y Difícil no lo tienen).
