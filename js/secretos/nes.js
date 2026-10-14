@@ -298,15 +298,39 @@ Scenes.menos1 = nesScene({
   },
 });
 
-// Pista original del Mundo -1: Mi menor, lenta, como flotar en un lugar que no debería existir.
-TRACKS.menos1 = {
-  bpm: 84,
-  voices: [
-    { wave: 'triangle', vol: 0.08, notes: 'E4/2 G4/2 B4/4 A4/2 F#4/2 D4/4 E4/2 B3/2 C4/2 D4/2 E4/8 G4/2 A4/2 B4/4 C5/2 B4/2 A4/4 F#4/2 D4/2 E4/2 F#4/2 E4/8' },
-    { wave: 'square', vol: 0.012, notes: rep('E3 B3 E4 B3', 4) + ' ' + rep('C3 G3 C4 G3', 2) + ' ' + rep('D3 A3 D4 A3', 2) + ' ' + rep('E3 B3 E4 B3', 4) + ' ' + rep('C3 G3 C4 G3', 2) + ' ' + rep('B2 F#3 B3 F#3', 2) },
-    { wave: 'noise', vol: 0.008, notes: rep('-/7 x', 8) },
-  ],
-};
+// Mundo -1: celesta de 8 bits en Mi menor, 72 BPM, como flotar en un lugar que no debería existir.
+// La melodía es la "Danza del Hada de Azúcar" de El Cascanueces (Chaikovski, 1892; murió en 1893:
+// dominio público), la misma pieza que Nintendo usó como "Music 1" del Tetris de NES (1989).
+// Fuentes: Wikipedia, "Tetris (NES video game)" (desarrollado y publicado por Nintendo R&D1; su música
+// incluye "The Dance of the Sugar Plum Fairy"); los créditos de MobyGames del Tetris de NES la listan
+// como Chaikovski sin acreditar. Las notas salen de la partitura de Chaikovski; el arreglo es propio:
+// pulso 25 % con envolvente de campana una octava arriba, el triángulo en pizzicato, acordes de
+// colchón, trinos de octava en el B y un poco de eco. Entrada de 4 tiempos, forma A B A (~67 s).
+TRACKS.menos1 = (() => {
+  const p1 = 'G5/1 E5/1 G5/2 F#5/2 D#5/2 E5/2 D5/1 D5/1 D5/2 C#5/1 C#5/1 C#5/2 C5/1 C5/1 C5/2 B4/1 E5/1 C5/1 E5/1 B4/2 -/4';
+  const p2 = 'G4/1 E4/1 G4/2 F#4/2 C5/2 B4/2 G5/1 G5/1 G5/2 F#5/1 F#5/1 F#5/2 E5/1 E5/1 E5/2 D#5/1 F#5/1 E5/1 F#5/1 D#5/2 -/4';
+  const p3 = 'E5/1 C#5/1 E5/2 D#5/2 -/2 D5/1 B4/1 D5/2 C#5/2 -/2 C5/1 A4/1 C5/2 B4/2 -/2 B4+D#5+F#5+B5/2 E5/6';
+  const run = 'C#5+C#6/2 D#5+D#6/2 E5+E6/2 F#5+F#6/2 G5+G6/2 E5+E6/2 D#5+D#6/4';
+  const melB = `${run} | B5/1 A5/1 F#5/1 D#5/1 B4/1 A4/1 F#4/1 D#4/1 B3/2 -/6 | ${run} | E5+E6/2 F#5+F#6/2 G5+G6/2 A5+A6/2 B5+B6/4 D#5/2 F#5/2`;
+  const b1 = '-/2 E2/2. -/2 E2/2. -/2 E2/2. -/2 E2/2. -/2 E2/2. -/2 E3/2. E3/2. E3/1 D3/1 C3/1 B2/1 A#1/2';
+  const b2 = '-/2 A1/4 G1/4 F#1/4 F#2/4 F#1/4 B1/2 C2/2 B1/4 E2/2';
+  const b3 = '-/2 E2/2. -/2 E2/2. -/2 D2/2. -/2 D2/2. -/2 C2/2. -/2 B1/2. -/2 E2/2. B1/2. E2/2.';
+  const bB = `-/2 ${rep('B1/2. -/2', 7)} B1/2.`;
+  const h1 = '-/2 E4+G4+B4/2 E4+A4+C5/2 D#4+F#4+A4/2 C#4+E4+G4/2 D4+F4+G#4/4 C#4+E4+G4/4 C4+D#4+F#4/4 B3+E4+G4/2 C4+E4+A4/2 B3+E4+G4/2 -/4';
+  const h2 = '-/2 C4+E4+G4/2 C4+D#4+F#4/2 D#4+F#4+A4/2 E4+G4+B4/2 C#4+E4+G4+A#4/4 D4+F#4+G#4+B4/4 C#4+E4+F#4+A#4/4 B3+D#4+F#4/10';
+  const h3 = '-/2 C#4+E4+G4+A#4/8 B3+D4+F#4/8 A3+C4+E4/4 A3+B3+D#4+F#4/4 E4+G4+B4/6';
+  return {
+    bpm: 72, era: 'nes', intro: ['I'], form: ['A', 'B', 'A'],
+    fx: { echo: { steps: 3, feedback: 0.3, mix: 0.18 } },
+    voices: [
+      { wave: 'pulse25', vol: 0.045, env: 'bell', transpose: 12, vib: false, parts: { A: [p1, p2, p1, p3].join(' | '), B: melB } },
+      { wave: 'square', vol: 0.014, env: 'pluck', parts: { A: [p1, p2, p1, p3].join(' | ') } },
+      { wave: 'square', vol: 0.012, env: 'pad', poly: true, filter: 1800, fx: 0.6, parts: { A: [h1, h2, h1, h3].join(' | '), B: 'A3+B3+D#4+F#4/32 | A3+B3+D#4+F#4/32' } },
+      { wave: 'triangle', vol: 0.1, fx: 0, parts: { I: `${rep('E2/2. -/2', 8)} -/2`, A: [b1, b2, b1, b3].join(' | '), B: `${bB} | ${bB}` } },
+      { wave: 'noise', vol: 0.02, fx: 0.4, parts: { A: rep('-/6 h/1? -/9', 8), B: rep('-/14 h/2?', 4) } },
+    ],
+  };
+})();
 
 // ---------- Secreto 2: la Segunda Misión ----------
 
