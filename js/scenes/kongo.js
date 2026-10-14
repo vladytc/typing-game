@@ -71,7 +71,7 @@ Scenes.kongo = nesScene({
   spawn() {
     if (this.mode !== 'climb') return;
     const twoWords = this.endless ? this.level >= 2 : this.round >= 2;
-    const word = rand(twoWords && Math.random() < 0.7 ? KONGO_W2 : KONGO_W1);
+    const word = rand(twoWords ? KONGO_W2 : KONGO_W1); // de la ronda 2 en adelante, TODOS de dos palabras (Kongo lo promete)
     const dir = this.beam % 2 === 0 ? 1 : -1;
     const from = (dir > 0 ? 570 : 70) + dir * 40;
     const level = this.endless ? this.level : this.round;
