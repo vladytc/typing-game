@@ -586,103 +586,336 @@ function giveTecloide(id) {
 }
 
 // ---------- Música (melodías originales, lore §14) ----------
-// "Reverb" de 16 bits: la misma voz, más bajito y un poco después.
-function echoVoice(notes, d) {
-  const toks = notes.trim().split(/\s+/);
-  let cut = d;
-  while (cut > 0 && toks.length) {
-    const [n, du] = toks.pop().split('/');
-    const len = Number(du || 1);
-    if (len > cut) { toks.push(`${n}/${len - cut}`); cut = 0; } else cut -= len;
-  }
-  return `-/${d} ${toks.join(' ')}`;
-}
+// Todas las pistas usan era 'snes': ondas "sampleadas" y acolchadas, envolventes suaves y el eco
+// del chip de sonido de la Super Nintendo. Las melodías son nuevas, escritas al ESTILO de los
+// juegos de 16 bits (shuffle con bongós, marcha épica, rock de carreras, ambiente submarino...).
+// Se arman como texto plano (sin `form`, sin "( )*n" ni "|"): la Copia de Sombra de GameCube
+// (gcShadowTrack en gc.js) recorta `notes` ficha por ficha y necesita fichas sueltas.
 
-const SNES_MAP_MEL = 'A4/4 D5/2 E5/2 F#5/4 E5/2 D5/2 B4/4 D5/2 B4/2 A4/8 ' +
-  'G4/2 A4/2 B4/2 D5/2 E5/4 F#5/2 G5/2 F#5/6 E5/2 D5/8 ' +
-  'A5/4 F#5/2 D5/2 G5/4 E5/2 C#5/2 D5/2 E5/2 F#5/2 A5/2 B5/8 ' +
-  'A5/2 G5/2 F#5/2 E5/2 D5/2 E5/2 F#5/4 E5/6 C#5/2 D5/8';
-const SNES_BATTLE_MEL = 'E5/2 E5 G5 B5/2 A5/2 G5/2 F#5/2 E5/4 D5/2 E5/2 F#5/2 G5/2 A5/4 B5/4 ' +
-  'C6/2 B5/2 A5/2 G5/2 A5/2 B5/2 G5/4 F#5/2 G5/2 A5/2 F#5/2 B5/8';
-const SNES_RAYO_MEL = 'C#5/4 F#5/4 E5/2 C#5/2 B4/4 A4/2 B4/2 C#5/4 D5/4 C#5/4 ' +
-  'B4/2 C#5/2 E5/4 G#5/4 F#5/4 F#5/8 -/4 C#5/4 ' +
-  'A5/4 G#5/2 F#5/2 E5/4 C#5/4 D5/2 E5/2 F#5/4 A5/4 F#5/4 ' +
-  'G#5/2 F#5/2 E5/2 D5/2 C#5/4 B4/4 G#4/4 C#5/4 F5/4 G#5/4';
-const rayoGuitar = (notes) => notes.map((n) => `${n}/2 ${n}/2 -/1 ${n}/1 ${n}/2 ${n}/2 -/2 ${n}/2 ${n}/2`).join(' ');
-const SNES_NEBULA_MEL = 'G4/6 G4/3 G#4/3 G4/6 D#4/6 F4/6 F4/3 G4/3 F4/6 D4/6 ' +
-  'D#4/6 D#4/3 F4/3 D#4/6 C4/6 D4/6 D#4/3 F4/3 G4/12';
-const SNES_NEBULA_VOICES = [
-  { wave: 'sine', vol: 0.05, notes: SNES_NEBULA_MEL },
-  { wave: 'sine', vol: 0.018, notes: echoVoice(SNES_NEBULA_MEL, 3) },
-  { wave: 'triangle', vol: 0.12, notes: 'C2/12 C2/12 G#1/12 G#1/12 F1/12 F1/12 G1/12 G1/12' },
-  { wave: 'sine', vol: 0.022, notes: 'D#4/24 C4/24 C4/24 B3/24' },
-  { wave: 'sine', vol: 0.022, notes: 'G4/24 D#4/24 G#4/24 D4/24' },
-];
-// La Arena Modo 7: el Reto de Tecloides con cuerdas y acordes completos.
-const withStrings = (base, lines, bpm, intro) => ({
-  bpm,
-  voices: base.voices.concat(lines.map((notes) => ({ wave: 'sawtooth', vol: 0.012, notes, ...(intro ? { intro } : {}) }))),
-});
+// Ayudantes: de acordes a notas. Las notas se cuentan en MIDI (C4 = 60).
+const S16_PC = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+const S16_NAME = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const S16_Q = { '': [0, 4, 7], m: [0, 3, 7], 7: [0, 4, 7, 10], m7: [0, 3, 7, 10], dim: [0, 3, 6] };
+const s16n = (m) => `${S16_NAME[m % 12]}${Math.floor(m / 12) - 1}`;
+// Notas del acorde (raíz, tercera, quinta[, séptima]) desde la primera raíz en `base` o arriba.
+function s16Chord(sym, base) {
+  const m = /^([A-G])([#b]?)(.*)$/.exec(sym);
+  const pc = (S16_PC[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0) + 12) % 12;
+  const root = base + ((pc - (base % 12) + 12) % 12);
+  return S16_Q[m[3]].map((i) => root + i);
+}
+// Repite una celda hasta llenar `steps` pasos; cell(i) da las fichas de la celda número i.
+const s16Fill = (steps, size, cell) => Array.from({ length: Math.round(steps / size) }, (_, i) => cell(i)).join(' ');
+// Una progresión 'Em C|D ...' (un compás por palabra; "|" lo parte a la mitad) → fn(acorde, pasos).
+const s16Bars = (prog, len, fn) => prog.trim().split(/\s+/).map((bar) => {
+  const cs = bar.split('|');
+  return cs.map((c) => fn(c, len / cs.length)).join(' ');
+}).join(' ');
+const s16Chd = (c, base) => s16Chord(c, base).map(s16n).join('+');
+// Patrones de acompañamiento: (acorde, pasos) → fichas.
+const S16P = {
+  // Bajo que rebota (raíz, quinta y octava), celdas de 8.
+  bounce: (c, st) => { const [r] = s16Chord(c, 40); return s16Fill(st, 8, () => `${s16n(r)}/3 ${s16n(r)}/1. ${s16n(r + 7)}/2. ${s16n(r + 12)}/2`); },
+  // Bajo que camina en negras: raíz, octava, quinta, octava.
+  walk: (c, st) => { const [r] = s16Chord(c, 40); const w = [r, r + 12, r + 7, r + 12]; return s16Fill(st, 4, (i) => `${s16n(w[i % 4])}/4`); },
+  // Bajo en corcheas: raíz y octava (batalla).
+  drive: (c, st) => { const [r] = s16Chord(c, 40); return s16Fill(st, 4, (i) => `${s16n(r)}/2${i % 2 ? '' : '!'} ${s16n(r + 12)}/2.`); },
+  // Bajo de rock: raíz en corcheas con un salto a la octava.
+  rock: (c, st) => { const [r] = s16Chord(c, 40); return s16Fill(st, 8, () => `${s16n(r)}/2! ${s16n(r)}/2 ${s16n(r + 12)}/2 ${s16n(r)}/2`); },
+  // Bajo largo (ambiente).
+  long: (c, st) => `${s16n(s16Chord(c, 36)[0])}/${st}`,
+  // Acorde a contratiempo: el "chik" del shuffle.
+  skank: (c, st) => s16Fill(st, 4, () => `-/2 ${s16Chd(c, 55)}/2.`),
+  // Acorde largo para pads.
+  pad: (base) => (c, st) => `${s16Chd(c, base)}/${st}`,
+  // Semicorcheas de cuerdas: raíz, quinta, tercera, quinta.
+  ostinato: (base) => (c, st) => { const t = s16Chord(c, base).map(s16n); return s16Fill(st, 4, (i) => `${t[0]}/1${i % 4 ? '?' : ''} ${t[2]}/1? ${t[1]}/1? ${t[2]}/1?`); },
+  // Arpegio de sintetizador que sube en semicorcheas.
+  arpUp: (base) => (c, st) => { const t = s16Chord(c, base); const seq = [t[0], t[1], t[2], t[0] + 12]; return s16Fill(st, 1, (i) => `${s16n(seq[i % 4])}/1${i % 4 ? '?' : ''}`); },
+  // Golpes de metales: largo-largo-corto y, en la otra mitad, dos a contratiempo.
+  stabs: (c, st) => { const ch = s16Chd(c, 55); return s16Fill(st, 8, (i) => (i % 2 ? `-/4 ${ch}/2. ${ch}/2.` : `${ch}/3! ${ch}/3 ${ch}/2.`)); },
+  // Power chord (raíz, quinta y octava) con apagado de palma, para la guitarra.
+  power: (c, st) => { const [r] = s16Chord(c, 49); const pc = [r, r + 7, r + 12].map(s16n).join('+'); return s16Fill(st, 8, () => `${pc}/2! ${pc}/2. -/1 ${pc}/1 ${pc}/2.`); },
+};
+// Guitarra "distorsionada" hecha de armónicos (la SNES la tocaba con una muestra).
+const S16_GUITAR = [1, 0.85, 0.7, 0.55, 0.5, 0.42, 0.35, 0.3, 0.25, 0.2, 0.16, 0.12];
 
 const SNES_TRACKS = {
-  // Reino 16-Bit (mapa): Re mayor, luminosa. Flauta, pad de 3 voces y "reverb".
-  snes_map: {
-    bpm: 118,
+  // Mapa del reino: shuffle saltarín en Re mayor con bongós, 132 BPM, 32 compases (~58 s).
+  // Al estilo de los plataformeros de 16 bits: swing, bajo que rebota y acordes a contratiempo.
+  // Forma A A' B A': en A' entran las cuerdas y la batería completa; B sube hasta un Fa# agudo.
+  snes_map: (() => {
+    const pA1 = 'D Bm G A D F#m G|A Em|A7';
+    const pA2 = 'D Bm G A D F#m G|A D';
+    const pB = 'G A F#m Bm Em A Bm|G E7|A7';
+    const m7 = 'A4/2 D5/2 F#5/3 E5/1 D5/2 F#5/2 A5/4 B5/2 A5/2 F#5/2 D5/2 F#5/4 -/2 B4/2 ' +
+      'D5/2 G5/2 B5/3 A5/1 G5/2 B5/2 D6/4! C#6/2 B5/2 A5/2 G5/2 E5/4 -/4 ' +
+      'A4/2 D5/2 F#5/3 E5/1 D5/2 F#5/2 A5/4 C#6/2 A5/2 F#5/2 C#5/2 E5/4 F#5/2 E5/2 ' +
+      'D5/2 E5/2 G5/2 F#5/2 E5/2 F#5/2 G5/2 C#5/2';
+    const melA1 = `${m7} E5/6 -/2 G5/2 E5/2 C#5/2 B4/2`;
+    const melA2 = `${m7} D5/4 A5/2 F#5/2 D6/4! -/4`;
+    const melB = 'B5/4 A5/2 G5/2 D5/4 G5/2 A5/2 C#6/4 B5/2 A5/2 E5/6 -/2 ' +
+      'A5/2 F#5/2 C#5/2 F#5/2 A5/2 C#6/2 E6/4 D6/6 C#6/2 B5/4 F#5/4 ' +
+      'G5/2 B5/2 E6/4^ D6/2 B5/2 G5/2 E5/2 A5/2 C#6/2 E6/4! F#6/4! E6/4 ' +
+      'D6/2 C#6/2 B5/2 F#5/2 G5/2 A5/2 B5/2 D6/2 E6/4 D6/2 B5/2 C#6/2 B5/2 A5/2 G5/2';
+    const sec = (fn) => [pA1, pA2, pB, pA2].map((p) => s16Bars(p, 16, fn)).join(' ');
+    const groove = 'k/4 h/2 h/2? s/4 h/2 h/2?';
+    const fill = 'k/2 s/2 s/1? s/1 s/2 t/2 t/2 T/2 T/2';
+    const drA = (lite) => `c+${groove} ${Array(6).fill(lite ? 'k/4 h/2 h/2? k/4 h/2 h/2?' : groove).join(' ')} ${fill}`;
+    const bongoA = Array(16).fill('-/2 t/1? t/1 T/2 t/2').join(' ');
+    const bongoB = Array(8).fill('t/2 t/1? t/1 T/2 t/2 t/2 T/2 t/1? t/1 T/2').join(' ');
+    return {
+      bpm: 132, era: 'snes', swing: 0.18,
+      voices: [
+        { wave: 'square', vol: 0.04, notes: [melA1, melA2, melB, melA2].join(' ') },
+        { wave: 'triangle', vol: 0.075, fx: 0, notes: [pA1, pA2].map((p) => s16Bars(p, 16, S16P.bounce)).join(' ') + ' ' +
+          s16Bars(pB, 16, S16P.walk) + ' ' + s16Bars(pA2, 16, S16P.bounce) },
+        { wave: 'organ', vol: 0.02, env: 'stab', poly: true, fx: 0.5, pan: 0.25, notes: sec(S16P.skank) },
+        { wave: 'sawtooth', vol: 0.018, env: 'pad', poly: true, pan: -0.25, notes: `-/128 ${[pA2, pB, pA2].map((p) => s16Bars(p, 16, S16P.pad(62))).join(' ')}` },
+        { wave: 'noise', vol: 0.02, fx: 0.15, notes: [drA(true), drA(false), drA(false), drA(false)].join(' ') },
+        { wave: 'noise', vol: 0.014, fx: 0.3, pan: -0.3, notes: [bongoA, bongoA, bongoB, bongoA].join(' ') },
+      ],
+    };
+  })(),
+
+  // Batalla normal: marcha épica en Mi menor, 160 BPM, 32 compases (~48 s) + 2 de entrada.
+  // Metales al frente, cuerdas en semicorcheas, golpes de metales y redobles de timbal;
+  // el puente cae al acorde napolitano (Fa mayor) antes de volver.
+  snes_battle: (() => {
+    const pA1 = 'Em Em C D Em Em C B7';
+    const pA2 = 'Em Em C D Em Em C|D Em';
+    const pB = 'C D Bm Em C D B B7';
+    const pC = 'Am Em Am Em F F B B';
+    const m7 = 'E5/3 B4/1 E5/2 G5/2 B5/4 A5/2 G5/2 F#5/3 G5/1 F#5/2 E5/2 D5/2 E5/2 B4/4 ' +
+      'C5/3 E5/1 G5/2 C6/2 B5/4 A5/2 G5/2 A5/6 F#5/2 D5/4 -/4 ' +
+      'E5/3 B4/1 E5/2 G5/2 B5/4 D6/2 C6/2 B5/3 A5/1 G5/2 F#5/2 G5/2 A5/2 B5/4';
+    const melA1 = `${m7} C6/4 B5/2 A5/2 G5/2 A5/2 E5/4 D#5/4 F#5/4 B5/6 -/2`;
+    const melA2 = `${m7} C6/4 G5/2 E5/2 F#5/4 A5/2 D6/2 E6/4! B5/2 G5/2 E5/4 -/4`;
+    const melB = 'G5/2 C6/2 E6/4 D6/2 C6/2 B5/2 C6/2 D6/6 A5/2 F#5/4 D6/4 ' +
+      'D6/2 B5/2 F#5/2 B5/2 D6/4 C#6/2 D6/2 E6/8 -/2 B5/2 G5/2 E5/2 ' +
+      'E5/2 G5/2 C6/4 D6/2 E6/2 D6/2 C6/2 D6/2 E6/2 F#6/6! E6/2 D6/4 ' +
+      'D#6/6! B5/2 F#5/4 B5/4 A5/2 B5/2 A5/2 G5/2 F#5/2 E5/2 D#5/4';
+    const melC = 'A4/8 C5/8 B4/8 G4/8 A4/4 C5/4 E5/4 A5/4 G5/12 F#5/4 ' +
+      'F5/8 A5/8 C6/16 B5/8 D#6/8 B5/2 C6/2 B5/2 A5/2 G5/2 F#5/2 E5/2 D#5/2';
+    const all = [pA1, pA2, pB, pC];
+    const sec = (fn, list = all) => list.map((p) => s16Bars(p, 16, fn)).join(' ');
+    const groove = 'k/2 h/2 s/2 h/2 k/2 k/2 s/2 h/2';
+    const fill = 'k/2 h/2 s/2 h/2 s/1 s/1 t/2 t/2 T/2';
+    const drA = `c+${groove} ${Array(6).fill(groove).join(' ')} ${fill}`;
+    const drC = `${Array(6).fill('T/4! -/4 T/4 -/2 T/2').join(' ')} T/2 T/2 T/2 T/2 t/2 t/2 T/2 T/2 ${Array(12).fill('s/1').join(' ')} s/2 s/2!`;
+    return {
+      bpm: 160, era: 'snes',
+      voices: [
+        { wave: 'brass', vol: 0.04, intro: 'B4/2! -/2 B4/2! -/2 B4/2! -/2 A4/2 B4/2 E5/4! D5/2 E5/2 F#5/2 G5/2 A5/2 B5/2',
+          notes: [melA1, melA2, melB, melC].join(' ') },
+        { wave: 'sawtooth', vol: 0.019, legato: 0.7, pan: -0.3, intro: s16Bars('Em Em', 16, S16P.ostinato(64)), notes: sec(S16P.ostinato(64)) },
+        { wave: 'brass', vol: 0.02, env: 'stab', poly: true, pan: 0.3, intro: '-/32',
+          notes: `${sec(S16P.stabs, [pA1, pA2, pB])} ${s16Bars(pC, 16, S16P.pad(57))}` },
+        { wave: 'triangle', vol: 0.075, fx: 0, intro: 'E2/2! -/2 E2/2! -/2 E2/2! -/2 D2/2 D#2/2 E2/16',
+          notes: `${sec(S16P.drive, [pA1, pA2, pB])} ${s16Bars(pC, 16, (c, st) => S16P.walk(c, st))}` },
+        { wave: 'noise', vol: 0.022, fx: 0.15, intro: 'c+k/2! -/2 k/2! -/2 k/2! -/2 s/2 s/2 s/1 s/1 s/1 s/1 t/2 t/2 T/2 T/2 s/1 s/1 s/2!',
+          notes: [drA, drA, drA, drC].join(' ') },
+      ],
+    };
+  })(),
+
+  // Rayo Cero (carrera): rock de carreras futuristas en Fa# menor, 175 BPM, 36 compases (~49 s).
+  // Riff de guitarra con el bajo al unísono, power chords apagados, coro que sube a Sol# agudo
+  // y un "solo" de arpegios en semicorcheas.
+  snes_rayo: (() => {
+    const pA = 'F#m D E F#m F#m D E C#';
+    const pB = 'D E C#m F#m D E C# C#';
+    const pC = 'Bm C#m D E Bm C#m D C#';
+    const riffG = 'F#3/2! F#3/2 A3/2 F#3/1 B3/1 F#3/2 C#4/2 B3/2 A3/2 F#3/2! F#3/2 A3/2 F#3/1 B3/1 F#3/2 E3/2 D3/2 E3/2';
+    const riffB = riffG.replace(/([A-G]#?)(\d)/g, (m, n, o) => `${n}${o - 1}`); // el bajo, una octava abajo
+    const melA = 'C#5/2 F#5/2 A5/2 G#5/2 F#5/4 E5/2 F#5/2 A5/6 F#5/2 D5/4 E5/2 F#5/2 ' +
+      'G#5/4 E5/2 B4/2 E5/2 G#5/2 B5/4 A5/3 G#5/1 F#5/4 C#5/8 ' +
+      'C#5/2 F#5/2 A5/2 C#6/2 B5/2 A5/2 G#5/2 A5/2 F#5/6 A5/2 D6/4 C#6/2 B5/2 ' +
+      'B5/4 G#5/2 E5/2 B5/4 E6/4 C#6/6 G#5/2 F5/4 C#5/4';
+    const melB = 'D6/4 C#6/2 A5/2 F#5/4 A5/2 D6/2 E6/6 D6/2 B5/4 G#5/4 ' +
+      'C#6/2 E6/2 G#6/4! F#6/2 E6/2 C#6/4 F#6/8 E6/2 C#6/2 A5/4 ' +
+      'A5/2 D6/2 F#6/4 E6/2 D6/2 A5/4 B5/2 E6/2 G#6/4 F#6/2 E6/2 B5/4 ' +
+      'G#5/2 C#6/2 F6/4! G#6/4! F6/4 C#6/8 G#5/2 F5/2 C#5/4';
+    // Solo: arpegios de ida y vuelta por cada acorde; el último compás aterriza largo.
+    const solo = pC.split(' ').slice(0, 7).map((c, i) => {
+      const t = s16Chord(c, 66);
+      const up = [t[0], t[1], t[2], t[0] + 12, t[1] + 12, t[2] + 12, t[1] + 12, t[0] + 12];
+      const seq = i % 2 ? up.slice().reverse() : up;
+      return seq.concat(seq).map((m, k) => `${s16n(m)}/1${k % 4 ? '' : '!'}`).join(' ');
+    }).join(' ') + ' F6/8! C#6/4 G#5/4';
+    const grooveA = 'k/2 h/2 s/2 h/2 k/2 k/2 s/2 h/2';
+    const grooveB = 'k/2 o/2 s/2 o/2 k/2 k/2 s/2 o/2';
+    const grooveC = 'k/2 h/1 h/1 s/2 h/1 h/1 k/2 k/2 s/2 h/1 h/1';
+    const fill = 'k/2 h/2 s/2 h/2 s/1 s/1 s/1 s/1 t/1 t/1 T/1 T/1';
+    const eight = (g, f = fill) => `c+${g} ${Array(6).fill(g).join(' ')} ${f}`;
+    const riffDr = 'k/2 k/2 s/2 k/2 k/2 k/2 s/2 h/2 k/2 k/2 s/2 k/2 s/1 s/1 s/1 s/1 t/2 T/2';
+    return {
+      bpm: 175, era: 'snes',
+      voices: [
+        { wave: 'brass', vol: 0.04, vib: { rate: 6, depth: 0.25, delay: 0.18 }, intro: '-/32',
+          notes: [melA, melA, '-/32', melB, solo, '-/32'].join(' ') },
+        { wave: S16_GUITAR, vol: 0.022, env: 'stab', poly: true, filter: 2600, pan: -0.35, intro: riffG,
+          notes: [s16Bars(pA, 16, S16P.power), s16Bars(pA, 16, S16P.power), riffG, s16Bars(pB, 16, S16P.power), s16Bars(pC, 16, S16P.power), riffG].join(' ') },
+        { wave: 'triangle', vol: 0.075, fx: 0, intro: riffB,
+          notes: [s16Bars(pA, 16, S16P.rock), s16Bars(pA, 16, S16P.rock), riffB, s16Bars(pB, 16, S16P.rock), s16Bars(pC, 16, S16P.rock), riffB].join(' ') },
+        { wave: 'sawtooth', vol: 0.019, env: 'pad', poly: true, pan: 0.35, intro: '-/32',
+          notes: ['-/128', s16Bars(pA, 16, S16P.pad(61)), '-/32', s16Bars(pB, 16, S16P.pad(61)), '-/128', '-/32'].join(' ') },
+        { wave: 'noise', vol: 0.022, fx: 0.12, intro: riffDr,
+          notes: [eight(grooveA), eight(grooveA), riffDr, eight(grooveB), eight(grooveC), riffDr].join(' ') },
+      ],
+    };
+  })(),
+
+  // Capitán Vulpino: fanfarria espacial en Si bemol mayor, 150 BPM, 32 compases (~51 s) + 2.
+  // Metales heroicos, arpegio de sintetizador en semicorcheas y redoble de marcha;
+  // B se va a Sol menor y su clímax llega a Sol agudo antes de la subida final.
+  snes_vulpino: (() => {
+    const pA1 = 'Bb F Gm Eb Bb F Eb|F F';
+    const pA2 = 'Bb F Gm Eb Bb F Eb|F Bb';
+    const pB = 'Gm Gm Eb Eb Cm D Gm D';
+    const pC = 'Eb F Dm Gm Cm Eb F F';
+    const m7 = 'F4/2 Bb4/2 D5/4 F5/6 D5/2 C5/4 F5/2 A5/2 G5/4 F5/4 ' +
+      'G5/3 F5/1 D5/2 Bb4/2 D5/4 G5/4 G5/6 F5/2 Eb5/4 -/4 ' +
+      'F4/2 Bb4/2 D5/4 F5/4 Bb5/4 A5/3 G5/1 F5/2 C5/2 F5/4 A5/4 G5/4 Bb5/4 A5/4 C6/4';
+    const melA1 = `${m7} C6/6 A5/2 F5/4 C5/4`;
+    const melA2 = `${m7} Bb5/8! F5/2 D5/2 Bb4/4`;
+    const melB = 'D5/4 G5/4 Bb5/6 A5/2 G5/4 F#5/2 G5/2 D5/8 Eb5/4 G5/4 Bb5/4 Eb6/4 D6/6 C6/2 Bb5/8 ' +
+      'C6/4 Bb5/2 G5/2 Eb6/6 D6/2 D6/4 F#5/4 A5/4 C6/4 Bb5/4 A5/2 G5/2 D6/4 G6/4! F#6/8 D6/4 A5/4';
+    const melC = 'G5/2 Bb5/2 Eb6/4 D6/4 Bb5/4 C6/2 A5/2 F5/4 A5/4 C6/4 D6/6 C6/2 A5/4 F5/4 G5/8 D5/4 G5/4 ' +
+      'Eb5/2 G5/2 C6/4 Bb5/2 G5/2 Eb5/4 G5/2 Bb5/2 Eb6/4 F6/4 G6/4 F6/12! -/4 -/16';
+    const all = [pA1, pA2, pB, pC];
+    const sec = (fn, list = all) => list.map((p) => s16Bars(p, 16, fn)).join(' ');
+    const groove = 'k/2 h/2 s/2 h/2 k/2 k/2 s/2 s/1? s/1';
+    const fill = 's/1 s/1 s/1 s/1 s/2 s/2 t/2 t/2 T/2 T/2';
+    const drA = `c+${groove} ${Array(6).fill(groove).join(' ')} ${fill}`;
+    const drC = `c+${groove} ${Array(6).fill(groove).join(' ')} ${Array(14).fill('s/1').join(' ')} s/2!`;
+    return {
+      bpm: 150, era: 'snes',
+      voices: [
+        { wave: 'brass', vol: 0.04, intro: 'F4/2! F4/1 F4/1 F4/2 Bb4/2 D5/4 F5/4 Bb5/12! -/4',
+          notes: [melA1, melA2, melB, melC].join(' ') },
+        { wave: 'square', vol: 0.018, env: 'pluck', pan: 0.3, legato: 0.6, intro: s16Bars('Bb Bb', 16, S16P.arpUp(58)), notes: sec(S16P.arpUp(58)) },
+        { wave: 'sawtooth', vol: 0.018, env: 'pad', poly: true, pan: -0.3, intro: 'A#3+D4+F4/32',
+          notes: `-/128 ${sec(S16P.pad(58), [pA2, pB, pC])}` },
+        { wave: 'triangle', vol: 0.075, fx: 0, intro: 'A#1/2! A#1/1 A#1/1 A#1/2 A#1/2 A#1/4 A#2/4 A#1/16',
+          notes: sec(S16P.rock) },
+        { wave: 'noise', vol: 0.022, fx: 0.15, intro: `c+k/4! -/4 s/1 s/1 s/1 s/1 s/2 s/2 c+k/4! -/4 ${Array(8).fill('s/1').join(' ')}`,
+          notes: [drA, drA, drA, drC].join(' ') },
+      ],
+    };
+  })(),
+
+  // Arena Modo 7 (Dani Turbo, reto de Tecloides): batalla de rock orquestal en La menor,
+  // 165 BPM, 32 compases (~47 s) + 2 de sirena. Cuerdas en semicorcheas y golpes de metales.
+  snes_arena: (() => {
+    const pA1 = 'Am Am F G Am Am Dm E';
+    const pA2 = 'Am Am F G Am Am Dm Am';
+    const pB = 'F G Em Am F G E E7';
+    const pC = 'Dm Am Dm Am Bb Bb E E';
+    const m7 = 'A4/2 C5/2 E5/2 A5/4 G5/2 E5/2 C5/2 D5/3 E5/1 C5/2 B4/2 A4/4 E4/4 ' +
+      'F4/2 A4/2 C5/2 F5/4 E5/2 F5/2 A5/2 G5/6 F5/2 E5/2 D5/2 B4/4 ' +
+      'A4/2 C5/2 E5/2 A5/4 B5/2 C6/2 A5/2 B5/3 C6/1 B5/2 A5/2 G5/2 E5/2 C5/4 ' +
+      'D5/2 F5/2 A5/2 D6/4 C6/2 A5/2 F5/2';
+    const melA1 = `${m7} G#5/4 B5/4 E6/6 -/2`;
+    const melA2 = `${m7} A5/8 E5/2 C5/2 A4/4`;
+    const melB = 'C6/4 A5/2 F5/2 C6/2 D6/2 C6/4 B5/6 G5/2 D5/4 B5/4 E6/4 B5/2 G5/2 E6/2 G6/2 F#6/4 E6/8 C6/4 A5/4 ' +
+      'A5/2 C6/2 F6/4 E6/2 D6/2 C6/4 B5/2 D6/2 G6/4! F6/2 E6/2 D6/4 E6/4 D6/2 B5/2 G#5/4 B5/4 ' +
+      'D6/2 C6/2 B5/2 A5/2 G#5/2 E5/2 B4/2 G#4/2';
+    const melC = 'F5/8 E5/4 D5/4 E5/8 C5/4 A4/4 D5/4 F5/4 A5/4 D6/4 C6/12 B5/4 ' +
+      'A#5/8 A5/4 F5/4 D6/8 C6/4 A#5/4 B5/4 G#5/4 E5/4 G#5/4 B5/12 -/4';
+    const all = [pA1, pA2, pB, pC];
+    const sec = (fn, list = all) => list.map((p) => s16Bars(p, 16, fn)).join(' ');
+    const groove = 'k/2 h/2 s/2 h/2 k/2 k/2 s/2 h/1 h/1';
+    const fill = 'k/2 h/2 s/2 h/2 s/1 s/1 s/1 s/1 t/2 T/2';
+    const dr = (g) => `c+${g} ${Array(6).fill(g).join(' ')} ${fill}`;
+    return {
+      bpm: 165, era: 'snes',
+      voices: [
+        { wave: 'square', vol: 0.038,
+          intro: 'A4/2! -/2 A4/2! -/2 A4/2! -/2 G4/2 G#4/2 E5/1 D5/1 C5/1 B4/1 A4/1 G#4/1 A4/1 B4/1 C5/1 D5/1 E5/1 F5/1 E5/4!',
+          notes: [melA1, melA2, melB, melC].join(' ') },
+        { wave: 'sawtooth', vol: 0.019, legato: 0.7, pan: -0.3, intro: s16Bars('Am E', 16, S16P.ostinato(64)), notes: sec(S16P.ostinato(64)) },
+        { wave: 'brass', vol: 0.02, env: 'stab', poly: true, pan: 0.3, intro: '-/32', notes: `-/128 ${sec(S16P.stabs, [pA2, pB, pC])}` },
+        { wave: 'triangle', vol: 0.075, fx: 0, intro: 'A2/2! -/2 A2/2! -/2 A2/2! -/2 G2/2 G#2/2 E2/16', notes: sec(S16P.drive) },
+        { wave: 'noise', vol: 0.022, fx: 0.15, intro: 'c+k/2! -/2 k/2! -/2 k/2! -/2 s/2 s/2 s/1 s/1 s/1 s/1 s/1 s/1 s/1 s/1 t/2 t/2 T/2 T/2',
+          notes: [dr(groove), dr(groove), dr('k/2 o/2 s/2 o/2 k/2 k/2 s/2 o/2'), dr('k/4 h/2 h/2 s/4 h/2 h/2')].join(' ') },
+      ],
+    };
+  })(),
+  // "¡Casi!" de la Arena: la misma banda pasa a Do mayor y acelera a 170 BPM, 32 compases (~45 s).
+  snes_arena_casi: (() => {
+    const pA1 = 'C C F G Am F D7 G';
+    const pA2 = 'C C F G Am F D7 C';
+    const pB = 'F G Em Am Dm G C G7';
+    const m7 = 'G4/2 C5/2 E5/2 G5/4 E5/2 G5/2 C6/2 B5/3 C6/1 B5/2 G5/2 E5/4 C5/4 ' +
+      'A4/2 C5/2 F5/2 A5/4 G5/2 A5/2 C6/2 D6/6 C6/2 B5/2 A5/2 G5/4 ' +
+      'A5/2 C6/2 E6/4 D6/2 C6/2 A5/4 F5/2 A5/2 C6/4 B5/2 A5/2 F5/4 ' +
+      'F#5/2 A5/2 C6/2 D6/4 C6/2 A5/2 F#5/2';
+    const melA1 = `${m7} G5/4 B5/4 D6/6 -/2`;
+    const melA2 = `${m7} C6/8! G5/2 E5/2 C5/4`;
+    const melB = 'A5/4 C6/4 F6/6 E6/2 D6/4 B5/4 G5/8 G5/2 B5/2 E6/4 D6/2 B5/2 G5/4 A5/4 C6/4 E6/4 A6/4! ' +
+      'F6/6 E6/2 D6/4 A5/4 B5/2 D6/2 G6/4 F6/2 D6/2 B5/4 C6/4 E6/4 G6/4 E6/4 F6/2 E6/2 D6/2 C6/2 B5/2 A5/2 G5/2 F5/2';
+    const all = [pA1, pA2, pB, pA2];
+    const sec = (fn) => all.map((p) => s16Bars(p, 16, fn)).join(' ');
+    const groove = 'k/2 o/2 s/2 o/2 k/2 k/2 s/2 o/2';
+    const fill = 'k/2 h/2 s/2 h/2 s/1 s/1 s/1 s/1 t/2 T/2';
+    const dr = `c+${groove} ${Array(6).fill(groove).join(' ')} ${fill}`;
+    return {
+      bpm: 170, era: 'snes',
+      voices: [
+        { wave: 'square', vol: 0.038, notes: [melA1, melA2, melB, melA2].join(' ') },
+        { wave: 'sawtooth', vol: 0.019, legato: 0.7, pan: -0.3, notes: sec(S16P.ostinato(64)) },
+        { wave: 'brass', vol: 0.02, env: 'stab', poly: true, pan: 0.3, notes: sec(S16P.stabs) },
+        { wave: 'triangle', vol: 0.075, fx: 0, notes: sec(S16P.drive) },
+        { wave: 'noise', vol: 0.022, fx: 0.15, notes: [dr, dr, dr, dr].join(' ') },
+      ],
+    };
+  })(),
+};
+
+// Reina Nébula: lamento submarino en Do menor y 6/8 (compases de 12 pasos), 32 compases.
+// Flauta con eco, arpegios de "burbujas" de campanita y un pad de cuerdas, al estilo de las
+// cuevas acuáticas de los juegos de exploración de 16 bits. A los 92 BPM dura ~63 s.
+// Al 60 % se prenden las luces: snes_nebula2 toca las MISMAS voces a 110 BPM (~52 s) con bajo
+// que se mueve y batería a contratiempo. Ojo: la Copia de Sombra de GameCube recorta snes_nebula.
+const SNES_NEBULA_VOICES = (() => {
+  const prog = 'Cm Cm Ab Ab Fm Fm G G Cm Cm Ab Ab Fm Fm G G Eb Bb Ab Fm Db Db G G7 Ab G Fm Eb Db Cm G G';
+  const mel = 'G4/6 C5/3 D5/3 Eb5/9 D5/3 C5/6 Eb5/3 G5/3 F5/6 Eb5/3 C5/3 Ab5/6 G5/3 F5/3 Eb5/3 F5/3 Ab5/3 C6/3 ' +
+    'B5/6 G5/3 F5/3 D5/9 -/3 ' +
+    'G5/6 Eb5/3 F5/3 G5/9 Ab5/3 C6/6 Bb5/3 Ab5/3 G5/6 Eb5/3 C5/3 F5/3 Ab5/3 C6/3 Eb6/3 Db6/6 C6/3 Ab5/3 ' +
+    'B5/3 C6/3 D6/3 F6/3 Eb6/6 D6/6 ' +
+    'G5/6 Bb5/3 Eb6/3 D6/9 F5/3 Ab5/6 C6/3 Eb6/3 F6/9! Eb6/3 Db6/6 C6/3 Ab5/3 F5/6 Ab5/3 Db6/3 ' +
+    'B5/6 D6/3 F6/3 G6/6 F6/3 D6/3 ' +
+    'Eb5/6 C5/6 D5/6 B4/6 C5/6 Ab4/6 G4/6 Bb4/3 G4/3 Ab4/6 F4/6 G4/6 Eb4/6 D4/3 F4/3 G4/3 B4/3 D5/12';
+  const bubbles = s16Bars(prog, 12, (c, st) => {
+    const t = s16Chord(c, 60);
+    return [t[0], t[1], t[2], t[0] + 12, t[2], t[1]].map((m, i) => `${s16n(m)}/2${i ? '?' : ''}`).join(' ');
+  });
+  return {
+    prog,
     voices: [
-      { wave: 'sine', vol: 0.055, notes: SNES_MAP_MEL },
-      { wave: 'square', vol: 0.012, notes: echoVoice(SNES_MAP_MEL, 2) },
-      { wave: 'triangle', vol: 0.1, notes: 'D3/4 A2/4 D3/4 A2/4 G2/4 D3/4 G2/4 D3/4 E2/4 B2/4 E3/4 B2/4 A2/4 E3/4 A2/4 C#3/4 ' +
-        'D3/4 A2/4 A2/4 E3/4 G2/4 D3/4 G2/4 B2/4 D3/4 F#3/4 A3/4 F#3/4 A2/4 E3/4 D3/8' },
-      { wave: 'sawtooth', vol: 0.01, notes: 'F#4/16 D4/16 E4/16 E4/16 F#4/8 E4/8 D4/16 F#4/16 E4/16' },
-      { wave: 'sawtooth', vol: 0.01, notes: 'A4/16 G4/16 B4/16 C#5/16 A4/8 C#5/8 B4/16 A4/16 C#5/8 A4/8' },
-      { wave: 'noise', vol: 0.012, notes: rep('x/4 -/4 x/2 x/2 -/4', 8) },
+      { wave: 'flute', vol: 0.045, env: 'soft', vib: 'slow', notes: mel },
+      { wave: 'bell', vol: 0.022, env: 'bell', pan: -0.35, notes: bubbles },
+      { wave: 'strings', vol: 0.016, env: 'pad', poly: true, pan: 0.35, notes: s16Bars(prog, 12, S16P.pad(55)) },
     ],
-  },
-  // Batalla normal: Mi menor, orquestal. Metales, timbal y cuerdas.
-  snes_battle: {
-    bpm: 155,
-    voices: [
-      { wave: 'square', vol: 0.03, notes: SNES_BATTLE_MEL },
-      { wave: 'square', vol: 0.016, notes: 'B4/4 B4/4 G4/4 B4/4 A4/4 A4/4 F#4/4 D5/4 G4/4 E4/4 E4/4 E4/4 D#5/4 D#5/4 F#4/8' },
-      { wave: 'triangle', vol: 0.11, notes: rep('E2/2 E3/2', 4) + ' ' + rep('D2/2 D3/2', 4) + ' ' + rep('C2/2 C3/2', 4) + ' ' + rep('B1/2 B2/2', 4) },
-      { wave: 'sawtooth', vol: 0.012, notes: 'E4/16 D4/16 C4/8 E4/8 D#4/16' },
-      { wave: 'noise', vol: 0.03, notes: rep('x/4 -/2 x/2 x/4 x/2 x/2', 4) },
-    ],
-  },
-  // Rayo Cero: Fa# menor, rock. Guitarras de power chords, bajo en corcheas, bombo en 4.
-  snes_rayo: {
-    bpm: 175,
-    voices: [
-      { wave: 'square', vol: 0.03, notes: SNES_RAYO_MEL },
-      { wave: 'square', vol: 0.014, notes: rayoGuitar(['F#3', 'D3', 'E3', 'F#3', 'F#3', 'D3', 'E3', 'C#3']) },
-      { wave: 'square', vol: 0.01, notes: rayoGuitar(['C#4', 'A3', 'B3', 'C#4', 'C#4', 'A3', 'B3', 'G#3']) },
-      { wave: 'triangle', vol: 0.11, notes: ['F#2', 'D2', 'E2', 'F#2', 'F#2', 'D2', 'E2', 'C#2'].map((n) => rep(`${n}/2`, 8)).join(' ') },
-      { wave: 'noise', vol: 0.03, notes: rep('x/2 x/2', 32) },
-    ],
-  },
-  // Capitán Vulpino: Si bemol mayor, espacial y heroica. Fanfarria, arpegio y redoble.
-  snes_vulpino: {
-    bpm: 140,
-    voices: [
-      { wave: 'square', vol: 0.03, notes: 'F4/2 A#4/2 D5/4 F5/6 D5/2 D#5/2 F5/2 G5/4 F5/4 D#5/4 D5/2 D#5/2 F5/4 A#5/4 A5/4 A#5/12 -/4' },
-      { wave: 'sine', vol: 0.03, notes: rep('A#4 D5 F5 A#5 F5 D5 A#4 D5', 2) + ' ' + rep('D#5 G5 A#5 D#6 A#5 G5 D#5 G5', 2) + ' ' +
-        'G4 A#4 D5 G5 D5 A#4 G4 A#4 F4 A4 C5 F5 C5 A4 F4 A4 ' + rep('A#4 D5 F5 A#5 F5 D5 A#4 D5', 2) },
-      { wave: 'triangle', vol: 0.11, notes: 'A#1/4 F2/4 A#1/4 F2/4 D#2/4 A#2/4 D#2/4 A#2/4 G2/4 D2/4 F2/4 C2/4 A#1/8 A#1/8' },
-      { wave: 'noise', vol: 0.026, notes: rep('x/2 -/2 x/1 x/1 x/2', 8) },
-    ],
-  },
-  // Reina Nébula: Do menor, 6/8, submarina y lenta. Al 60 % sube a 110 con contratiempo.
+  };
+})();
+Object.assign(SNES_TRACKS, {
   snes_nebula: {
-    bpm: 92,
-    voices: SNES_NEBULA_VOICES.concat([{ wave: 'noise', vol: 0.006, notes: rep('-/6 x/3 -/3', 8) }]),
+    bpm: 92, era: 'snes', fx: { echo: { steps: 3, feedback: 0.45, mix: 0.32, tone: 2200 }, filter: { type: 'lowpass', freq: 6000 }, comp: true },
+    voices: SNES_NEBULA_VOICES.voices.concat([
+      { wave: 'warmbass', vol: 0.075, fx: 0, notes: s16Bars(SNES_NEBULA_VOICES.prog, 12, (c) => { const [r] = s16Chord(c, 36); return `${s16n(r)}/9 ${s16n(r + 7)}/3`; }) },
+      { wave: 'noise', vol: 0.018, fx: 0.4, notes: Array(32).fill('T/2? -/4 h/2? -/4').join(' ') },
+    ]),
   },
   snes_nebula2: {
-    bpm: 110,
-    voices: SNES_NEBULA_VOICES.concat([{ wave: 'noise', vol: 0.016, notes: rep('-/3 x/3 -/3 x/3', 8) }]),
+    bpm: 110, era: 'snes',
+    voices: SNES_NEBULA_VOICES.voices.concat([
+      { wave: 'warmbass', vol: 0.075, fx: 0, notes: s16Bars(SNES_NEBULA_VOICES.prog, 12, (c) => { const [r] = s16Chord(c, 36); return `${s16n(r)}/3! ${s16n(r)}/1 ${s16n(r)}/2 ${s16n(r + 7)}/3 ${s16n(r + 12)}/3`; }) },
+      { wave: 'noise', vol: 0.018, fx: 0.2, notes: Array(4).fill(`c+k/2 h/2 h/2? s/2 h/2 h/2? ${Array(6).fill('k/2 h/2 h/2? s/2 h/2 h/2?').join(' ')} k/2 s/2 s/1? s/1 s/2 t/2 T/2`).join(' ') },
+    ]),
   },
-  snes_arena: withStrings(TRACKS.tecloides, ['A4/16 A4/16 G4/16 F#4/8 G#4/8', 'E4/16 C5/16 E4/16 A4/8 B4/8'], 165, '-/16'),
-  snes_arena_casi: withStrings(TRACKS.tecloides_casi, ['E4/16 E4/16 F4/16 G4/16', 'G4/16 C5/16 A4/16 B4/16'], 172),
-};
+});
 
 // ---------- Cosas que pasan en las batallas ----------
 
