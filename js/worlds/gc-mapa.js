@@ -204,49 +204,128 @@ Object.assign(SPRITES, GC_GROUND, {
   ]),
 });
 
-// ---------- Música ORIGINAL de las zonas (todas las voces de cada pista suman los mismos pasos) ----------
-// Isla Celeste: Fa mayor en 3/4 (vals marinero, como dirigir el viento con batuta). 96 pasos.
-TRACKS.gc_celeste = {
-  bpm: 132,
-  voices: [
-    {
-      wave: 'square', vol: 0.026,
-      notes: 'C5/4 F5/4 A5/4 G5/6 F5/2 E5/4 D5/4 G5/4 A#5/4 A5/8 -/4 ' +
-        'C6/4 A5/4 F5/4 G5/6 A5/2 G5/4 E5/4 C5/4 E5/4 F5/8 -/4',
-    },
-    { wave: 'triangle', vol: 0.1, notes: 'F2/4 C3/4 C3/4 C2/4 G2/4 G2/4 A#1/4 F2/4 F2/4 F2/4 C3/4 C3/4 F2/4 A2/4 A2/4 C2/4 G2/4 G2/4 C2/4 G2/4 G2/4 F2/4 C3/4 C3/4' },
-    { wave: 'sine', vol: 0.02, notes: rep('-/4 A6/1 -/3 C7/1 -/3', 8) },
-    { wave: 'noise', vol: 0.018, notes: rep('x/4 -/2 x/2 -/2 x/2', 8) },
-  ],
-};
-// Pueblo de Bellota: Re mayor, tranquila, de pueblito con buzones. 64 pasos.
-TRACKS.gc_bellota = {
-  bpm: 112,
-  voices: [
-    {
-      wave: 'square', vol: 0.024,
-      notes: 'F#5/2 A5/2 B5/2 A5/2 F#5/4 D5/4 E5/2 F#5/2 G5/2 E5/2 A5/8 ' +
-        'G5/2 B5/2 D6/2 B5/2 A5/4 F#5/4 E5/2 D5/2 E5/2 C#5/2 D5/8',
-    },
-    { wave: 'triangle', vol: 0.1, notes: 'D3/4 A2/4 D3/4 A2/4 G2/4 D3/4 A2/4 E3/4 G2/4 D3/4 G2/4 D3/4 A2/4 E3/4 D3/8' },
-    { wave: 'sine', vol: 0.02, legato: 1, notes: 'D4/16 E4/16 G4/16 F#4/16' },
-    { wave: 'noise', vol: 0.016, notes: rep('x/2 -/2 x/1 x/1 -/2', 8) },
-  ],
-};
-// Arena Final: Mi menor, tensa, antes del torneo. 64 pasos.
-TRACKS.gc_arena = {
-  bpm: 140,
-  voices: [
-    {
-      wave: 'square', vol: 0.026,
-      notes: 'E5/4 -/2 E5/2 G5/4 F#5/4 E5/2 D5/2 B4/4 -/8 ' +
-        'C5/4 -/2 C5/2 E5/4 D5/4 C5/2 B4/2 E5/8 -/4',
-    },
-    { wave: 'triangle', vol: 0.11, notes: `${rep('E2/2 E3/2', 8)} ${rep('C2/2 C3/2', 4)} ${rep('D2/2 D3/2', 4)}` },
-    { wave: 'sine', vol: 0.022, legato: 1, notes: 'E4/16 E4/16 C4/16 D4/16' },
-    { wave: 'noise', vol: 0.024, notes: rep('x/2 -/2 x/2 x/2', 8) },
-  ],
-};
+// ---------- Música ORIGINAL de las zonas (era 'gc'; ayudantes gcBars/GC_* en js/worlds/gc.js) ----------
+// Isla Celeste: giga celta de mar en Sol mayor (6/8) al estilo Wind Waker; flauta, violín,
+// arpa, bodhrán y una gaita con bordón en la parte C (Mi menor). AABB + C, 40 compases.
+TRACKS.gc_celeste = (() => {
+  // Compases de 12 pasos: cada corchea de la giga son 2 pasos.
+  const mA = 'D5/2 G5/2 B5/2 A5/4 G5/2 | B5/2 A5/2 G5/2 D5/4 B4/2 | C5/2 E5/2 G5/2 C6/4 B5/2 | A5/2 B5/2 A5/2 F#5/4 D5/2 | ';
+  const melA = `${mA} D5/2 G5/2 B5/2 D6/4 B5/2 | E6/4 D6/2 B5/2 G5/2 E5/2 | E5/2 G5/2 C6/2 B5/2 A5/2 F#5/2 | G5/4 B5/2 G5/6`;
+  const melA2 = `${mA} D6/2 B5/2 G5/2 D6/2 B5/2 G5/2 | E6/2 C6/2 A5/2 E6/4 D6/2 | B5/2 G5/2 B5/2 A5/2 F#5/2 D5/2 | G5/6! -/6`;
+  const mB = 'B5/2 E6/2 E6/2 E6/4 D6/2 | E6/2 F#6/2 G6/2 F#6/4 E6/2 | D6/2 A5/2 D6/2 F#6/4 E6/2 | D6/2 B5/2 A5/2 F#5/4 A5/2 | ' +
+    'G5/2 C6/2 E6/2 G6/4! E6/2 | D6/2 B5/2 G5/2 D6/4 B5/2 | ';
+  const melB = `${mB} C6/2 B5/2 A5/2 D6/2 C6/2 A5/2 | B5/4 A5/2 G5/6`;
+  const melB2 = `${mB} A5/2 B5/2 C6/2 D6/4 F#5/2 | G5/6! -/6`;
+  const melC = 'E5/6 G5/4 A5/2 | B5/6 A5/4 G5/2 | A5/6 F#5/4 D5/2 | E5/2 F#5/2 G5/2 A5/6 | ' +
+    'C6/6 B5/4 A5/2 | B5/6 G5/4 D5/2 | C6/4 B5/2 A5/4 F#5/2 | E5/6 -/2 D5/2 F#5/2';
+  // Un acorde por medio compás (negra con puntillo).
+  const hA = ['G', 'G', 'G', 'G', 'C', 'C', 'D', 'D', 'G', 'G', 'Em', 'Em', 'C', 'D', 'G', 'G'];
+  const hA2 = ['G', 'G', 'G', 'G', 'C', 'C', 'D', 'D', 'G', 'G', 'Am', 'Am', 'G', 'D', 'G', 'G'];
+  const hB = ['Em', 'Em', 'Em', 'Em', 'D', 'D', 'D', 'D', 'C', 'C', 'G', 'G', 'Am', 'D', 'G', 'G'];
+  const hC = ['Em', 'Em', 'Em', 'Em', 'D', 'D', 'D', 'D', 'C', 'C', 'G', 'G', 'Am', 'B', 'Em', 'Em'];
+  const BS = { G: ['G2', 'D3'], C: ['C3', 'G2'], D: ['D3', 'A2'], Em: ['E2', 'B2'], Am: ['A2', 'E3'], B: ['B2', 'F#2'] };
+  const CH = { G: 'G3+B3+D4', C: 'G3+C4+E4', D: 'F#3+A3+D4', Em: 'G3+B3+E4', Am: 'A3+C4+E4', B: 'F#3+B3+D#4' };
+  const bas = (h) => gcBars(h, (c) => `${BS[c][0]}/4 ${BS[c][1]}/2`);
+  const strum = (h) => gcBars(h, (c) => `-/2 ${CH[c]}/2. ${CH[c]}/2.`);
+  // Bodhrán: grave en el 1 y el 4 de la giga; el último compás de cada parte, redoble.
+  const bod = 'k+T/2 t/2? t/2? T/2 t/2? t/2';
+  const bodFill = 'T/2 t/1 t/1 t/2 T/2 t/1! t/1! T/2!';
+  const drm = (first) => `${first ? 'c+' : ''}${bod} ${rep(bod, 6)} ${bodFill}`;
+  return {
+    bpm: 152, era: 'gc', intro: ['I'], form: ['A', 'A2', 'B', 'B2', 'C'],
+    voices: [
+      // Flauta (la "tin whistle").
+      { wave: 'square', vol: 0.045, vib: 'light', parts: { I: '-/24', A: melA, A2: melA2, B: melB, B2: melB2 } },
+      // Violín que dobla en las segundas vueltas.
+      { wave: 'sawtooth', vol: 0.014, env: { a: 0.01, d: 0.1, s: 0.7, r: 0.06 }, pan: 0.25, parts: { A2: melA2, B2: melB2 } },
+      // Gaita: lleva la parte C sola con su bordón.
+      { wave: GC_GAITA, vol: 0.03, env: 'organ', filter: 3200, vib: { rate: 5, depth: 0.08, delay: 0.3 }, parts: { C: melC } },
+      { wave: GC_GAITA, vol: 0.02, poly: true, env: 'pad', filter: 1100, fx: 0.4,
+        parts: { I: 'G2+D3/24', C: 'E2+B2/96' } },
+      { wave: 'triangle', vol: 0.095, env: 'bass', fx: 0, parts: { A: bas(hA), A2: bas(hA2), B: bas(hB), B2: bas(hB), C: bas(hC) } },
+      { wave: GC_HARP, vol: 0.022, poly: true, env: 'pluck', fx: 0.5, pan: -0.3,
+        parts: { A: strum(hA), A2: strum(hA2), B: strum(hB), B2: strum(hB), C: strum(hC) } },
+      { wave: 'noise', vol: 0.016, fx: 0.2,
+        parts: { I: 'T/2 t/2? t/2? T/2 t/2? t/2 | T/2 t/2 t/2 T/2! T/2! T/2!', A: drm(true), A2: drm(false), B: drm(true), B2: drm(false), C: drm(true) } },
+    ],
+  };
+})();
+// Pueblo de Bellota: pueblito tranquilo al estilo Animal Crossing (la música de cada hora y
+// los temas de K.K.): jazz suave con swing en Re mayor, silbido, piano eléctrico en charlestón,
+// bajo caminante y escobillas. A A' B A, 32 compases.
+TRACKS.gc_bellota = (() => {
+  const mA = '-/2 F#5/2 A5/2 C#6/4 B5/2 A5/2 F#5/2 | A5/6 F#5/2 D5/4 -/4 | -/2 G5/2 B5/2 D6/4 C#6/2 B5/2 G5/2 | A5/6 C#6/2 B5/4 -/4 | ' +
+    '-/2 A5/2 C#6/2 E6/4 D6/2 C#6/2 A5/2 | B5/6 A5/2 F#5/2 D#5/2 -/4 | E5/2 G5/2 B5/2 D6/2 C#6/4 A5/2 G5/2 | ';
+  const melA = `${mA} F#5/8 -/8`;
+  const melA2 = `${mA} D5/4 F#5/2 A5/2 C6/6 -/2`;
+  const melB = 'B5/4 D6/2 F#6/6 E6/2 D6/2 | E6/6 D6/2 Bb5/4 G5/4 | -/2 A5/2 C#6/2 E6/2 F#6/6 E6/2 | D#6/6 C#6/2 B5/4 A5/4 | ' +
+    'G5/2 B5/2 D6/2 G6/2! F#6/4 E6/4 | C#6/6 B5/2 A5/4 G5/4 | F#5/2 A5/2 C#6/2 E6/2 D#6/4 B5/4 | E6/4 D6/2 B5/2 C#6/4 A5/4';
+  // Acordes: uno o dos por compás ("Em7 A7" = medio y medio).
+  const hA = ['Dmaj7', 'Bm7', 'Em7', 'A7', 'F#m7', 'B7', 'Em7 A7', 'Dmaj7'];
+  const hA2 = ['Dmaj7', 'Bm7', 'Em7', 'A7', 'F#m7', 'B7', 'Em7 A7', 'D7'];
+  const hB = ['Gmaj7', 'Gm6', 'F#m7', 'B7', 'Em7', 'A7', 'F#m7 B7', 'Em7 A7'];
+  const EP = { Dmaj7: 'F#4+A4+C#5', Bm7: 'D4+F#4+A4', Em7: 'D4+G4+B4', A7: 'C#4+G4+B4', 'F#m7': 'E4+A4+C#5', B7: 'D#4+A4+B4',
+    D7: 'C4+F#4+A4', Gmaj7: 'F#4+B4+D5', Gm6: 'E4+G4+Bb4' };
+  // Charlestón: un golpe en el "y" del 1 y otro en el 3 (o el segundo acorde del compás).
+  const comp = (h) => gcBars(h, (c) => { const [x, y = x] = c.split(' '); return `-/2 ${EP[x]}/2. -/4 ${EP[y]}/2. -/2 ${EP[y]}/4`; });
+  // Bajo caminante en negras, con notas de paso hacia el acorde que sigue.
+  const walkA = 'D3/4 F#3/4 A3/4 C3/4 | B2/4 D3/4 F#3/4 D#3/4 | E3/4 G3/4 B2/4 Bb2/4 | A2/4 C#3/4 E3/4 G3/4 | ' +
+    'F#2/4 A2/4 C#3/4 C3/4 | B2/4 D#3/4 F#3/4 F3/4 | E3/4 B2/4 A2/4 C#3/4 | ';
+  const basA = `${walkA} D3/4 A2/4 F#2/4 A2/4`;
+  const basA2 = `${walkA} D3/4 C3/4 A2/4 F#2/4`;
+  const basB = 'G2/4 B2/4 D3/4 F#3/4 | G2/4 Bb2/4 D3/4 G3/4 | F#3/4 C#3/4 A2/4 C#3/4 | B2/4 D#3/4 F#3/4 F3/4 | ' +
+    'E3/4 B2/4 G2/4 B2/4 | A2/4 C#3/4 E3/4 G3/4 | F#3/4 C#3/4 B2/4 D#3/4 | E3/4 B2/4 A2/4 C#3/4';
+  // Campanitas que contestan al silbido en los huecos (solo en A').
+  const bellA2 = '-/28 C#6/2 A5/2 | -/28 E6/2 C#6/2 | -/28 F#6/2 D#6/2 | -/32';
+  const brush = 'k+h/4 h/2 h/2? s+h/4 h/2 h/2?';
+  const brushFill = 'k+h/4 h/2 h/2? s/2? s/2? s/2 s/2';
+  const drA = `${rep(brush, 7)} ${brushFill}`;
+  return {
+    bpm: 96, era: 'gc', swing: 0.18, form: ['A', 'A2', 'B', 'A'],
+    fx: { reverb: { time: 1.8, mix: 0.22 }, echo: { steps: 3, feedback: 0.18, mix: 0.08 }, comp: true },
+    voices: [
+      // Silbido de vecino (flauta suave con vibrato).
+      { wave: 'square', vol: 0.048, legato: 0.8, vib: { rate: 5, depth: 0.16, delay: 0.25 }, parts: { A: melA, A2: melA2, B: melB } },
+      { wave: GC_EPIANO, vol: 0.024, poly: true, env: { a: 0.004, d: 0.4, s: 0.35, r: 0.2 }, fx: 0.5, pan: -0.25,
+        parts: { A: comp(hA), A2: comp(hA2), B: comp(hB) } },
+      { wave: 'triangle', vol: 0.095, env: 'bass', legato: 0.7, fx: 0, parts: { A: basA, A2: basA2, B: basB } },
+      { wave: 'bell', vol: 0.025, env: 'bell', fx: 0.8, pan: 0.35, parts: { A2: bellA2 } },
+      { wave: 'noise', vol: 0.014, fx: 0.15, parts: { A: drA, A2: drA, B: drA } },
+    ],
+  };
+})();
+// Arena Final: tensa antes del torneo, rock orquestal al estilo Super Smash Bros. Melee en
+// Mi menor; metales al frente, cuerdas en semicorcheas y un puente que sube la tensión. 28 compases.
+TRACKS.gc_arena = (() => {
+  const melA = 'E5/3 E5/3 E5/2 G5/4 F#5/4 | E5/4 B4/4 -/4 D5/2 E5/2 | G5/3 G5/3 G5/2 C6/4 B5/4 | A5/8 F#5/4 D5/4 | ' +
+    'E5/3 E5/3 E5/2 B5/4 A5/4 | G5/4 F#5/2 E5/2 D5/4 E5/4 | C6/6 B5/2 A5/4 E5/4 | D#5/8 F#5/4 B5/4';
+  const melB = 'G5/6 A5/2 B5/4 C6/4 | D6/6 C6/2 B5/4 A5/4 | B5/6 F#5/2 D5/4 F#5/4 | E5/12 -/4 | ' +
+    'E6/6 D6/2 C6/4 G5/4 | F#6/6! E6/2 D6/4 A5/4 | B5/4 A5/2 B5/2 D#6/4 F#6/4 | F#6/8 -/4 B5/2 B5/2';
+  const hA = ['Em', 'Em', 'C', 'D', 'Em', 'Em', 'Am', 'B7'];
+  const hB = ['C', 'D', 'Bm', 'Em', 'C', 'D', 'B7', 'B7'];
+  const hP = ['Am', 'B7', 'C', 'D'];
+  const ST = { Em: ['E4', 'B4', 'E5'], C: ['C4', 'G4', 'C5'], D: ['D4', 'A4', 'D5'], Am: ['A3', 'E4', 'A4'], B7: ['B3', 'F#4', 'A4'], Bm: ['B3', 'F#4', 'B4'] };
+  const BS = { Em: 'E2', C: 'C2', D: 'D2', Am: 'A1', B7: 'B1', Bm: 'B1' };
+  const CH = { Em: 'E4+G4+B4', C: 'E4+G4+C5', D: 'F#4+A4+D5', Am: 'E4+A4+C5', B7: 'D#4+F#4+A4', Bm: 'D4+F#4+B4' };
+  const ost = (h) => gcBars(h, (c) => { const [x, y, z] = ST[c]; return rep(`${x}/1. ${y}/1. ${z}/1. ${y}/1.`, 4); });
+  const eighths = (h) => gcBars(h, (c) => rep(`${BS[c]}/2.`, 8));
+  const stab = (h) => gcBars(h, (c) => `-/6 ${CH[c]}/2. -/4 ${CH[c]}/2. -/2`);
+  const rock = 'k/2 h/2 s/2 h/2 k/2 k/2 s/2 h/2';
+  const drA = `c+${rock} ${rep(rock, 6)} k/2 h/2 s/2 h/2 k/2 s/1 s/1 t/2 T/2!`;
+  const drP = 'k/4 s/4 k/4 s/4 | k/4 s/4 k/2 k/2 s/4 | ' + rep('k+s/2', 8) + ' | ' + rep('s/1', 12) + ' t/1 t/1! T/1! T/1!';
+  return {
+    bpm: 132, era: 'gc', form: ['A', 'B', 'A', 'P'],
+    voices: [
+      { wave: 'brass', vol: 0.05, env: { a: 0.02, d: 0.15, s: 0.7, r: 0.1 }, vib: { rate: 5, depth: 0.14, delay: 0.25 },
+        parts: { A: melA, B: melB, P: '-/64' } },
+      { wave: 'sawtooth', vol: 0.016, env: 'stab', fx: 0.5, pan: 0.3, parts: { A: ost(hA), B: ost(hB), P: ost(hP) } },
+      { wave: 'brass', vol: 0.03, poly: true, env: 'stab', pan: -0.3,
+        parts: { A: stab(hA), B: stab(hB), P: gcBars(hP, (c) => `${CH[c]}/16`) } },
+      { wave: 'triangle', vol: 0.1, env: 'bass', fx: 0, parts: { A: eighths(hA), B: eighths(hB), P: eighths(hP) } },
+      { wave: 'noise', vol: 0.024, fx: 0.15, parts: { A: drA, B: drA, P: drP } },
+    ],
+  };
+})();
 
 // ---------- Casillas (sprite 2D + colores para el modo clásico; d3/h para el 3D) ----------
 const gcT = (s, colors, extra = {}) => ({ s, ...(colors ? { colors } : {}), ...extra });
