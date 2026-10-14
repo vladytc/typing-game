@@ -311,6 +311,7 @@ const FIN_CRED = {
   gc: ['-/2 E5/2 G5/2 C6/4 B5/2 A5/2 G5/2 -/2 E5/2 F5/2 G5/2 E5/4 D5/4', 'C3/3 G3/3 C3/2 A2/3 E3/3 A2/2 F2/3 C3/3 F2/2 G2/3 D3/3 G2/2', rep('x/3 x/3 x/2', 4)],
   wii: ['C6/2 G5/2 E5/2 G5/2 A5/2 G5/2 E5/4 D5/2 E5/2 G5/2 E5/2 C5/8', 'C3/4 C3/4 A2/4 A2/4 F2/4 F2/4 G2/4 G2/4', rep('x/1 -/1 x/1 -/1 x/2 -/2', 4)],
 };
+const FIN_PAD_A = 'C4/16 A3/16 F3/16 G3/16 C4/16 E3/16 F3/8 G3/8 C4/16';
 const finCredVoice = (k) => ['gb', 'nes', 'snes', 'n64', 'gc', 'wii'].map((w) => rep(FIN_CRED[w][k], 2)).join(' ');
 
 Object.assign(TRACKS, {
@@ -336,8 +337,9 @@ Object.assign(TRACKS, {
   fin_nombre: {
     bpm: 80,
     voices: [
-      ...TRACKS.town.voices,
-      { wave: 'sine', vol: 0.05, notes: 'C4/16 A3/16 F3/16 G3/16' },
+      ...TRACKS.town.voices.filter((v) => v.wave !== 'noise'),
+      // Pad que sigue los acordes del pueblo (A A' B A).
+      { wave: 'sine', vol: 0.05, notes: [FIN_PAD_A, FIN_PAD_A, 'F3/16 C4/16 D4/16 G3/16 A3/16 F3/16 D4/8 G3/8 G3/16', FIN_PAD_A].join(' ') },
     ],
   },
   // Créditos: popurrí de todas las eras, terminando en el pueblo.
@@ -346,15 +348,14 @@ Object.assign(TRACKS, {
     voices: [
       { wave: 'square', vol: 0.032, notes: `${finCredVoice(0)} ${TRACKS.town.voices[0].notes}` },
       { wave: 'triangle', vol: 0.1, notes: `${finCredVoice(1)} ${TRACKS.town.voices[1].notes}` },
-      { wave: 'noise', vol: 0.02, notes: `${finCredVoice(2)} -/64` },
+      { wave: 'noise', vol: 0.02, notes: `${finCredVoice(2)} -/${Music.steps(TRACKS.town.voices[0].notes)}` },
     ],
   },
 });
 
 // Revisa que todas las voces de una pista sumen lo mismo (si no, el loop se desfasa).
 function finTrackSteps(t) {
-  const count = (s) => (s || '').trim().split(/\s+/).filter(Boolean).reduce((a, tok) => a + Number(tok.split('/')[1] || 1), 0);
-  return t.voices.map((v) => count(v.notes));
+  return t.voices.map((v) => Music.steps(v.notes));
 }
 
 // Una nota suelta (para la pantalla de NOMBRAR: cada letra toca una nota del tema del pueblo).
