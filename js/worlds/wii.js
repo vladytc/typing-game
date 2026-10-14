@@ -75,108 +75,335 @@ TRAINERS.daniwii = {
   retry: ['* PROFESORA LETRA (desde las gradas): ¡Ya curé a tu equipo!', '* DANI: Otra vez. Y esta vez escribe con TODOS los dedos.'],
 };
 
-// ---------- Música ORIGINAL (lore §14.2). Todas las voces de cada pista suman los mismos pasos. ----------
+// ---------- Música ORIGINAL (lore §14.2) con el motor de js/music.js (era 'wii': flauta, cuerdas,
+// bajo cálido, campanitas y reverb brillante). Cada pista usa `form`: el motor rellena cada sección
+// para que todas las voces queden alineadas. Estilo: jazz y bossa de los menús, pop deportivo,
+// orquesta espacial. Ninguna melodía viene de un juego; la única pieza ajena es la Oda a la alegría
+// (Beethoven, dominio público), en el gimnasio.
 
-// Gimnasio Sensor: Fa mayor, simple y alegre. El tempo es la mecánica (se crea al tempo de cada prueba).
-// Sin percusión fuerte: el TIC del metrónomo lo pone la escena, para que siempre coincida.
+// Sube o baja `n` semitonos todas las notas de un texto de fichas (para modular una sección).
+const WII_PCS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const WII_PC = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+const wiiMidi = (l, acc, o) => WII_PC[l] + (acc === '#' ? 1 : acc === 'b' ? -1 : 0) + Number(o) * 12;
+const wiiName = (m) => `${WII_PCS[((m % 12) + 12) % 12]}${Math.floor(m / 12)}`;
+function wiiUp(s, n) {
+  return s.replace(/([A-G])([#b]?)(\d)/g, (x, l, acc, o) => wiiName(wiiMidi(l, acc, o) + n));
+}
+// Segunda voz a una tercera diatónica arriba (escala dada en clases de tono, p. ej. Fa mayor).
+function wiiThird(s, scale) {
+  return s.replace(/([A-G])([#b]?)(\d)/g, (x, l, acc, o) => {
+    const m = wiiMidi(l, acc, o);
+    const i = scale.indexOf(((m % 12) + 12) % 12);
+    if (i < 0) return x;
+    let t = m + ((scale[(i + 2) % 7] - scale[i] + 12) % 12);
+    if (t <= m) t += 12;
+    return wiiName(t);
+  });
+}
+// Acorde quebrado en corcheas: 4 notas → sube y baja (16 pasos); en 3/4 son 6 corcheas (12 pasos).
+const wiiBroken = (ch) => { const [a, b, c, d] = ch.split('+'); return `${a}/2 ${b}/2 ${c}/2 ${d}/2 ${c}/2 ${b}/2 ${a}/2 ${b}/2`; };
+// Envolvente de metales: ataque rápido y nota sostenida (la 'stab' se apagaba demasiado).
+const WII_BRASS = { a: 0.01, d: 0.15, s: 0.7, r: 0.08 };
+const wiiHarp = (ch) => { const [a, b, c, d] = ch.split('+'); return `${a}/2 ${b}/2 ${c}/2 ${d}/2 ${c}/2 ${b}/2`; };
+
+// Gimnasio Sensor: la "Oda a la alegría" de Beethoven (9.ª sinfonía, 1824; dominio público) con
+// arreglo propio de pop deportivo en Fa mayor. Nintendo la incluyó en Wii Music (2008): ver
+// https://www.nintendoworldreport.com/news/17028/wii-music-trumpets-into-stores y la lista japonesa en
+// https://purenintendo.com/wii-music-japanese-track-listing/ . Es pura negra, así que marca el pulso igual
+// que el metrónomo. El tempo es la mecánica: se crea al tempo de cada prueba. Sin percusión fuerte (el
+// TIC lo pone la escena). Vuelta 1: flauta con marimba; vuelta 2: trompetas, flauta a una tercera y cuerdas.
 function wiiGymTrack(bpm) {
+  const odeA = 'A5/4 A5/4 A#5/4 C6/4 | C6/4 A#5/4 A5/4 G5/4 | F5/4 F5/4 G5/4 A5/4 |';
+  const ode = `${odeA} A5/6 G5/2 G5/8 | ${odeA} G5/6 F5/2 F5/8 | ` +
+    'G5/4 G5/4 A5/4 F5/4 | G5/4 A5/2 A#5/2 A5/4 F5/4 | G5/4 A5/2 A#5/2 A5/4 G5/4 | F5/4 G5/4 C5/8 | ' +
+    `${odeA} G5/6 F5/2 F5/8`;
+  // Acordes por medio compás (16 compases).
+  const H = 'F F F C F F C C F F F C F F C F C C C F C C F C F F F C F F C F'.split(' ');
+  const CH = { F: 'F4+A4+C5', C: 'E4+G4+C5' };
+  const BS = { F: ['F2', 'C3', 'F3'], C: ['C3', 'G2', 'C3'] };
+  const bassO1 = H.map((c) => `${BS[c][0]}/4 ${BS[c][1]}/4`).join(' ');
+  const bassO2 = H.map((c) => `${BS[c][0]}/2. ${BS[c][2]}/2. ${BS[c][1]}/2. ${BS[c][2]}/2.`).join(' ');
+  const mar = H.map((c) => `-/2 ${CH[c]}/2. -/2 ${CH[c]}/2.`).join(' ');
+  const pad = H.map((c) => `${CH[c]}/8`).join(' ');
   return {
-    bpm,
+    bpm, vol: 1.3, era: 'wii', form: ['O1', 'O2'],
     voices: [
-      { wave: 'sine', vol: 0.04, legato: 0.5, notes: 'F5/4 A5/4 C6/4 A5/4 G5/4 A#5/4 A5/8 F5/4 A5/4 C6/4 D6/4 C6/4 A5/4 F5/8' },
-      { wave: 'triangle', vol: 0.08, notes: rep('F3/4 C3/4', 2) + ' ' + rep('C3/4 G2/4', 2) + ' ' + rep('F3/4 C3/4', 2) + ' ' + rep('A#2/4 C3/4', 2) },
-      { wave: 'sine', vol: 0.018, legato: 0.3, notes: rep('-/2 A4/2', 4) + ' ' + rep('-/2 G4/2', 4) + ' ' + rep('-/2 A4/2', 4) + ' ' + rep('-/2 A#4/2', 4) },
+      { wave: 'square', vol: 0.048, parts: { O1: ode, O2: wiiUp(ode, -12) } },
+      { wave: 'brass', vol: 0.022, env: 'soft', parts: { O1: '-/256', O2: ode } },
+      { wave: 'square', vol: 0.02, parts: { O1: '-/256', O2: wiiThird(ode, [5, 7, 9, 10, 0, 2, 4]) } },
+      { wave: 'triangle', vol: 0.075, fx: 0, env: 'bass', parts: { O1: bassO1, O2: bassO2 } },
+      { wave: [1, 0, 0.3, 0, 0.1], vol: 0.022, env: 'pluck', poly: true, fx: 0.5, parts: { O1: mar, O2: mar } },
+      { wave: 'sawtooth', vol: 0.011, env: 'pad', poly: true, filter: 2500, parts: { O1: '-/256', O2: pad } },
+      { wave: 'noise', vol: 0.016, fx: 0.1, parts: { O1: rep('h/2? h/2', 64), O2: rep('h/2? h/1? h/1', 64) } },
     ],
   };
 }
 
-// Invierte una pista (cuando el Capitán Cometa gira la gravedad, la música suena al revés).
+// Invierte una pista (cuando el Capitán Cometa gira la gravedad, o en la Plaza Lanac): arma la vuelta
+// completa (secciones de `form` con su relleno y grupos "( )*n" expandidos) y la toca de atrás para adelante.
 function wiiReverse(track) {
+  const expand = (s) => {
+    let out = s;
+    let prev;
+    do {
+      prev = out;
+      out = out.replace(/\(([^()]*)\)(?:\s*\*\s*(\d+))?/g, (m, body, n) => Array(Number(n || 1)).fill(body).join(' '));
+    } while (out !== prev);
+    return out.replace(/\|/g, ' ');
+  };
+  const txt = (s) => (Array.isArray(s) ? s.join(' ') : String(s || ''));
+  const len = (sec) => Math.max(0, ...track.voices.map((w) => (w.parts ? Music.steps(txt(w.parts[sec])) : 0)));
+  const flat = (v) => {
+    if (!track.form || !v.parts) return txt(v.notes);
+    return track.form.map((sec) => {
+      const p = txt(v.parts[sec]);
+      const pad = len(sec) - Music.steps(p);
+      return pad > 0 ? `${p} -/${pad}` : p;
+    }).join(' ');
+  };
   return {
     ...track,
-    voices: track.voices.map((v) => ({ ...v, intro: undefined, notes: v.notes.trim().split(/\s+/).reverse().join(' ') })),
+    form: undefined,
+    intro: undefined,
+    voices: track.voices.map((v) => ({
+      ...v, intro: undefined, parts: undefined,
+      notes: expand(flat(v)).trim().split(/\s+/).filter(Boolean).reverse().join(' '),
+    })),
   };
 }
 
 const WII_TRACKS = {
-  // Ciudad Sensor (mapa): Do mayor, limpia y moderna. Marimba, silbido y un bajo redondo.
-  wii_map: {
-    bpm: 110,
-    voices: [
-      { wave: 'sine', vol: 0.035, legato: 0.9, notes: 'E5/4 G5/2 C6/2 B5/4 G5/4 A5/2 G5/2 E5/2 D5/2 C5/8 -/4 D5/2 E5/2 F5/4 E5/2 D5/2 G5/8 -/8' },
-      { wave: 'sine', vol: 0.028, legato: 0.3, notes: rep('C5/2 E5/2 G5/2 E5/2', 2) + ' ' + rep('A4/2 C5/2 E5/2 C5/2', 2) + ' ' + rep('F4/2 A4/2 C5/2 A4/2', 2) + ' ' + rep('G4/2 B4/2 D5/2 B4/2', 2) },
-      { wave: 'triangle', vol: 0.08, notes: 'C3/4 -/4 G2/4 -/4 A2/4 -/4 E2/4 -/4 F2/4 -/4 C3/4 -/4 G2/4 -/4 B2/4 -/4' },
-      { wave: 'noise', vol: 0.012, notes: rep('x -/3 -/2 x/2 -/4 x -/3', 4) },
-    ],
-  },
-  // Batalla normal Wii: Sol menor, "electrónica": ruido en 16 pasos y arpegio sincopado.
-  wii_battle: {
-    bpm: 160,
-    voices: [
-      {
-        wave: 'square', vol: 0.028,
-        notes: 'G5/2 A#5/2 D6/3 C6/1 A#5/2 A5/2 G5/4 F5/2 G5/2 A5/2 A#5/2 C6/3 A#5/1 A5/4 ' +
-          'D#5/2 G5/2 A#5/2 D#6/3 D6/1 C6/2 A#5/4 F5/2 A5/2 C6/2 D6/2 C6/2 A5/2 F#5/4',
-      },
-      { wave: 'square', vol: 0.012, notes: rep('G4 - D5 A#4 - G4 D5 -', 2) + ' ' + rep('F4 - C5 A4 - F4 C5 -', 2) + ' ' + rep('D#4 - A#4 G4 - D#4 A#4 -', 2) + ' ' + rep('D4 - A4 F#4 - D4 A4 -', 2) },
-      { wave: 'triangle', vol: 0.1, notes: rep('G2/2 G3/2', 4) + ' ' + rep('F2/2 F3/2', 4) + ' ' + rep('D#2/2 D#3/2', 4) + ' ' + rep('D2/2 D3/2', 4) },
-      { wave: 'noise', vol: 0.024, notes: rep('x - - x - - x - x - - x - - x x', 4) },
-    ],
-  },
-  // Torneo Sensor: el Reto de Tecloides versión final, con todas las capas y modulación a mitad.
-  wii_torneo: {
-    bpm: 170,
-    voices: [
-      {
-        wave: 'square', vol: 0.03,
-        intro: '-/4 E5 F5 F#5 G5 G#5 A5 A#5 B5 C6/4',
-        notes: 'A5/2 E5/2 A5/2 C6/2 B5/2 G5/2 E5/4 F5/2 A5/2 C6/2 E6/2 D6/3 C6/1 B5/4 ' +
-          'B5/2 F#5/2 B5/2 D6/2 C#6/2 A5/2 F#5/4 G5/2 B5/2 D6/2 F#6/2 E6/3 D6/1 C#6/4',
-      },
-      { wave: 'triangle', vol: 0.11, intro: '-/8 E2/8', notes: rep('A2 A3 G3 A3', 4) + ' ' + rep('F2 F3 E3 F3', 4) + ' ' + rep('B2 B3 A3 B3', 4) + ' ' + rep('G2 G3 F#3 G3', 4) },
-      { wave: 'sine', vol: 0.02, legato: 1, intro: '-/16', notes: 'A3/16 F3/16 B3/16 G3/16' },
-      { wave: 'sine', vol: 0.016, legato: 0.3, intro: '-/16', notes: rep('E6 -/3', 8) + ' ' + rep('F#6 -/3', 8) },
-      { wave: 'noise', vol: 0.03, intro: 'x x x x -/12', notes: rep('x/2 x/2 x/4 x/2 -/2 x/4', 4) },
-    ],
-  },
-  // Capitán Cometa: Mi bemol mayor, vals lento (3/4) y espacial. 8 compases de 12 pasos.
-  wii_cometa: {
-    bpm: 100,
-    voices: [
-      { wave: 'sine', vol: 0.04, legato: 0.95, notes: 'D#5/6 G5/3 A#5/3 D#6/9 D6/3 C6/6 A#5/3 G#5/3 G5/12 F5/6 G5/3 G#5/3 A#5/9 G5/3 F5/6 D5/3 F5/3 D#5/12' },
-      {
-        wave: 'triangle', vol: 0.07,
-        notes: 'D#2/4 G3/4 A#3/4 D#2/4 G3/4 A#3/4 G#2/4 C4/4 D#4/4 D#2/4 G3/4 A#3/4 ' +
-          'A#1/4 D3/4 F3/4 D#2/4 G3/4 A#3/4 A#1/4 D3/4 F3/4 D#2/4 G3/4 A#3/4',
-      },
-      { wave: 'sine', vol: 0.018, legato: 1, notes: 'G3/24 G#3/12 G3/12 F3/12 G3/12 D3/12 G3/12' },
-      { wave: 'sine', vol: 0.014, legato: 0.3, notes: rep('A#6/1 -/11 G6/1 -/11', 4) },
-    ],
-  },
-  // Fase final (7 estrellitas): 4/4 a 128, arpegios de 7 notas (una por estrellita).
-  wii_cometa2: {
-    bpm: 128,
-    voices: [
-      { wave: 'square', vol: 0.028, notes: 'G5/4 A#5/4 D#6/6 D6/2 C6/4 A#5/4 G5/8 G#5/4 C6/4 D#6/6 D6/2 D6/4 C6/2 A#5/2 A#5/8' },
-      { wave: 'sine', vol: 0.02, legato: 0.4, notes: 'D#5 G5 A#5 D6 D#6 G6 A#6 -/9 C5 D#5 G5 A#5 C6 D#6 G6 -/9 G#4 C5 D#5 G5 G#5 C6 D#6 -/9 A#4 D5 F5 A5 A#5 D6 F6 -/9' },
-      { wave: 'triangle', vol: 0.1, notes: rep('D#2/2 D#3/2', 4) + ' ' + rep('C2/2 C3/2', 4) + ' ' + rep('G#1/2 G#2/2', 4) + ' ' + rep('A#1/2 A#2/2', 4) },
-      { wave: 'noise', vol: 0.022, notes: rep('x/2 -/2 x x -/2 x/2 -/2 x x x/2', 4) },
-    ],
-  },
-  // Guiño a la musiquita del canal de los muñequitos: bossa tranquila y ORIGINAL (no es la real).
-  wii_canal: {
-    bpm: 114,
-    voices: [
-      { wave: 'sine', vol: 0.04, legato: 0.8, notes: 'E5/3 G5/1 -/2 A5/2 G5/3 E5/1 -/4 D5/3 E5/1 -/2 F5/2 E5/6 -/2 C5/3 E5/1 -/2 G5/2 A5/3 B5/1 -/4 C6/3 B5/1 -/2 A5/2 G5/8' },
-      {
-        wave: 'sine', vol: 0.018, legato: 0.5,
-        notes: '-/2 E4/2 -/1 B4/2 -/1 G4/2 -/2 B4/2 -/2 -/2 A4/2 -/1 E5/2 -/1 C5/2 -/2 E5/2 -/2 ' +
-          '-/2 F4/2 -/1 C5/2 -/1 A4/2 -/2 C5/2 -/2 -/2 F4/2 -/1 B4/2 -/1 D5/2 -/2 B4/2 -/2',
-      },
-      { wave: 'triangle', vol: 0.07, notes: 'C3/6 G2/2 -/4 C3/2 -/2 F2/6 C3/2 -/4 F2/2 -/2 D3/6 A2/2 -/4 D3/2 -/2 G2/6 D3/2 -/4 G2/2 -/2' },
-      { wave: 'noise', vol: 0.01, notes: rep('x/3 x/3 x/2 -/2 x/2 x/2 x/2', 4) },
-    ],
-  },
+  // Ciudad Sensor (mapa): jazz-pop de menú con swing suave en Do mayor, 110 BPM. Flauta, vibráfono,
+  // piano eléctrico, bajo caminante y escobillas. Forma A A' B A' (32 compases, ~70 s).
+  // La Plaza Lanac (js/secretos/wii.js) la toca al revés con wiiReverse.
+  wii_map: (() => {
+    const melA = 'G5/3 E5/1 -/2 G5/2 B5/4 A5/2 G5/2 | C6/3 A5/1 -/2 E5/2 G5/6 -/2 | F5/3 A5/1 -/2 C6/2 E6/4 D6/2 C6/2 | ' +
+      'B5/6 A5/2 G5/2 F5/2 D5/4 | E5/3 G5/1 -/2 B5/2 D6/4 C6/2 B5/2 | C#6/3 A5/1 -/2 E5/2 G5/4 F5/2 E5/2 | ' +
+      'F5/2 A5/2 D6/4 B5/2 G5/2 F5/4 |';
+    const melB = 'A5/2 C6/2 E6/6 D6/2 C6/2 A5/2 | B5/2 D6/2 G6/6 E6/2 D6/2 B5/2 | A5/2 C6/2 F6/6 E6/2 D6/2 C6/2 | ' +
+      'B5/4 D6/4 G6/4! F6/4 | E6/3 D6/1 -/2 B5/2 G5/4 B5/4 | C#6/3 E6/1 -/2 G6/2 A6/4! G6/2 E6/2 | ' +
+      'F6/4 E6/2 D6/2 C6/2 A5/2 F5/4 | D6/2 C6/2 B5/2 A5/2 G5/2 F5/2 D5/2 G4/2';
+    const CH = { C: 'E4+G4+B4+D5', Am: 'G4+C5+E5+A5', Dm: 'F4+A4+C5+E5', G7: 'F4+B4+D5+G5', A7: 'G4+C#5+E5+A5',
+      C6: 'E4+G4+A4+D5', F: 'E4+A4+C5+F5', Em: 'D4+G4+B4+E5' };
+    const comp = (a, b = a) => `-/2 ${CH[a]}/2. -/4 ${CH[b]}/3 ${CH[b]}/1. -/4`;
+    const progA = [['C'], ['Am'], ['Dm'], ['G7'], ['C'], ['A7'], ['Dm', 'G7']];
+    const epA1 = `${progA.map((p) => comp(...p)).join(' ')} ${comp('C6', 'G7')}`;
+    const epA2 = `${progA.map((p) => comp(...p)).join(' ')} ${CH.C6}/8 -/8`;
+    const epB = [['F'], ['Em'], ['Dm'], ['G7'], ['Em'], ['A7'], ['Dm'], ['G7']].map((p) => comp(...p)).join(' ');
+    const up = (k) => wiiUp(CH[k], 12);
+    const vibA = ['C', 'Am', 'Dm', 'G7', 'C', 'A7', 'Dm', 'C6'].map((k) => wiiBroken(up(k))).join(' ');
+    const vibB = ['F', 'Em', 'Dm', 'G7', 'Em', 'A7', 'Dm', 'G7'].map((k) => wiiBroken(up(k))).join(' ');
+    const basA = 'C3/4 E3/4 G3/4 A3/4 A2/4 C3/4 E3/4 G3/4 D3/4 E3/4 F3/4 F#3/4 G2/4 B2/4 D3/4 B2/4 ' +
+      'C3/4 G2/4 A2/4 B2/4 A2/4 C#3/4 E3/4 G3/4 D3/4 F3/4 G2/4 B2/4';
+    const basB = 'F2/4 A2/4 C3/4 E3/4 E2/4 G2/4 B2/4 D3/4 D3/4 C3/4 A2/4 F2/4 G2/4 A2/4 B2/4 D3/4 ' +
+      'E3/4 D3/4 B2/4 G2/4 A2/4 B2/4 C#3/4 E3/4 D3/4 F3/4 A3/4 F3/4 G2/4 F2/4 E2/4 D2/4';
+    const brush = 'k/4 h/2 h/2? s/4? h/2 h/2?';
+    const fill = 'k/4 h/2 h/2 s/2? t/2 T/2 s/2';
+    return {
+      bpm: 110, vol: 1.3, era: 'wii', swing: 0.14, form: ['A1', 'A2', 'B', 'A2'],
+      voices: [
+        { wave: 'square', vol: 0.05, vib: 'light', parts: {
+          A1: `${melA} E5/8 -/4 G4/2 A4/2`, A2: `${melA} C5/2 E5/2 G5/2 C6/8! -/2`, B: melB } },
+        { wave: 'sine', vol: 0.022, env: 'pluck', fx: 0.7, pan: 0.3, parts: { A1: '-/128', A2: vibA, B: vibB } },
+        { wave: [1, 0.35, 0.12, 0.06], vol: 0.026, env: 'pluck', poly: true, pan: -0.25, fx: 0.5,
+          parts: { A1: epA1, A2: epA2, B: epB } },
+        { wave: 'triangle', vol: 0.075, fx: 0, env: 'bass', parts: {
+          A1: `${basA} C3/4 G2/4 A2/4 B2/4`, A2: `${basA} C3/4 E3/4 G3/4 C3/4`, B: basB } },
+        { wave: 'noise', vol: 0.02, fx: 0.15, parts: {
+          A1: `${rep(brush, 7)} ${fill}`, A2: `c+${rep(brush, 7)} ${fill}`, B: `c+${rep(brush, 7)} ${fill}` } },
+      ],
+    };
+  })(),
+
+  // Batalla normal Wii: rock-funk electrónico de carreras en Sol menor, 160 BPM. Bajo en semicorcheas,
+  // trompetas al frente, arpegios de sintetizador y un puente a medio tiempo. I + A B A C (~48 s).
+  wii_battle: (() => {
+    const melA = 'G5/2! A#5/2 D6/3 C6/1 A#5/2 A5/2 G5/4 | F5/2 G5/2 A5/2 A#5/2 D6/4! C6/4 | ' +
+      'A#5/2 G5/2 D#6/3 D6/1 C6/2 A#5/2 G5/4 | A5/2 A#5/2 C6/2 D6/2 F6/4! D#6/2 D6/2 | ' +
+      'D6/3 C6/1 A#5/2 G5/2 D5/4 G5/4 | A#5/2 A5/2 G5/2 F5/2 G5/8 | ' +
+      'D#5/2 G5/2 A#5/2 D#6/2 D6/3 C6/1 A#5/4 | A5/2 F#5/2 D5/2 F#5/2 A5/4 C6/4';
+    const melB = 'G6/6 F6/2 D#6/4 A#5/4 | C6/6 D6/2 D#6/4 F6/4 | F#6/6 D6/2 A5/4 F#5/4 | G5/2 A5/2 A#5/2 C6/2 D6/8 | ' +
+      'D#6/6 D6/2 C6/4 A#5/4 | A5/6 A#5/2 C6/4 F6/4! | F#6/4 G6/4 A6/4! F#6/4 | D6/2 C6/2 A5/2 F#5/2 D5/2 F#5/2 A5/2 C6/2';
+    const melC = 'C5/4 D#5/4 G5/6 -/2 | F5/2 D#5/2 D5/2 C5/2 G5/8 | A#4/4 D5/4 G5/6 -/2 | A5/2 G5/2 F5/2 D5/2 G5/8 | ' +
+      'C5/4 D#5/4 G#5/6 -/2 | A#5/2 G#5/2 G5/2 D#5/2 C6/8 | D6/4 C6/4 A5/4 F#5/4 | D5/1 F#5/1 A5/1 D6/1 F#6/1 A6/1 D6/1 A5/1 -/8';
+    // Bajo: riff de semicorcheas sobre la raíz (raíz, octava, tercera y séptima del acorde).
+    const riff = (r, o, t, s) => `${r}/2. ${r}/1 ${o}/1 ${r}/2. ${t}/2 ${r}/2. ${s}/2 ${r}/2 ${t}/2`;
+    const BR = { Gm: ['G2', 'G3', 'A#2', 'F2'], Eb: ['D#2', 'D#3', 'G2', 'D2'], F: ['F2', 'F3', 'A2', 'D#2'],
+      D: ['D2', 'D3', 'F#2', 'C3'], Cm: ['C2', 'C3', 'D#2', 'A#1'], Ab: ['G#1', 'G#2', 'C2', 'G1'] };
+    const bass = (prog) => prog.map((c) => riff(...BR[c])).join(' ');
+    const CH = { Gm: 'G4+A#4+D5', Eb: 'G4+A#4+D#5', F: 'F4+A4+C5', D: 'F#4+A4+D5', Cm: 'G4+C5+D#5', Ab: 'G#4+C5+D#5' };
+    const arp = (prog) => prog.map((c) => `${CH[c]}/4. ${CH[c]}/2. ${CH[c]}/2. ${CH[c]}/4. ${CH[c]}/4.`).join(' ');
+    const pad = (prog) => prog.map((c) => `${CH[c]}/16`).join(' ');
+    const pA = ['Gm', 'Gm', 'Eb', 'F', 'Gm', 'Gm', 'Eb', 'D'];
+    const pB = ['Eb', 'F', 'D', 'Gm', 'Eb', 'F', 'D', 'D'];
+    const pC = ['Cm', 'Cm', 'Gm', 'Gm', 'Ab', 'Ab', 'D', 'D'];
+    const beat = 'k/2 h/2 s/2 h/2 k/2 k/2 s/2 h/1 h/1';
+    const fill = 'k/2 h/2 s/2 s/1 s/1 t/2 t/2 T/2 T/2';
+    const half = 'k/4 h/2 h/2 s/4 h/2 h/2';
+    return {
+      bpm: 160, vol: 1.3, era: 'wii', form: ['A', 'B', 'A', 'C'], intro: ['I'],
+      fx: { reverb: { time: 1.2, mix: 0.16 }, echo: { steps: 3, feedback: 0.25, mix: 0.12 } },
+      voices: [
+        { wave: 'brass', vol: 0.045, env: WII_BRASS, vib: 'light', parts: { I: '-/32', A: melA, B: melB, C: melC } },
+        { wave: 'pulse25', vol: 0.02, env: 'stab', arp: 0.04, pan: 0.3, fx: 0.6, parts: { I: '-/32', A: arp(pA), B: '-/128', C: arp(pC) } },
+        { wave: 'sawtooth', vol: 0.016, env: 'pad', poly: true, filter: 3000, pan: -0.3, parts: { I: '-/32', A: '-/128', B: pad(pB), C: pad(pC) } },
+        { wave: 'triangle', vol: 0.08, fx: 0, env: 'bass', parts: {
+          I: 'G2/2! -/6 G2/2! -/6 | D#2/4 F2/4 F#2/4 G2/2 -/2', A: bass(pA), B: bass(pB), C: bass(pC) } },
+        { wave: 'noise', vol: 0.02, fx: 0.15, parts: {
+          I: 'c+k/2! -/6 k/2! -/6 | s/1 s/1 s/2 s/2 s/2 t/2 t/2 T/2 T/2',
+          A: `c+${rep(beat, 7)} ${fill}`,
+          B: `c+${rep('k/2 h/2 s/2 o/2 k/2 k/2 s/2 o/2', 7)} ${fill}`,
+          C: `${rep(half, 6)} ${rep('s/2', 4)} ${rep('s/1', 8)} | k/2 -/6 s/1 s/1 s/1 s/1 t/2 T/2` } },
+      ],
+    };
+  })(),
+
+  // Torneo Sensor: el Reto de Tecloides versión final, rock orquestal de torneo en La menor, 170 BPM.
+  // Abre con la subida cromática del reto; la segunda mitad modula a Si menor y el clímax regresa por
+  // Mi7. I + A A' B C (32 compases, ~45 s; a 184 BPM con "¡casi!").
+  wii_torneo: (() => {
+    const mel7 = 'A5/2! E5/2 A5/2 C6/2 B5/3 A5/1 E5/4 | F5/2 A5/2 C6/2 F6/2 E6/3 C6/1 A5/4 | ' +
+      'G5/2 B5/2 D6/2 G6/2 F6/2 E6/2 D6/4 | E6/6 C6/2 A5/8 | A5/2 C6/2 E6/2 A6/2! G6/3 E6/1 C6/4 | ' +
+      'F6/3 E6/1 D6/2 C6/2 A5/4 C6/4 | B5/2 C6/2 D6/2 B5/2 G5/4 D6/4 |';
+    const melA1 = `${mel7} E6/4! D6/2 B5/2 G#5/4 E5/4`;
+    const melA2 = `${mel7} F#5/2 A#5/2 C#6/2 E6/2 F#6/8!`;
+    const melC = 'B5/4 D6/4 G6/6 F#6/2 | E6/4 C#6/4 A6/6! G6/2 | F#6/6 E6/2 C#6/4 A5/4 | B5/2 C#6/2 D6/2 E6/2 F#6/8 | ' +
+      'G6/6 F#6/2 E6/4 D6/4 | E6/6 F#6/2 G6/4 A6/4! | B6/6! G#6/2 E6/4 D6/4 | B5/2 G#5/2 E5/2 D5/2 B4/2 D5/2 E5/2 G#5/2';
+    const R = { Am: 'A2', F: 'F2', G: 'G2', E: 'E2', 'F#': 'F#2', Bm: 'B2', A: 'A2', 'F#m': 'F#2', E7: 'E2' };
+    const oct = (c) => `${R[c]}/2 ${wiiUp(R[c], 12)}/2`;
+    const gal = (c) => `${R[c]}/1 ${R[c]}/1 ${wiiUp(R[c], 12)}/2`;
+    const pA1 = ['Am', 'F', 'G', 'Am', 'Am', 'F', 'G', 'E'];
+    const pA2 = ['Am', 'F', 'G', 'Am', 'Am', 'F', 'G', 'F#'];
+    const pC = ['G', 'A', 'F#m', 'Bm', 'G', 'A', 'E7', 'E7'];
+    const bass = (prog, f = oct) => prog.map((c) => rep(f(c), 4)).join(' ');
+    const CH = { Am: 'A3+C4+E4', F: 'A3+C4+F4', G: 'B3+D4+G4', E: 'B3+E4+G#4', 'F#': 'A#3+C#4+F#4',
+      A: 'A3+C#4+E4', 'F#m': 'A3+C#4+F#4', Bm: 'B3+D4+F#4', E7: 'B3+D4+G#4' };
+    const pad = (prog) => prog.map((c) => `${CH[c]}/16`).join(' ');
+    const glk = (prog) => prog.map((c) => rep(`${wiiUp(CH[c].split('+')[2], 24)}/2 -/2`, 4)).join(' ');
+    const rock = 'k/2 h/2 s/2 h/2 k/2 k/2 s/2 h/2';
+    const fill = 'k/2 s/1 s/1 s/2 s/1 s/1 t/2 t/2 T/2 T/2';
+    return {
+      bpm: 170, vol: 1.3, era: 'wii', form: ['A1', 'A2', 'B', 'C'], intro: ['I'],
+      fx: { reverb: { time: 1.5, mix: 0.2 }, echo: { steps: 3, feedback: 0.2, mix: 0.08 } },
+      voices: [
+        { wave: 'brass', vol: 0.045, env: WII_BRASS, vib: 'light', parts: {
+          I: '-/4 E5 F5 F#5 G5 G#5 A5 A#5 B5 C6/4!', A1: melA1, A2: melA2, B: wiiUp(melA1, 2), C: melC } },
+        { wave: 'sawtooth', vol: 0.016, env: 'pad', poly: true, pan: -0.25, parts: {
+          I: '-/16', A1: pad(pA1), A2: pad(pA2), B: wiiUp(pad(pA1), 2), C: pad(pC) } },
+        { wave: 'sine', vol: 0.02, env: 'pluck', pan: 0.35, parts: { I: '-/16', A1: '-/128', A2: glk(pA2), B: wiiUp(glk(pA1), 2), C: glk(pC) } },
+        { wave: 'triangle', vol: 0.085, fx: 0, env: 'bass', parts: {
+          I: '-/8 E2/8!', A1: bass(pA1), A2: bass(pA2), B: wiiUp(bass(pA1), 2), C: bass(pC, gal) } },
+        { wave: 'noise', vol: 0.021, fx: 0.15, parts: {
+          I: 'k/1! k/1! k/1! k/1! -/8 s/1 s/1 s/1 s/1',
+          A1: `c+${rep(rock, 7)} ${fill}`, A2: `c+${rep(rock, 7)} ${fill}`, B: `c+${rep(rock, 7)} ${fill}`,
+          C: `c+${rep('k/2 h/1 h/1 s/2 h/1 h/1 k/2 k/2 s/2 o/2', 7)} ${fill}` } },
+      ],
+    };
+  })(),
+
+  // Capitán Cometa (jefe): vals espacial orquestal en Mi bemol mayor, 3/4 a 100 BPM. Cuerdas al frente,
+  // arpa en corcheas, timbales y una parte B en Do menor que sube al clímax. A A' B A' (32 compases, ~58 s).
+  // Cuando gira la gravedad suena al revés (wii_cometa_rev).
+  wii_cometa: (() => {
+    const mel7 = 'A#5/6 G5/3 A#5/3 | D#6/9 D6/3 | C6/6 G#5/3 C6/3 | A#5/12 | C6/6 D#6/3 G6/3 | F6/9 D#6/3 | D6/6 C6/3 A#5/3 |';
+    const melB = 'G6/6 F6/3 D#6/3 | D#6/6 C6/3 G#5/3 | G#6/6 G6/3 F6/3 | D6/9 B5/3 | C6/3 D6/3 D#6/3 G6/3 | ' +
+      'C7/6! A#6/3 G#6/3 | A6/6 F6/3 D#6/3 | D6/3 C6/3 A#5/3 G#5/3';
+    const CH = { Eb: 'D#4+G4+A#4+D#5', Ab: 'D#4+G#4+C5+D#5', Cm: 'D#4+G4+C5+D#5', F7: 'D#4+F4+A4+C5',
+      Bb7: 'D4+F4+G#4+A#4', Fm: 'C4+F4+G#4+C5', G7: 'D4+F4+G4+B4' };
+    const R = { Eb: 'D#2', Ab: 'G#1', Cm: 'C2', F7: 'F2', Bb7: 'A#1', Fm: 'F2', G7: 'G1' };
+    const pA1 = ['Eb', 'Eb', 'Ab', 'Eb', 'Cm', 'F7', 'Bb7', 'Bb7'];
+    const pA2 = ['Eb', 'Eb', 'Ab', 'Eb', 'Cm', 'F7', 'Bb7', 'Eb'];
+    const pB = ['Cm', 'Ab', 'Fm', 'G7', 'Cm', 'Ab', 'F7', 'Bb7'];
+    const harp = (p) => p.map((c) => wiiHarp(wiiUp(CH[c], 12))).join(' ');
+    const pah = (p) => p.map((c) => `-/4 ${CH[c]}/4. ${CH[c]}/4.`).join(' ');
+    const bass = (p) => p.map((c) => `${R[c]}/4 ${wiiUp(R[c], 7)}/4. ${wiiUp(R[c], 12)}/4.`).join(' ');
+    const drA = `c+T/4 -/8 ${rep('T/4 -/8', 6)} T/2 T/2 s/2 s/2 t/2 T/2`;
+    const drB = `c+T/4 k/4? -/4 ${rep('T/4 k/4? -/4', 6)} s/1 s/1 s/1 s/1 s/2 s/2 c+T/4`;
+    return {
+      bpm: 100, vol: 1.3, era: 'wii', form: ['A1', 'A2', 'B', 'A2'],
+      voices: [
+        { wave: 'sawtooth', vol: 0.04, env: 'soft', vib: { rate: 5.2, depth: 0.2, delay: 0.25 }, parts: {
+          A1: `${mel7} G#5/6 F5/3 D5/3`, A2: `${mel7} D#6/6! A#5/3 G5/3`, B: melB } },
+        { wave: 'square', vol: 0.018, parts: { A1: '-/96', A2: `${mel7} D#6/6! A#5/3 G5/3`, B: melB } },
+        { wave: 'sine', vol: 0.026, env: 'pluck', pan: 0.3, parts: { A1: harp(pA1), A2: harp(pA2), B: harp(pB) } },
+        { wave: 'sawtooth', vol: 0.018, env: 'stab', poly: true, pan: -0.3, parts: { A1: pah(pA1), A2: pah(pA2), B: pah(pB) } },
+        { wave: 'triangle', vol: 0.075, fx: 0, env: 'bass', parts: { A1: bass(pA1), A2: bass(pA2), B: bass(pB) } },
+        { wave: 'noise', vol: 0.016, fx: 0.4, parts: { A1: drA, A2: drA, B: drB } },
+      ],
+    };
+  })(),
+
+  // Fase final (7 estrellitas): marcha orquestal heroica en Mi bemol, 4/4 a 128. Cada compás trae un
+  // arpegio de 7 notas (una por estrellita). Metales, cuerdas, campanitas y redobles. A B A C (~60 s).
+  wii_cometa2: (() => {
+    const melA = 'G5/4 A#5/4 D#6/6 D6/2 | C6/4 A#5/4 G5/8 | G#5/4 C6/4 D#6/6 F6/2 | D6/8 A#5/4 F5/4 | ' +
+      'G5/4 A#5/4 D#6/6 F6/2 | G6/6 F6/2 D#6/4 C6/4 | C6/4 D#6/4 D6/4 F6/4 | D#6/12! -/4';
+    const melB = 'C6/6 D#6/2 G#6/8 | A#6/6 G#6/2 F6/8 | G6/6 F6/2 D6/4 A#5/4 | C6/4 D6/4 D#6/4 G6/4 | ' +
+      'G#6/6 G6/2 F6/4 C6/4 | D6/4 F6/4 A#6/8! | G6/6 F6/2 D#6/4 A#5/4 | G#5/2 A#5/2 C6/2 D6/2 F6/4 D6/4';
+    const melC = 'D#5/8 G5/4 C6/4 | C6/8 A#5/4 G#5/4 | G5/8 A#5/4 D#6/4 | D6/12 -/4 | D#6/8 D6/4 C6/4 | ' +
+      'D#6/8 F6/4 G6/4 | A6/8 F6/4 C6/4 | A#5/2 C6/2 D6/2 F6/2 A#6/8';
+    // Arpegios de 7 notas por acorde (raíz, 3.ª, 5.ª y siguen subiendo).
+    const ST = { Eb: 'D#5 G5 A#5 D#6 G6 A#6 D#7', Cm: 'C5 D#5 G5 C6 D#6 G6 C7', Ab: 'G#4 C5 D#5 G#5 C6 D#6 G#6',
+      Bb: 'A#4 D5 F5 A#5 D6 F6 A#6', Gm: 'G4 A#4 D5 G5 A#5 D6 G6', Fm: 'F4 G#4 C5 F5 G#5 C6 F6', F: 'F4 A4 C5 F5 A5 C6 F6',
+      Bb7: 'A#4 D5 F5 G#5 A#5 D6 F6' };
+    const stars = (p) => p.map((c) => `${ST[c]} -/9`).join(' ');
+    const pA = ['Eb', 'Cm', 'Ab', 'Bb', 'Eb', 'Cm', 'Ab', 'Eb'];
+    const pB = ['Ab', 'Bb', 'Gm', 'Cm', 'Fm', 'Bb', 'Eb', 'Bb7'];
+    const pC = ['Cm', 'Ab', 'Eb', 'Bb', 'Cm', 'Ab', 'F', 'Bb'];
+    const root = (c) => ST[c].split(' ')[0];
+    const bass = (p) => p.map((c) => { const r = wiiUp(root(c), -24); return `${r}/2 ${r}/2 ${wiiUp(r, 12)}/2 ${r}/2 ${r}/2 ${wiiUp(r, 7)}/2 ${wiiUp(r, 12)}/2 ${wiiUp(r, 7)}/2`; }).join(' ');
+    const chord = (c) => ST[c].split(' ').slice(0, 3).map((n) => wiiUp(n, -12)).join('+');
+    const strings = (p) => p.map((c) => `${chord(c)}/16`).join(' ');
+    const march = 'k/2 s/1? s/1? s/2 k/2 k/2 s/2 s/2 h/2';
+    const roll = 'k/2 s/1 s/1 s/1 s/1 s/1 s/1 s/1 s/1 s/1 s/1 t/2 T/2';
+    return {
+      bpm: 128, vol: 1.3, era: 'wii', form: ['A', 'B', 'A', 'C'],
+      voices: [
+        { wave: 'brass', vol: 0.05, env: WII_BRASS, vib: 'light', parts: { A: melA, B: melB, C: '-/128' } },
+        { wave: 'square', vol: 0.05, parts: { A: '-/128', B: '-/128', C: melC } },
+        { wave: 'sine', vol: 0.024, env: 'pluck', pan: 0.3, parts: { A: stars(pA), B: stars(pB), C: stars(pC) } },
+        { wave: 'sawtooth', vol: 0.014, env: 'pad', poly: true, pan: -0.3, parts: { A: strings(pA), B: strings(pB), C: strings(pC) } },
+        { wave: 'triangle', vol: 0.075, fx: 0, env: 'bass', parts: { A: bass(pA), B: bass(pB), C: bass(pC) } },
+        { wave: 'noise', vol: 0.018, fx: 0.25, parts: {
+          A: `c+${rep(march, 7)} ${roll}`, B: `c+${rep(march, 7)} ${roll}`,
+          C: `${rep('T/4 -/4 k/4? -/4', 7)} ${roll}` } },
+      ],
+    };
+  })(),
+
+  // Canal de los muñequitos: bossa nova juguetona y ORIGINAL en Do mayor, 114 BPM (guiño al estilo de
+  // los canales, no a una melodía). Silbido de flauta, guitarra de nylon, bajo de bossa y cuerdas en B.
+  // A A B A (32 compases, ~67 s).
+  wii_canal: (() => {
+    const melA = '-/2 E5/2 G5/2 B5/4 A5/2 G5/2 E5/2 | D5/3 E5/3 G5/2 -/8 | -/2 F5/2 A5/2 C6/4 B5/2 A5/2 F5/2 | ' +
+      'E5/3 F5/3 D5/2 -/8 | -/2 G5/2 B5/2 D6/4 C6/2 B5/2 G5/2 | A5/3 C#6/3 E6/2 -/4 D6/2 C#6/2 | ' +
+      'D6/3 A5/3 F5/2 -/2 E5/2 F5/2 A5/2 | G5/12 -/4';
+    const melB = 'A5/4 C6/2 E6/6 D6/2 C6/2 | G#5/4 C6/2 D6/6 C6/2 G#5/2 | G5/3 B5/3 D6/2 -/2 E6/2 D6/2 B5/2 | ' +
+      'C#6/6 A5/2 G5/4 E5/4 | F5/3 A5/3 C6/2 -/2 D6/2 E6/2 F6/2 | G6/6! F6/2 D6/4 B5/4 | ' +
+      'C6/3 B5/3 G5/2 -/2 E5/2 D5/2 E5/2 | D5/8 -/4 G4/2 B4/2';
+    const CH = { C: 'E3+B3+D4+G4', Dm: 'F3+C4+E4+A4', G7: 'F3+B3+D4+G4', Em: 'D3+G3+B3+E4', A7: 'G3+C#4+E4+A4',
+      F: 'E3+A3+C4+F4', Fm: 'D3+G#3+C4+F4' };
+    const R = { C: ['C3', 'G2'], Dm: ['D3', 'A2'], G7: ['G2', 'D3'], Em: ['E3', 'B2'], A7: ['A2', 'E3'], F: ['F2', 'C3'], Fm: ['F2', 'C3'] };
+    const pA = ['C', 'C', 'Dm', 'G7', 'Em', 'A7', 'Dm', 'G7'];
+    const pB = ['F', 'Fm', 'Em', 'A7', 'Dm', 'G7', 'C', 'G7'];
+    // Guitarra: ritmo de bossa de dos compases (el segundo compás va desplazado).
+    const gtr = (p) => p.map((c, i) => (i % 2 === 0 ?
+      `${CH[c]}/3. ${CH[c]}/3. ${CH[c]}/2. -/2 ${CH[c]}/3. ${CH[c]}/3.` :
+      `-/2 ${CH[c]}/3. ${CH[c]}/3. ${CH[c]}/2. -/2 ${CH[c]}/2. ${CH[c]}/2.`)).join(' ');
+    const bass = (p) => p.map((c) => { const [r, f] = R[c]; return `${r}/6 ${f}/2 ${f}/6 ${r}/2`; }).join(' ');
+    const pad = (p) => p.map((c) => `${wiiUp(CH[c], 12)}/16`).join(' ');
+    const bossa = 'k/3 h/1? h/2 s/2? k/3 h/1? h/2 s/2?';
+    return {
+      bpm: 114, vol: 1.3, era: 'wii', form: ['A', 'A', 'B', 'A'],
+      voices: [
+        { wave: 'square', vol: 0.05, legato: 0.8, vib: 'light', parts: { A: melA, B: melB } },
+        { wave: [1, 0.45, 0.25, 0.12, 0.06], vol: 0.026, env: 'pluck', poly: true, pan: -0.25, fx: 0.4, parts: { A: gtr(pA), B: gtr(pB) } },
+        { wave: 'sawtooth', vol: 0.014, env: 'pad', poly: true, filter: 2200, pan: 0.25, parts: { A: '-/128', B: pad(pB) } },
+        { wave: 'triangle', vol: 0.075, fx: 0, env: 'bass', parts: { A: bass(pA), B: bass(pB) } },
+        { wave: 'noise', vol: 0.018, fx: 0.1, parts: { A: rep(bossa, 8), B: `c+${rep(bossa, 8)}` } },
+      ],
+    };
+  })(),
 };
 WII_TRACKS.wii_torneo_casi = { ...WII_TRACKS.wii_torneo, bpm: 184 };
 WII_TRACKS.wii_cometa_rev = wiiReverse(WII_TRACKS.wii_cometa);
