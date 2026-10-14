@@ -31,7 +31,7 @@ Scenes.vitrina = {
     const d = Save.data;
     const id = this.room;
     const w = WORLDS.find((x) => x.id === id);
-    const era = w ? w.theme : hubEra();
+    const era = w ? w.theme : shownHubEra();
     const look = (sprite) => charColors(sprite, era);
     const rows = [{ tabs: true }];
     if (id === 'secretos') {

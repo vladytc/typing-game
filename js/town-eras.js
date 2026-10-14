@@ -128,7 +128,15 @@ function hubEra() {
   for (let i = open.length - 1; i >= 0; i--) if (HUB_ERAS[open[i].theme]) return open[i].theme;
   return 'gb';
 }
-const hubTheme = () => HUB_ERAS[hubEra()].theme;
+// La era que el jugador ya VIO en el pueblo. Al abrir un mundo nuevo, hubEra() cambia de inmediato,
+// pero el pueblo "viaja en el tiempo" hasta que entras (js/scenes/town.js). Mientras, el museo y
+// los menús se quedan con la era anterior para no adelantar la sorpresa.
+function shownHubEra() {
+  if (!Save.data.flags.metBit) return hubEra();
+  const seen = Save.data.flags.hubEra;
+  return HUB_ERAS[seen] ? seen : 'gb';
+}
+const hubTheme = () => HUB_ERAS[shownHubEra()].theme;
 
 // Colores de una casilla del mapa del pueblo en la era actual.
 function tileColors(era, sprite) {
