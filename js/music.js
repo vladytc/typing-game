@@ -930,21 +930,74 @@ const TRACKS = {
     ],
   },
 
-  // Mundo 1-1: alegre y brincadora, Do mayor (original, al estilo de los plataformeros del NES).
-  nes11: {
-    bpm: 170,
-    voices: [
-      {
-        wave: 'square', vol: 0.032,
-        notes: 'G4 C5 E5/2 D5 C5 A4/2 C5 D5 E5/2 C5/4 ' +
-          'A4 C5 F5/2 E5 D5 C5/2 D5 E5 G5/2 E5/4 ' +
-          'F5 E5 D5/2 C5 D5 E5/2 G5 A5 G5/2 E5/4 ' +
-          'D5 E5 C5/2 A4 B4 C5/2 G4 B4 D5/2 C5/4',
-      },
-      { wave: 'triangle', vol: 0.11, notes: rep('C3 G3', 8) + ' ' + rep('F2 C3', 8) + ' ' + rep('C3 G3', 8) + ' ' + rep('G2 D3', 8) },
-      { wave: 'noise', vol: 0.022, notes: rep('x - x -', 16) },
-    ],
-  },
+  // Mundo 1-1: calipso brincador en Do mayor, 170 BPM (original, al estilo de los plataformeros
+  // del NES): melodía sincopada 3+3+2, bajo de triángulo saltarín, golpecitos de pulso 12 % y una
+  // parte "subterránea" en Do menor. Forma A A' B A C A' (48 compases, ~68 s).
+  // La entrada es el arranque de "Eine kleine Nachtmusik" (Mozart, 1787, dominio público), como el
+  // "Game Start" de Mario Bros. (1983); arreglo propio al unísono. Fuente: MarioWiki, "Game Start
+  // (Mario Bros.)" (mariowiki.com/Game_Start_(Mario_Bros.)): "a brief arrangement of Eine kleine
+  // Nachtmusik: I. Allegro", también en la versión de NES.
+  nes11: (() => {
+    const down = (s) => s.replace(/([A-G][#b]?)(\d)/g, (m, n, o) => `${n}${o - 1}`);
+    // Bajo [raíz, tercera, quinta, octava] y acorde para los golpecitos.
+    const B = {
+      C: ['C3', 'E3', 'G3', 'C4'], Am: ['A2', 'C3', 'E3', 'A3'], Dm: ['D3', 'F3', 'A3', 'D4'], G7: ['G2', 'B2', 'D3', 'F3'],
+      E7: ['E2', 'G#2', 'B2', 'D3'], F: ['F2', 'A2', 'C3', 'F3'], G: ['G2', 'B2', 'D3', 'G3'], CE: ['E2', 'G2', 'C3', 'E3'],
+      Fm: ['F2', 'Ab2', 'C3', 'F3'], CG: ['G2', 'C3', 'E3', 'G3'], A7: ['A2', 'C#3', 'E3', 'G3'],
+    };
+    const CH = {
+      C: 'E4+G4+C5', Am: 'E4+A4+C5', Dm: 'F4+A4+D5', G7: 'F4+B4+D5', E7: 'E4+G#4+D5', F: 'F4+A4+C5', G: 'D4+G4+B4',
+      CE: 'E4+G4+C5', Fm: 'F4+Ab4+C5', CG: 'E4+G4+C5', A7: 'E4+G4+C#5',
+    };
+    const halfB = (c) => { const [r, , f, o] = B[c]; return `${r}/3. ${f}/3. ${o}/2`; };
+    const barB = (c) => { const [r, t, f] = B[c]; return `${halfB(c)} ${r}/3. ${f}/3. ${t}/2`; };
+    const halfS = (c) => `-/2 ${CH[c]}/2. -/1 ${CH[c]}/1. ${CH[c]}/2.`;
+    const barS = (c) => `${halfS(c)} -/2 ${CH[c]}/2. -/2 ${CH[c]}/2.`;
+    const line = (chords, bar, half) => chords.map((c) => (Array.isArray(c) ? c.map(half).join(' ') : bar(c))).join(' | ');
+    const chA = ['C', 'Am', 'Dm', 'G7', 'C', 'E7', ['F', 'G'], 'C'];
+    const chB = ['F', 'CE', 'Dm', 'G', 'F', 'Fm', ['CG', 'A7'], ['Dm', 'G7']];
+    // Melodía. A: pregunta en Do, respuesta en La menor; B sube por Fa menor hasta el La6.
+    const a7 = 'C5/2 E5/1 G5/3! A5/2 G5/3 E5/2 C5/3 | -/2 A5/1 C6/3 B5/2 A5/3 E5/2 -/3 | ' +
+      'F5/2 A5/1 D6/3 C6/2 A5/3 F5/2 D5/3 | B4/2 D5/1 G5/3 F5/2 D5/2 B4/2 G4/4 | ' +
+      'C5/2 E5/1 G5/3! A5/2 G5/3 E5/2 C5/3 | -/2 G#5/1 B5/3 D6/2 B5/3 G#5/2 E5/3 | ' +
+      'A5/2 G5/1 F5/3 A5/2 G5/2 F5/2 E5/2 D5/2 |';
+    const melA1 = `${a7} C5/4 -/4 G4/2 A4/2 B4/4`;
+    const melA2 = `${a7} C5/3 E5/3 G5/2 C6/4! -/4`;
+    const melB = 'A5/4 C6/2 A5/2 F5/4 -/2 G5/2 | E5/4 G5/2 E5/2 C5/6 -/2 | F5/3 F5/3 A5/2 D6/4 C6/2 A5/2 | B5/3 A5/3 G5/2 D5/8 | ' +
+      'A5/4 C6/2 A5/2 F6/4 E6/2 D6/2 | C6/3 Ab5/3 F5/2 Ab5/3 C6/3 Eb6/2 | E6/4! D6/2 C6/2 C#6/2 E6/2 G6/2 A6/2 | ' +
+      'F6/3 D6/3 A5/2 G5/2 F5/2 D5/2 B4/2';
+    const harB = 'C5/8 A4/8 | G4/16 | A4/8 F4/8 | B4/8 D5/8 | C5/16 | C5/8 Ab4/8 | G4/8 C#5/8 | A4/8 B4/8';
+    // C: el "subterráneo", riff en staccato con el bajo en octavas de semicorchea.
+    const c1 = 'C5/1. -/1 Eb5/1. -/1 F5/1. -/1 G5/2. Bb5/1. -/1 G5/2. F5/2. Eb5/2.';
+    const c2 = 'C5/2. -/6 G4/1. Bb4/1. C5/2. -/4';
+    const c5 = 'F5/1. -/1 Ab5/1. -/1 Bb5/1. -/1 C6/2. Eb6/1. -/1 C6/2. Bb5/2. Ab5/2.';
+    const melC = [c1, c2, c1, c2, c5, c2, c5, 'G5/2. -/2 G5/1. G5/1. -/2 B4/2 D5/2 F5/2 G5/2!'].join(' | ');
+    const oct = (lo, hi, n = 8) => rep(`${lo}/1. ${hi}/1.`, n);
+    const basC = [oct('C2', 'C3'), oct('C2', 'C3'), oct('C2', 'C3'), oct('C2', 'C3'), oct('F2', 'F3'), oct('C2', 'C3'), oct('F2', 'F3'),
+      `${oct('G2', 'G3', 6)} B2/1 C3/1 D3/1 F3/1`].join(' | ');
+    // Entrada: Mozart al unísono (melodía, eco una octava abajo y el triángulo dos octavas abajo).
+    const intro = 'C5/4 -/2 G4/2 C5/4 -/2 G4/2 | C5/2 G4/2 C5/2 E5/2 G5/8 | F5/4 -/2 D5/2 F5/4 -/2 D5/2 | F5/2 D5/2 B4/2 D5/2 G4/8';
+    const groove = 'k/3 h/1 h/2 s/2 k/2 h/1 h/1 s/2 h/2';
+    const fill = 'k/2 s/1 s/1 s/2 t/2 t/1 t/1 T/2 s/2! s/2!';
+    const drA = `c+${groove} ${rep(groove, 6)} ${fill}`;
+    const rock = 'k/2 h/2 s/2 h/2 k/2 k/2 s/2 h/2';
+    return {
+      bpm: 170, era: 'nes', intro: ['I'], form: ['A1', 'A2', 'B', 'A1', 'C', 'A2'],
+      voices: [
+        { wave: 'square', vol: 0.032, parts: { I: intro, A1: melA1, A2: melA2, B: melB, C: melC } },
+        { wave: 'pulse25', vol: 0.014, env: 'soft', parts: { I: down(intro), B: harB, C: down(melC) } },
+        { wave: 'triangle', vol: 0.1, parts: {
+          I: down(down(intro)), A1: line(chA, barB, halfB), A2: line(chA, barB, halfB), B: line(chB, barB, halfB), C: basC,
+        } },
+        { wave: 'pulse12', vol: 0.016, env: 'stab', parts: {
+          A1: line(chA, barS, halfS), A2: line(chA, barS, halfS), B: line(chB, barS, halfS), C: `-/112 ${barS('G7')}`,
+        } },
+        { wave: 'noise', vol: 0.02, parts: {
+          I: '-/48 s/1 s/1 s/1 s/1 s/2 s/2 t/2 t/2 T/2! -/2', A1: drA, A2: drA, B: drA, C: `c+${rock} ${rep(rock, 6)} ${fill}`,
+        } },
+      ],
+    };
+  })(),
 
   // Jingle de victoria (no se repite).
   victory: {
@@ -956,5 +1009,5 @@ const TRACKS = {
   },
 };
 
-// ¡Apúrate! La misma pista, más rápida, cuando el tiempo baja de 100.
-TRACKS.nes11_hurry = { ...TRACKS.nes11, bpm: 230 };
+// ¡Apúrate! La misma pista, más rápida y sin la entrada de Mozart, cuando el tiempo baja de 100.
+TRACKS.nes11_hurry = { ...TRACKS.nes11, bpm: 230, intro: [] };

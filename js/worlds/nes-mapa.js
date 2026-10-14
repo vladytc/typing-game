@@ -283,34 +283,90 @@ Object.assign(TREASURES, {
 // ---------- Música de las zonas que no tenían pista ----------
 
 Object.assign(TRACKS, {
-  // Patio de Ladrillos: Do mayor, saltarina, de paseo por los bloques.
-  nes_patio: {
-    bpm: 140,
-    voices: [
-      {
-        wave: 'square', vol: 0.03,
-        notes: 'E5 G5 C6/2 G5 E5 C5/2 D5 E5 F5/2 E5 D5 C5/2 ' +
-          'E5 G5 A5/2 G5 E5 C5/2 D5 F5 E5/2 D5 B4 C5/2 ' +
-          'A4 C5 F5/2 E5 C5 A4/2 B4 D5 G5/2 F5 D5 B4/2 ' +
-          'C5 E5 G5/2 C6/2 B5 G5/2 D5/2 E5/2 C5/2 -',
-      },
-      {
-        wave: 'triangle', vol: 0.1,
-        notes: rep('C3/2 G3/2', 4) + ' ' + rep('C3/2 G3/2', 2) + ' ' + rep('G2/2 D3/2', 2) + ' ' +
-          rep('F2/2 C3/2', 2) + ' ' + rep('G2/2 D3/2', 2) + ' ' + rep('C3/2 G3/2', 2) + ' G2/2 B2/2 C3/4',
-      },
-      { wave: 'noise', vol: 0.02, notes: rep('x/2 -/2 x - x/2', 8) },
-    ],
-  },
-  // Castillo 3: La menor, lenta y con eco de pasos en la piedra.
-  nes_castillo: {
-    bpm: 110,
-    voices: [
-      { wave: 'square', vol: 0.03, notes: 'A4/2 C5/2 B4/2 G#4/2 A4/4 E4/4 F4/2 A4/2 G#4/2 E4/2 A4/8 A4/2 C5/2 D5/2 C5/2 B4/4 G#4/4 A4/2 E5/2 D#5/2 E5/2 A4/8' },
-      { wave: 'triangle', vol: 0.11, notes: 'A2/4 A2/4 E2/4 E2/4 F2/4 F2/4 E2/4 E2/4 D2/4 D2/4 E2/4 E2/4 A2/4 E2/4 A2/8' },
-      { wave: 'noise', vol: 0.015, notes: rep('x -/7', 8) },
-    ],
-  },
+  // Patio de Ladrillos: swing de paseo en Fa mayor, 140 BPM. Bajo de triángulo que camina en negras
+  // (con nota de paso hacia el acorde que sigue), acordes de pulso 12 % a contratiempo y un B que
+  // pasa por Si bemol menor y sube hasta el La#6. Forma A A' B A' (32 compases, ~55 s).
+  nes_patio: (() => {
+    const W = {
+      F: ['F2', 'A2', 'C3'], Dm: ['D2', 'F2', 'A2'], Gm7: ['G2', 'A#2', 'D3'], Gm: ['G2', 'A#2', 'D3'], C7: ['C2', 'E2', 'G2'],
+      D7: ['D2', 'F#2', 'A2'], Bb: ['A#1', 'D2', 'F2'], Bbm: ['A#1', 'C#2', 'F2'], FA: ['A1', 'C2', 'F2'], A7: ['A1', 'C#2', 'E2'], G7: ['G1', 'B1', 'D2'],
+    };
+    const CH = {
+      F: 'F4+A4+C5', Dm: 'D4+F4+A4', Gm7: 'F4+A#4+D5', Gm: 'G4+A#4+D5', C7: 'E4+G4+A#4', D7: 'F#4+A4+C5',
+      Bb: 'F4+A#4+D5', Bbm: 'F4+A#4+C#5', FA: 'F4+A4+C5', A7: 'E4+G4+C#5', G7: 'F4+G4+B4',
+    };
+    // Bajo caminante: raíz, tercera, quinta y medio tono abajo del acorde que sigue.
+    const walk = (chords, after) => {
+      const flat = chords.flatMap((c) => (Array.isArray(c) ? c.map((x) => [x, 2]) : [[c, 4]]));
+      let out = '';
+      let beats = 0;
+      flat.forEach(([c, n], i) => {
+        const next = i + 1 < flat.length ? flat[i + 1][0] : after;
+        const [r, t, f] = W[c];
+        const app = nesTr(W[next][0], -1);
+        out += `${n === 4 ? `${r}/4 ${t}/4 ${f}/4` : `${r}/4`} ${app}/4 `;
+        beats += n;
+        if (beats % 4 === 0 && i + 1 < flat.length) out += '| ';
+      });
+      return out.trim();
+    };
+    const compH = (c) => `-/4 ${CH[c]}/3. -/1`;
+    const comp = (c) => `${compH(c)} ${compH(c)}`;
+    const chA = ['F', 'Dm', 'Gm7', 'C7', 'F', 'D7', ['Gm', 'C7'], 'F'];
+    const chB = ['Bb', 'Bbm', 'FA', 'D7', 'Gm', 'C7', ['A7', 'Dm'], ['G7', 'C7']];
+    const s1 = 'C5/2 F5/2 A5/3 G5/1 F5/2 C5/2 D5/2 F5/2';
+    const a7 = `${s1} | A5/4 G5/2 F5/2 D5/6 -/2 | D5/2 G5/2 A#5/3 A5/1 G5/2 D5/2 F5/2 A5/2 | G5/4 E5/2 C5/2 E5/2 G5/2 A#5/4 | ` +
+      `${s1} | C6/4 A5/2 F#5/2 D5/4 C6/2 A5/2 | A#5/2 A5/2 G5/2 D5/2 E5/2 G5/2 A#5/2 E5/2 |`;
+    const melB = 'D6/4 A#5/2 F5/2 D5/4 F5/4 | C#6/4 A#5/2 F5/2 C#5/4 F5/4 | C6/2 A5/2 F5/2 A5/2 C6/2 F6/6 | F#6/4 D6/2 A5/2 C6/8 | ' +
+      'A#5/2 D6/2 G6/4 F6/2 D6/2 A#5/4 | A5/2 C6/2 E6/4 G6/4 A#6/4 | A6/4 G6/2 E6/2 F6/4 D6/4 | B5/2 D6/2 F6/2 D6/2 E6/2 C6/2 A#5/2 G5/2';
+    // Segunda voz en B: notas largas una tercera o una sexta abajo.
+    const harB = 'F5/8 D5/8 | F5/8 C#5/8 | A4/8 C5/8 | D5/8 F#5/8 | D5/8 A#4/8 | E5/8 G5/8 | E5/8 A5/8 | F5/8 E5/8';
+    const swing = 'k/4 h/2 h/2 s/4 h/2 h/2';
+    const fill = 'k/4 h/2 h/2 s/2 s/2 t/2 T/2';
+    const dr = `c+${swing} ${rep(swing, 6)} ${fill}`;
+    return {
+      bpm: 140, era: 'nes', swing: 0.2, form: ['A1', 'A2', 'B', 'A2'],
+      voices: [
+        { wave: 'square', vol: 0.03, parts: {
+          A1: `${a7} F5/6 -/2 C5/2 D5/2 E5/2 -/2`, A2: `${a7} F5/4 A5/2 C6/2 F6/4! -/4`, B: melB,
+        } },
+        { wave: 'pulse25', vol: 0.013, env: 'soft', parts: { B: harB } },
+        { wave: 'pulse12', vol: 0.016, env: 'stab', parts: {
+          A1: nesLine(chA, comp, compH), A2: nesLine(chA, comp, compH), B: nesLine(chB, comp, compH),
+        } },
+        { wave: 'triangle', vol: 0.1, legato: 0.7, parts: { A1: walk(chA, 'F'), A2: walk(chA, 'Bb'), B: walk(chB, 'F') } },
+        { wave: 'noise', vol: 0.018, parts: { A1: dr, A2: dr, B: dr } },
+      ],
+    };
+  })(),
+
+  // Castillo 3: marcha de castillo en La frigio, 110 BPM. Segundas menores que se arrastran, un
+  // trémolo de pulso 12 % como antorchas, bajo que pisa medio tono arriba y pasos de armadura.
+  // En B sube a Do y baja por semitonos de regreso. Forma A B A' (24 compases, ~52 s).
+  nes_castillo: (() => {
+    const a6 = 'A4/6 A#4/2 A4/8 | C5/6 B4/2 A#4/8 | A4/4 E5/4 D#5/4 D5/4 | C#5/12 -/4 | A4/6 A#4/2 A4/4 C5/4 | E5/6 F5/2 E5/8 |';
+    const melA1 = `${a6} D#5/4 D5/4 C#5/4 D5/4 | A4/12 -/4`;
+    const melA2 = `${a6} D#5/4 D5/4 C#5/4 A#4/4 | A4/16`;
+    const melB = 'C5/6 C#5/2 C5/8 | D#5/6 D5/2 C#5/8 | C5/4 G5/4 F#5/4 F5/4 | E5/12 -/4 | F5/4 F#5/4 G5/4 G#5/4 | A5/4 A#5/4 B5/4 C6/4 | ' +
+      'C#6/8! A5/4 E5/4 | A#5/2 A5/2 G#5/2 G5/2 F#5/2 F5/2 E5/2 D#5/2';
+    const trem = (n) => rep(`${n}/1 ${nesTr(n, 1)}/1`, 8);
+    const tremA = ['A3', 'A3', 'E3', 'E3', 'A3', 'A3', 'E3', 'E3'].map(trem).join(' | ');
+    const tremB = ['C4', 'C4', 'G3', 'G3', 'F3', 'A3', 'C#4', 'E3'].map(trem).join(' | ');
+    const step = (r) => { const b = nesTr(r, 1); return rep(`${r}/2. ${r}/2. ${r}/2. ${b}/2.`, 2); };
+    const basA = ['A2', 'A2', 'E2', 'E2', 'A2', 'A2', 'E2', 'E2'].map(step).join(' | ');
+    const basB = ['C3', 'C3', 'G2', 'G2', 'F2', 'A2', 'C#3', 'E2'].map(step).join(' | ');
+    const walkA = 'k/4 -/4 k/2. -/2 h/2? -/2';
+    const walkB = 'T/4 -/4 T/2. t/2. -/2 h/2?';
+    return {
+      bpm: 110, era: 'nes', form: ['A1', 'B', 'A2'],
+      voices: [
+        { wave: 'square', vol: 0.03, legato: 0.95, vib: 'slow', parts: { A1: melA1, A2: melA2, B: melB } },
+        { wave: 'pulse12', vol: 0.011, parts: { A1: tremA, A2: tremA, B: tremB } },
+        { wave: 'triangle', vol: 0.11, parts: { A1: basA, A2: basA, B: basB } },
+        { wave: 'noise', vol: 0.018, parts: { A1: rep(walkA, 8), A2: rep(walkA, 8), B: `${rep(walkB, 7)} T/2 T/2 t/2 t/2 T/2! t/2! T/4!` } },
+      ],
+    };
+  })(),
 });
 
 // ---------- Leyendas de casillas ----------
