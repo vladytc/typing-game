@@ -226,20 +226,61 @@ Object.assign(TREASURES, {
   camara: { room: 'gb', name: 'Cámara de bolsillo', desc: 'Como la Game Boy Camera (1998): fotos en 4 tonos de verde. ¡Y con su impresora salían en calcomanía!' },
 });
 
-// Música del valle (melodía original, Sol mayor, de paseo).
+// Mapa del valle: marcha de ruta optimista en Re mayor a 132 BPM, 2 compases de intro + 32 (≈ 58 s).
+// Melodía ORIGINAL al estilo de las rutas de los RPG de monstruos de Game Boy: dos pulsos y el
+// canal de onda en el bajo, vibrato en las notas largas, acordes quebrados en corcheas,
+// cromatismos (Fa#7, Sol menor prestado) y un puente que sube al Do mayor "prestado" (bVII).
 Object.assign(TRACKS, {
-  gb_valle: {
-    bpm: 118,
-    voices: [
-      {
-        wave: 'square', vol: 0.032,
-        notes: 'G4/2 B4/2 D5/2 B4/2 C5/2 E5/2 D5/4 B4/2 G4/2 A4/2 B4/2 A4/8 ' +
-          'G4/2 B4/2 D5/2 G5/2 F#5/2 E5/2 D5/4 C5/2 E5/2 D5/2 A4/2 G4/8',
-      },
-      { wave: 'triangle', vol: 0.09, notes: 'G2/4 D3/4 G2/4 D3/4 E2/4 B2/4 D2/4 A2/4 C3/4 G2/4 G2/4 D3/4 C3/4 D3/4 G2/8' },
-      { wave: 'noise', vol: 0.018, notes: rep('x/4 -/4 x/2 x/2 -/4', 4) },
-    ],
-  },
+  gb_valle: (() => {
+    const { bars, chord, root, tones, tr } = GB_MUS;
+    const H = {
+      I: ['D A', 'G A7'],
+      A: ['D', 'D', 'Bm', 'G', 'Em', 'A', 'D G', 'A7'],
+      A2: ['D', 'D', 'Bm', 'G', 'Em', 'F#7', 'Bm Gm', 'A7 D'],
+      B: ['G', 'A', 'F#m', 'Bm', 'C', 'G', 'Em7', 'A7'],
+    };
+    const head = 'F#5/6 E5/2 D5/2 E5/2 F#5/2 A5/2 | A5/4 B5/2 A5/2 F#5/4 D5/4 | D5/2 F#5/2 B5/4 A5/2 F#5/2 D5/2 F#5/2 | G5/8 -/2 G5/2 A5/2 B5/2';
+    const mel = {
+      I: 'A4/2 D5/2 F#5/2 A5/2 G5/2 F#5/2 E5/2 C#5/2 | B4/2 C#5/2 D5/2 E5/2 F#5/2 G5/2 A5/4!',
+      // A pregunta (acaba en La), A2 responde con cromatismos y cierra en Re.
+      A: `${head} | B5/6 A5/2 G5/2 E5/2 G5/2 B5/2 | A5/4 G5/2 F#5/2 E5/4 C#5/4 | D5/2 F#5/2 A5/2 D6/2 B5/2 G5/2 D5/2 B4/2 | C#5/4 E5/2 G5/2 A5/8`,
+      A2: `${head} | B5/6 A#5/2 B5/2 G5/2 E5/2 G5/2 | A#5/4 F#5/2 E5/2 C#5/4 A#4/4 | B4/2 D5/2 F#5/2 B5/2 Bb5/4 G5/4 | A5/2 G5/2 E5/2 C#5/2 D5/8`,
+      // B: sube por Sol y La, y el clímax llega en el Do mayor prestado.
+      B: 'G5/2 B5/2 D6/4 B5/2 G5/2 D5/4 | E5/2 A5/2 C#6/4 B5/2 A5/2 E5/4 | F#5/2 A5/2 C#6/2 A5/2 F#5/2 E5/2 C#5/2 E5/2 | D5/6 E5/2 F#5/4 A5/4 | ' +
+        'G5/2 C6/2 E6/4! D6/2 C6/2 G5/4 | D6/6 B5/2 G5/2 B5/2 D6/2 G6/2! | E6/4 D6/2 B5/2 G5/4 E5/4 | C#5/2 E5/2 G5/2 A5/2 C#6/4! -/4',
+    };
+    // Segundo pulso: acordes quebrados en corcheas; en B, el arpegio rápido de chiptune.
+    const brkH = (c) => { const t = tones(c, 'A3'); return `${t[0]}/2 ${t[2]}/2 ${t[1]}/2 ${t[2]}/2`; };
+    const brk = (c) => `${brkH(c)} ${brkH(c)}`;
+    const v2 = {
+      I: bars(H.I, brk, brkH), A: bars(H.A, brk, brkH), A2: bars(H.A2, brk, brkH),
+      B: bars(H.B, (c) => `${chord(c, 'D4')}/16`, (c) => `${chord(c, 'D4')}/8`),
+    };
+    // Bajo (canal de onda): octavas en corcheas con una nota cromática que lleva al siguiente acorde.
+    const R = (c) => root(c, 'E2');
+    const app = (n) => tr(R(n), -1);
+    const oct = (c, n) => `${R(c)}/2 ${tr(R(c), 12)}/2 ${tr(R(c), 7)}/2 ${tr(R(c), 12)}/2 ${R(c)}/2 ${tr(R(c), 12)}/2 ${tr(R(c), 7)}/2 ${app(n)}/2`;
+    const octH = (c, n) => `${R(c)}/2 ${tr(R(c), 12)}/2 ${tr(R(c), 7)}/2 ${app(n)}/2`;
+    const walk = (c, n) => `${R(c)}/4 ${tr(R(c), 7)}/2 ${tr(R(c), 12)}/2 ${R(c)}/2 ${tr(R(c), 7)}/2 ${tr(R(c), 12)}/2 ${app(n)}/2`;
+    const bas = { I: bars(H.I, oct, octH), A: bars(H.A, oct, octH), A2: bars(H.A2, oct, octH), B: bars(H.B, walk, octH) };
+    // Batería de marcha suave, redoble al final de cada sección.
+    const beat = 'k/2 h/2 s/2 h/2 k/2 h/2 s/2 h/1 h/1';
+    const beatB = 'k/2 h/2 s/1 s/1 h/2 k/2 k/2 s/2 h/2';
+    const fill = 'k/2 s/1 s/1 s/2 k/2 s/1 s/1 s/1 s/1 t/2 T/2';
+    const dr = {
+      I: 'c+k/4 -/4 s/2 s/2 s/1 s/1 s/2 | k/2 s/1 s/1 s/2 s/2 s/1 s/1 s/1 s/1 s/2! s/2!',
+      A: `c+${beat} (${beat})*6 ${fill}`, A2: `(${beat})*7 ${fill}`, B: `c+${beatB} (${beatB})*6 ${fill}`,
+    };
+    return {
+      bpm: 132, era: 'gb', intro: ['I'], form: ['A', 'A2', 'B', 'A2'],
+      voices: [
+        { wave: 'pulse25', vol: 0.034, vib: { rate: 6, depth: 0.22, delay: 0.25 }, parts: mel },
+        { wave: 'pulse50', vol: 0.015, parts: v2 },
+        { wave: 'triangle', vol: 0.085, fx: 0, parts: bas },
+        { wave: 'noise', vol: 0.02, parts: dr },
+      ],
+    };
+  })(),
 });
 
 addMaps('gb', {
