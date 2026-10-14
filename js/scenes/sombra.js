@@ -239,15 +239,15 @@ Scenes.sombra = {
       }
     } else {
       this.spawnT -= dt * diff().speed;
-      if (this.spawnT <= 0) { this.spawnT += this.K.every; if (this.items.length < 6) this.spawn(); }
+      if (this.spawnT <= 0) { this.spawnT += this.K.every * pace(`sombra_${this.kind}`); if (this.items.length < 6) this.spawn(); }
     }
     for (const it of [...this.items]) {
       it.t += dt;
       if (this.kind === 'tetro') {
-        it.y += it.vy * diff().speed * dt;
+        it.y += it.vy * diff().speed / pace(`sombra_${this.kind}`) * dt;
         if (it.y + it.h >= this.H - 6) { this.hurt(it); continue; }
       } else if (this.kind === 'nebula') {
-        it.y += it.vy * diff().speed * dt;
+        it.y += it.vy * diff().speed / pace(`sombra_${this.kind}`) * dt;
         it.x = it.x0 + Math.sin(it.t * 2 + it.ph) * 26;
         if (it.y <= 4) { this.hurt(it); continue; }
       } else {

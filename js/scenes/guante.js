@@ -400,7 +400,7 @@ Scenes.guante = Object.assign(Object.create(Scenes.battle), {
     this.task = new TypingTask(this.box, {
       label: '¡SALISTE VOLANDO! Escribe rapidísimo:',
       texts: ['recuperar'],
-      timeLimit: GC_GUANTE.recoverMs,
+      timeLimit: GC_GUANTE.recoverMs * pace('guante'),
       onDone: (res) => {
         this.st.chars += res.chars;
         this.st.errors += res.errors;

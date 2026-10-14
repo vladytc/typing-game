@@ -274,7 +274,7 @@ class WiiBowling {
     this.s = scene;
     this.bpm = Math.round(90 / diff().time);
     this.beat = 60000 / this.bpm;
-    this.win = 120 * diff().time;
+    this.win = 120 * diff().time * pace('boliche');
     this.frame = 0;
     this.total = 0;
     this.strikes = 0;
@@ -518,7 +518,7 @@ class WiiTennis {
     const list = this.side === 'left' ? WII_TENIS_LEFT : WII_TENIS_RIGHT;
     const text = rand(list.filter((w) => !this.word || w !== this.word.text));
     const speedup = Math.max(0.78, Math.pow(0.97, this.hits)); // se acelera, pero a 0.7 un niño de ~30 PPM ya no llegaba
-    const dur = (1300 + text.length * 380) * diff().time * speedup;
+    const dur = (1300 + text.length * 380) * diff().time * pace('tenis') * speedup;
     this.word = { text, pos: 0, t0: now, errors: 0 };
     this.ball = { from: now, dur, dir: 'in', side: this.side };
     this.render();
@@ -652,7 +652,7 @@ class WiiTennis {
 class WiiBoxing {
   constructor(scene) {
     this.s = scene;
-    this.bpm = Math.round(100 / diff().time);
+    this.bpm = Math.round(100 / diff().time / pace('box'));
     this.beat = 60000 / this.bpm;
     this.onBeatWin = 90 * diff().time;
     this.hits = 0;

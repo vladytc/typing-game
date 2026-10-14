@@ -27,7 +27,7 @@ function kongoHeroX(beam, step) {
 }
 // Segundos que tarda un barril en llegar: más letras = más tiempo; cada viga y cada ronda, 8 % más rápido.
 function kongoBarrelTime(word, beam, level) {
-  return ((1.3 + word.length * 0.55) * diff().time) / ((1 + 0.08 * beam) * (1 + 0.08 * (level - 1)));
+  return ((1.3 + word.length * 0.55) * diff().time * pace('kongo')) / ((1 + 0.08 * beam) * (1 + 0.08 * (level - 1)));
 }
 
 Scenes.kongo = nesScene({
