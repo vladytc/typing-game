@@ -42,12 +42,21 @@ const Save = {
 };
 
 // Dificultad: multiplica el tiempo para escribir, la velocidad de lo que cae y el daño recibido.
+// Experto (~80 PPM) es como Normal para un niño de ~30 PPM pero con todo al doble de rápido: speed 2 también
+// parte a la mitad el espaciado mínimo de 360 ms por letra del Dodge (gap / speed). Campos solo de Experto (1 si faltan):
+// - hit: multiplica el daño que TÚ haces (a 80 PPM las peleas duraban un suspiro y el jefe casi no atacaba).
+// - pace: por escena, multiplica tiempos fijos pensados para ~30 PPM que no escalaban con time (menor = más apretado).
 const DIFFICULTIES = {
   facil: { name: 'Fácil', desc: 'Más tiempo para escribir, todo cae más lento y los golpes duelen menos.', time: 1.5, speed: 0.7, dmg: 0.6 },
   normal: { name: 'Normal', desc: 'El reto pensado para el juego.', time: 1, speed: 1, dmg: 1 },
   dificil: { name: 'Difícil', desc: 'Menos tiempo, todo más rápido y los golpes duelen más. ¡Para dedos turbo!', time: 0.75, speed: 1.3, dmg: 1.4 },
+  experto: { name: 'Experto', desc: 'Para dedos de 80 palabras por minuto. Aquí los jefes sí pegan.', time: 0.5, speed: 2, dmg: 1.2, hit: 0.55,
+    pace: { chupin: 0.98, kongo: 0.95, patos: 0.55, mazmorra: 0.7, caparazon: 0.65, punin: 0.99, vulpino: 1.03, nebula: 0.92, castillo: 0.7,
+      brotes: 0.8, sombra_tetro: 0.9, sombra_nebula: 0.75, sombra_marco: 0.8, guante: 0.7, boliche: 0.5, tenis: 0.93, box: 0.93 } },
 };
 const diff = () => DIFFICULTIES[Save.data.difficulty] || DIFFICULTIES.normal;
+// pace('escena'): multiplicador de esa escena en diff().pace (1 si no está; Fácil, Normal y Difícil no lo tienen).
+const pace = (k) => (diff().pace || {})[k] || 1;
 const scaledDmg = (n) => Math.max(1, Math.round(n * diff().dmg));
 
 const xpToNext = (level) => 15 + level * 10;

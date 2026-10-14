@@ -96,7 +96,7 @@ class SpiralDodge extends Dodge {
       this.nextSpawn += this.gap / diff().speed; // el mismo espaciado mínimo que el Dodge normal
     }
     for (const b of [...this.bullets]) {
-      b.r += this.cfg.speed * diff().speed * dt;
+      b.r += this.cfg.speed * diff().speed / pace('nebula') * dt;
       b.a += 1.1 * dt;
       b.y = b.r; // para apuntar a la que va más adelantada
       this.place(b);

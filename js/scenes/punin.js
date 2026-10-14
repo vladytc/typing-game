@@ -20,7 +20,7 @@ const PUNIN_ACTS = [
 const PUNIN_DODGE = { izquierda: [-70, 0], derecha: [70, 0], abajo: [0, 26], gancho: [-60, 10], arriba: [60, 10], jab: [0, 26] };
 
 function puninWindow(word, round) {
-  return (0.65 + 0.45 * word.length) * [1, 0.88, 0.78][Math.min(3, round) - 1] * diff().time;
+  return (0.65 + 0.45 * word.length) * [1, 0.88, 0.78][Math.min(3, round) - 1] * diff().time * pace('punin');
 }
 
 Scenes.punin = nesScene({

@@ -328,7 +328,7 @@ Scenes.castillo = {
     const chars = texts.join('').length;
     this.phase = 'challenge';
     const tickMs = 2000; // un tic por palabra: a ~30 PPM una palabra corta (con reacción) tarda ~2 s
-    const time = p.kind === 'clock' ? texts.length * tickMs + 1500 : Math.max(p.time || 25000, chars * 420 + 2500);
+    const time = p.kind === 'clock' ? texts.length * tickMs + 1500 : Math.max(p.time || 25000 * pace('castillo'), chars * 420 + 2500); // pace: Experto acorta el piso de 25 s
     this.box.innerHTML = '';
     this.ui = new PolyTask(this.box, {
       label: p.label,

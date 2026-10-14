@@ -175,7 +175,7 @@ Scenes.mazmorra = nesScene({
     this.task({
       label: 'PUERTA CERRADA: escribe la llave (con mayúscula y punto)',
       texts: [phrase],
-      timeLimit: (phrase.length * 650 + 3000) * (this.run.second ? MZ2_TIME : 1),
+      timeLimit: (phrase.length * 650 + 3000) * (this.run.second ? MZ2_TIME : 1) * pace('mazmorra'),
       onDone: (res) => {
         if (res.completed) {
           this.open(door);
@@ -203,7 +203,7 @@ Scenes.mazmorra = nesScene({
     this.task({
       label: '¡ASUSTA A LOS LADRILLINES! (con mayúsculas)',
       texts: words,
-      timeLimit: (words.join('').length * 600 + 2500) * (this.run.second ? MZ2_TIME : 1),
+      timeLimit: (words.join('').length * 600 + 2500) * (this.run.second ? MZ2_TIME : 1) * pace('mazmorra'),
       onDone: (res) => {
         if (res.completed) {
           this.run.guards = false;
@@ -222,7 +222,7 @@ Scenes.mazmorra = nesScene({
     this.task({
       label: 'COFRE: escribe las 3 frases para sacar la llave',
       texts: phrases,
-      timeLimit: (phrases.join('').length * 600 + 4000) * (this.run.second ? MZ2_TIME : 1),
+      timeLimit: (phrases.join('').length * 600 + 4000) * (this.run.second ? MZ2_TIME : 1) * pace('mazmorra'),
       onDone: (res) => {
         if (res.completed) {
           this.run.keys[n] = true;

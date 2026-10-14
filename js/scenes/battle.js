@@ -175,6 +175,7 @@ Scenes.battle = {
     const perfect = errors === 0;
     let dmg = text.length * (0.6 + Math.min(wpm, 120) / 50) * levelBoost - this.def.def;
     if (perfect) dmg *= 1.3;
+    dmg *= diff().hit || 1; // Experto: tus golpes rinden menos (a 80 PPM la pelea si no dura un suspiro)
     return { dmg: Math.max(1, Math.round(dmg)), perfect };
   },
 
