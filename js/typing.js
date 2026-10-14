@@ -3,9 +3,13 @@
 //   Dodge: el turno del enemigo; caen letras/palabras y hay que escribirlas antes de que toquen el suelo.
 // Las dos aceptan `caps: true` para exigir las mayúsculas (practicar SHIFT); los acentos siguen sin importar.
 
-// Como keyMatches, pero si la letra esperada es mayúscula hay que escribirla en mayúscula.
+// Como keyMatches, pero las mayúsculas cuentan: la letra mayúscula se escribe con SHIFT y la
+// minúscula SIN él (si no, se pasaría el nivel dejando SHIFT apretado todo el tiempo).
+const isUpper = (ch) => ch !== ch.toLowerCase();
+const isLower = (ch) => ch !== ch.toUpperCase();
 function capsMatch(expected, typed) {
-  if (expected !== expected.toLowerCase()) return typed === expected || (norm(typed) === norm(expected) && typed !== typed.toLowerCase());
+  if (isUpper(expected)) return typed === expected || (norm(typed) === norm(expected) && isUpper(typed));
+  if (isLower(expected) && isUpper(typed)) return false;
   return keyMatches(expected, typed);
 }
 
@@ -27,7 +31,7 @@ function strictTip(expected, typed) {
 
 // Elige cómo comparar teclas según las reglas activas (se pueden combinar).
 function pickMatch({ caps = false, strict = false } = {}) {
-  if (caps && strict) return (e, t) => strictMatch(e, t) && (e === e.toLowerCase() || t !== t.toLowerCase());
+  if (caps && strict) return (e, t) => strictMatch(e, t) && isUpper(e) === isUpper(t);
   if (strict) return strictMatch;
   if (caps) return capsMatch;
   return keyMatches;
