@@ -188,38 +188,69 @@ Object.assign(SPRITES, {
   wii_estrellin: wiiArt(SPRITES.estrellita_capitan.slice()),
 });
 
-// ---------- Música ORIGINAL de las zonas (las voces de cada pista suman los mismos pasos) ----------
-// Distrito Deportes: Fa mayor, saltarina, como ir al gimnasio con tenis nuevos. 64 pasos.
-TRACKS.wii_deportes = {
-  bpm: 132,
-  voices: [
-    {
-      wave: 'square', vol: 0.024,
-      notes: 'C5/2 F5/2 A5/2 C6/2 A5/2 F5/2 G5/4 A5/2 G5/2 F5/2 E5/2 F5/4 -/4 ' +
-        'D5/2 F5/2 A#5/2 D6/2 C6/2 A#5/2 A5/4 G5/2 A5/2 A#5/2 G5/2 F5/8',
-    },
-    { wave: 'triangle', vol: 0.09, notes: `${rep('F2/2 C3/2', 4)} ${rep('C2/2 G2/2', 4)} ${rep('A#1/2 F2/2', 4)} ${rep('C2/2 G2/2', 4)}` },
-    { wave: 'sine', vol: 0.02, legato: 1, notes: 'F4/16 E4/16 D4/16 C4/16' },
-    { wave: 'noise', vol: 0.016, notes: rep('x/2 -/2 x/2 x x', 8) },
-  ],
-};
-// Canal Galaxia: Sol menor a Re mayor, vals lento (3/4) entre planetitas. 96 pasos (8 compases de 12).
-TRACKS.wii_galaxia = {
-  bpm: 92,
-  voices: [
-    {
-      wave: 'sine', vol: 0.04, legato: 0.95,
-      notes: 'G5/6 A#5/3 D6/3 C6/9 A#5/3 A5/6 F5/3 G5/3 A5/12 A#5/6 D6/3 F6/3 D#6/9 D6/3 C6/6 A5/3 F5/3 G5/12',
-    },
-    {
-      wave: 'sine', vol: 0.016, legato: 0.4,
-      notes: `${rep('G3/2 D4/2 G4/2 A#4/2 G4/2 D4/2', 2)} ${rep('D#3/2 A#3/2 D#4/2 G4/2 D#4/2 A#3/2', 2)} ` +
-        `${rep('C3/2 G3/2 C4/2 D#4/2 C4/2 G3/2', 2)} ${rep('D3/2 A3/2 D4/2 F#4/2 D4/2 A3/2', 2)}`,
-    },
-    { wave: 'sine', vol: 0.012, legato: 0.3, notes: `${rep('D6/1 -/11', 4)} ${rep('G6/1 -/11', 4)}` },
-    { wave: 'triangle', vol: 0.07, notes: 'G2/24 D#2/24 C2/24 D2/24' },
-  ],
-};
+// ---------- Música ORIGINAL de las zonas (era 'wii'; ayudantes wiiUp/wiiHarp en js/worlds/wii.js) ----------
+// Distrito Deportes: pop deportivo de metales en Fa mayor, 132 BPM, como entrar a la cancha con tenis
+// nuevos. Bajo saltarín, golpes de cuerdas a contratiempo y glockenspiel en el clímax. A A' B A' (~58 s).
+TRACKS.wii_deportes = (() => {
+  const mel7 = 'C5/2. F5/2. A5/2. C6/4! A5/2. C6/2 -/2 | D6/4 C6/2. A#5/2. A5/2. A#5/2. D6/4 | ' +
+    'C6/2. A#5/2. A5/2. G5/2. E5/4 G5/4 | F5/6 -/2 A5/2. G5/2. F5/2. E5/2. | D5/2. F5/2. A5/2. D6/4! C6/2 A5/2 -/2 | ' +
+    'A#5/4 A5/2. G5/2. F5/2. G5/2. A#5/4 | C6/2. A#5/2. A5/2. G5/2. E5/2. G5/2. A#5/2. C6/2. |';
+  const melB = 'D6/6 C6/2 A#5/4 F5/4 | E5/2 G5/2 C6/6 A#5/2 A5/2 G5/2 | A5/6 G5/2 E5/4 C5/4 | D5/2 F5/2 A5/6 G5/2 F5/2 E5/2 | ' +
+    'G5/2 A#5/2 D6/6 C6/2 A#5/2 D6/2 | E6/4! D6/2 C6/2 G5/4 E5/4 | C#6/2 E6/2 A6/6! G6/2 F6/2 E6/2 | F6/4 D6/4 E6/2 D6/2 C6/2 A#5/2';
+  const R = { F: ['F2', 'C3', 'F3'], Bb: ['A#1', 'F2', 'A#2'], C: ['C2', 'G2', 'C3'], Dm: ['D2', 'A2', 'D3'], Gm: ['G1', 'D2', 'G2'],
+    C7: ['C2', 'G2', 'C3'], Am: ['A1', 'E2', 'A2'], A7: ['A1', 'E2', 'A2'] };
+  const bpop = (c) => { const [r, f, o] = R[c]; return `${r}/3. ${r}/1 ${o}/2. ${r}/2 ${f}/2. ${r}/2 ${o}/2. ${f}/2`; };
+  const CH = { F: 'F4+A4+C5', Bb: 'F4+A#4+D5', C: 'E4+G4+C5', Dm: 'F4+A4+D5', Gm: 'G4+A#4+D5', C7: 'E4+A#4+C5',
+    Am: 'E4+A4+C5', A7: 'E4+G4+C#5' };
+  const stab = (c) => `-/2 ${CH[c]}/2. -/2 ${CH[c]}/2. -/2 ${CH[c]}/2. -/2 ${CH[c]}/2.`;
+  const pA = ['F', 'Bb', 'C', 'F', 'Dm', 'Gm', 'C7'];
+  const pB = ['Bb', 'C', 'Am', 'Dm', 'Gm', 'C', 'A7', 'Dm'];
+  const beat = 'k/2 h/2 s/2 h/2 k/2 k/2 s/2 h/2';
+  const fill = 'k/2 h/2 s/2 s/2 t/2 t/2 T/2 T/2';
+  return {
+    bpm: 132, vol: 1.3, era: 'wii', form: ['A1', 'A2', 'B', 'A2'],
+    voices: [
+      { wave: 'brass', vol: 0.045, env: WII_BRASS, vib: 'light', parts: {
+        A1: `${mel7} A5/8 -/4 C5/2 E5/2`, A2: `${mel7} F5/4 A5/2. C6/2. F6/4! -/4`, B: melB } },
+      { wave: 'sine', vol: 0.03, env: 'pluck', transpose: 12, pan: 0.3, parts: { A1: '-/128', A2: '-/128', B: melB } },
+      { wave: 'sawtooth', vol: 0.018, env: 'stab', poly: true, pan: -0.3, parts: {
+        A1: `${pA.map(stab).join(' ')} ${stab('C')}`, A2: `${pA.map(stab).join(' ')} ${stab('F')}`, B: pB.map(stab).join(' ') } },
+      { wave: 'triangle', vol: 0.08, fx: 0, env: 'bass', parts: {
+        A1: `${pA.map(bpop).join(' ')} ${bpop('C')}`, A2: `${pA.map(bpop).join(' ')} ${bpop('F')}`, B: pB.map(bpop).join(' ') } },
+      { wave: 'noise', vol: 0.018, fx: 0.15, parts: {
+        A1: `c+${rep(beat, 7)} ${fill}`, A2: `${rep(beat, 7)} ${fill}`, B: `c+${rep('k/2 h/2 s/2 o/2', 14)} ${fill}` } },
+    ],
+  };
+})();
+// Canal Galaxia: vals espacial tranquilo (3/4) en Sol menor que sale a Re mayor en la parte B, 92 BPM.
+// Flauta, arpa, cuerdas y destellos de campanita, como un observatorio entre planetitas. A A' B A' (~63 s).
+TRACKS.wii_galaxia = (() => {
+  const mel4 = 'D5/6 G5/3 A#5/3 | A#5/6 A5/3 G5/3 | D#5/6 G5/3 C6/3 | A5/9 F#5/3 |';
+  const melA1 = `${mel4} D6/6 C6/3 A#5/3 | G5/6 A#5/3 D#6/3 | C6/6 A#5/3 A5/3 | A5/12`;
+  const melA2 = `${mel4} G6/6 F6/3 D6/3 | D#6/6 D6/3 A#5/3 | C6/6 D6/3 D#6/3 | D6/6 C6/3 A5/3`;
+  const melB = 'F#5/6 A5/3 D6/3 | F#6/9 E6/3 | D6/6 B5/3 G5/3 | E6/12 | F#6/6 E6/3 D6/3 | B5/6 C#6/3 D6/3 | G6/6 E6/3 C#6/3 | D6/12';
+  const CH = { Gm: 'G3+A#3+D4+G4', Eb: 'D#3+G3+A#3+D#4', Cm: 'C3+D#3+G3+C4', D: 'D3+F#3+A3+D4', Bm: 'B2+D3+F#3+B3',
+    G: 'G3+B3+D4+G4', A: 'A3+C#4+E4+A4', EmA: 'E3+G3+B3+E4' };
+  const R = { Gm: 'G2', Eb: 'D#2', Cm: 'C2', D: 'D2', Bm: 'B1', G: 'G2', A: 'A2', EmA: 'E2' };
+  const pA = ['Gm', 'Eb', 'Cm', 'D', 'Gm', 'Eb', 'Cm', 'D'];
+  const pB = ['D', 'Bm', 'G', 'A', 'D', 'Bm', 'EmA', 'D'];
+  const harp = (p) => p.map((c) => wiiHarp(wiiUp(CH[c], 12))).join(' ');
+  const bass = (p) => p.map((c) => `${R[c]}/4 ${wiiUp(R[c], 7)}/4 ${wiiUp(R[c], 12)}/4`).join(' ');
+  const pad = (p) => p.map((c) => `${CH[c].split('+').slice(1).join('+')}/12`).join(' ');
+  const twinkle = (p) => p.map((c, i) => (i % 2 ? '-/12' : `-/6 ${wiiUp(CH[c].split('+')[2], 24)}/1 -/5`)).join(' ');
+  return {
+    bpm: 92, vol: 1.3, era: 'wii', form: ['A1', 'A2', 'B', 'A2'],
+    fx: { reverb: { time: 2.4, mix: 0.3 }, echo: { steps: 6, feedback: 0.25, mix: 0.1 }, comp: true },
+    voices: [
+      { wave: 'square', vol: 0.05, vib: 'slow', parts: { A1: melA1, A2: melA2, B: melB } },
+      { wave: 'sine', vol: 0.024, env: 'pluck', pan: 0.3, parts: { A1: harp(pA), A2: harp(pA), B: harp(pB) } },
+      { wave: 'sawtooth', vol: 0.011, env: 'pad', poly: true, filter: 2400, pan: -0.25, parts: { A1: '-/96', A2: pad(pA), B: pad(pB) } },
+      { wave: 'triangle', vol: 0.07, fx: 0, env: 'bass', parts: { A1: bass(pA), A2: bass(pA), B: bass(pB) } },
+      { wave: 'sine', vol: 0.016, env: 'bell', fx: 1, parts: { A1: twinkle(pA), A2: twinkle(pA), B: twinkle(pB) } },
+      { wave: 'noise', vol: 0.012, fx: 0.4, parts: { A1: '-/96', A2: rep('k/4? h/4? h/4?', 8), B: `c/12 ${rep('k/4? h/4? h/4?', 7)}` } },
+    ],
+  };
+})();
 
 // ---------- Casillas (sprite + colores para el 2D; `w3` = modelo propio de la Ciudad Sensor en 3D) ----------
 const wiiT = (s, colors, extra = {}) => ({ s, colors, ...extra });
