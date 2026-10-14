@@ -112,20 +112,54 @@ Object.assign(SPRITE_PALETTES, {
   transfer_pak: { a: '#f4f4f4', b: '#58b85c', c: '#3a3a44', d: '#202030' },
 });
 
-// Música ORIGINAL del overworld de la isla (Do mayor, alegre, con campanitas).
-TRACKS.n64isla = {
-  bpm: 126,
-  voices: [
-    {
-      wave: 'square', vol: 0.028,
-      notes: 'E5/2 G5/2 C6/2 G5/2 A5/2 F5/2 D5/4 E5/2 G5/2 A5/2 B5/2 C6/3 B5/1 A5/4 ' +
-        'F5/2 A5/2 C6/2 A5/2 G5/2 E5/2 C5/4 D5/2 F5/2 E5/2 D5/2 C5/8',
-    },
-    { wave: 'triangle', vol: 0.1, notes: `${rep('C3/2 G3/2', 4)} ${rep('F2/2 C3/2', 4)} ${rep('A2/2 E3/2', 4)} ${rep('G2/2 D3/2', 4)}` },
-    { wave: 'sine', vol: 0.02, legato: 1, notes: 'C4/16 F4/16 A3/16 G3/16' },
-    { wave: 'noise', vol: 0.02, notes: rep('x/2 -/2 x - x/2', 8) },
-  ],
-};
+// Mapa de la isla: shuffle saltarín en Fa mayor a 132, de plataformero 3D (ocarina, bajo que
+// rebota, piano a contratiempo; en B cuerdas y arpa). Forma A A' B A', 32 compases (~58 s).
+// Música ORIGINAL: ninguna melodía viene de un juego.
+TRACKS.n64isla = (() => {
+  const melA = 'C5/2! F5/2 A5/3 G5/1 F5/2 A5/2 C6/4 | A5/3 G5/1 E5/2 C5/2 E5/6 -/2 | ' +
+    'D5/2 F5/2 Bb5/3 A5/1 G5/2 F5/2 D5/4 | E5/2 G5/2 C6/2 Bb5/2 A5/2 G5/2 E5/2 G5/2 | ' +
+    'A5/3! C6/1 A5/2 F5/2 C5/2 F5/2 A5/4 | F#5/2 A5/2 D6/4 C6/2 A5/2 F#5/4 | ' +
+    'G5/2 Bb5/2 D6/2 Bb5/2 C6/2 Bb5/2 G5/2 E5/2 |';
+  const melB = 'D6/6 C6/2 Bb5/4 F5/4 | Db6/6 C6/2 Bb5/4 F5/4 | C6/3 A5/1 E5/2 A5/2 C6/2 E6/2 D6/2 C6/2 | ' +
+    'D6/6 A5/2 F#5/4 C6/4 | Bb5/2 A5/2 G5/2 Bb5/2 D6/4 G6/4! | F6/3 E6/1 D6/2 C6/2 Bb5/2 G5/2 E5/4 | ' +
+    'G5/2 C6/2 E6/2 G6/2 F6/2 E6/2 D6/2 C6/2 | Bb5/2. A5/2. G5/2. E5/2. C5/2 D5/2 E5/2 G5/2';
+  const cA = ['F', 'Am', 'Bb', 'C', 'F', 'D7', ['Gm', 'C7'], 'F'];
+  const cB = ['Bb', 'Bbm', 'Am', 'D7', 'Gm', 'Gm', 'C7', 'C7'];
+  const R = { F: ['F2', 'C3', 'F3', 'A2'], Am: ['A2', 'E3', 'A3', 'C3'], Bb: ['Bb2', 'F3', 'Bb3', 'D3'], C: ['C3', 'G3', 'C4', 'E3'], D7: ['D3', 'A3', 'D4', 'F#3'], Gm: ['G2', 'D3', 'G3', 'Bb2'], C7: ['C3', 'G3', 'Bb3', 'E3'], Bbm: ['Bb2', 'F3', 'Bb3', 'Db3'] };
+  const CH = { F: 'A3+C4+F4', Am: 'A3+C4+E4', Bb: 'Bb3+D4+F4', C: 'G3+C4+E4', D7: 'A3+C4+F#4', Gm: 'G3+Bb3+D4', C7: 'G3+Bb3+E4', Bbm: 'Bb3+Db4+F4' };
+  const bars = (list, full, half) => list.map((c) => (Array.isArray(c) ? c.map(half).join(' ') : full(c))).join(' ');
+  // Bajo: en A rebota en staccato (raíz-quinta); en B camina (raíz, tercera, quinta, tercera).
+  const bounce = (c) => { const [r, f, o] = R[c]; return `${r}/4. ${f}/4. ${r}/4. ${f}/2. ${o}/2.`; };
+  const bounceH = (c) => { const [r, f] = R[c]; return `${r}/4. ${f}/4.`; };
+  const walk = (c) => { const [r, f, , t] = R[c]; return `${r}/4 ${t}/4 ${f}/4 ${t}/4`; };
+  const comp = (c) => `(-/2 ${CH[c]}/2.)*4`;
+  const compH = (c) => `(-/2 ${CH[c]}/2.)*2`;
+  const harp = (c) => { const [a, b, d] = CH[c].split('+'); return `(${a}/2 ${b}/2 ${d}/2 ${b}/2)*2`; };
+  const harpH = (c) => { const [a, b, d] = CH[c].split('+'); return `${a}/2 ${b}/2 ${d}/2 ${b}/2`; };
+  const groove = 'k/2 h/2 s/2 h/1? h/1 k/2 h/2 s/2 h/2';
+  const fill = 'k/2 h/2 s/2 h/2 s/1 s/1? t/2 t/2 T/2';
+  const drA = `c+${groove} (${groove})*6 ${fill}`;
+  const drB = `c+k/2 h/2 o/2 h/2 s/2 h/2 o/2 h/2 (k/2 h/2 o/2 h/2 s/2 h/2 o/2 h/2)*6 ${fill}`;
+  return {
+    bpm: 132, vol: 1.3, era: 'n64', swing: 0.12, form: ['A', 'A2', 'B', 'A2'],
+    voices: [
+      { wave: 'square', vol: 0.038, parts: {
+        A: `${melA} F5/4 -/2 C5/2 D5/2 E5/2 F5/2 G5/2`,
+        A2: `${melA} F5/6 A5/2 F5/4! -/4`,
+        B: melB } },
+      // "Piano" a contratiempo: armónicos brillantes y caída corta.
+      { wave: [1, 0.5, 0.3, 0.2, 0.1], vol: 0.02, env: 'pluck', poly: true, fx: 0.5, parts: {
+        A: bars(cA, comp, compH), A2: bars(cA, comp, compH) } },
+      { wave: 'sawtooth', vol: 0.015, env: 'pad', poly: true, unison: 10, parts: {
+        B: bars(cB, (c) => `${CH[c]}/16`, (c) => `${CH[c]}/8`) } },
+      { wave: [1, 0.45, 0.2, 0.1, 0.05], vol: 0.02, env: 'pluck', transpose: 12, fx: 0.7, parts: {
+        A2: bars(cA, harp, harpH), B: bars(cB, harp, harpH) } },
+      { wave: 'triangle', vol: 0.075, fx: 0, parts: {
+        A: bars(cA, bounce, bounceH), A2: bars(cA, bounce, bounceH), B: bars(cB, walk, walk) } },
+      { wave: 'noise', vol: 0.02, fx: 0.15, parts: { A: drA, A2: drA, B: drB } },
+    ],
+  };
+})();
 
 // ---------- Casillas (sprite 2D + colores para el modo clásico; d3/h para el 3D) ----------
 const n64T = (s, colors, extra = {}) => ({ s, colors, ...extra });
