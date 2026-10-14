@@ -16,28 +16,92 @@ const MELODY_NOTES = {
   l: { f: 1046.5, color: '#F0953C' },
 };
 
-// Sonido de flauta (onda senoidal con un vibrato suavecito).
-function fluteNote(freq, dur = 0.35) {
+// Sonido de OCARINA: casi un seno con un 3.er armónico suave (como el preset 'ocarina' de
+// music.js), un soplido de aire al empezar, vibrato que entra tarde y un eco de templo.
+// Las alturas (MELODY_NOTES) no cambian: la mecánica las necesita tal cual.
+const OCA = { wave: null, air: null };
+function fluteNote(freq, dur = 0.42) {
   const c = Sfx.unlock();
   if (!c || Sfx.muted) return;
   const t = c.currentTime;
+  const out = c.createGain();
+  out.connect(c.destination);
+  // Eco del templo: un retardo corto que se apaga solo (se suelta al terminar).
+  let tail = null;
+  if (c.createDelay && c.createBiquadFilter) {
+    const dl = c.createDelay(1);
+    dl.delayTime.value = 0.19;
+    const fb = c.createGain();
+    fb.gain.value = 0.3;
+    tail = c.createBiquadFilter();
+    tail.type = 'lowpass';
+    tail.frequency.value = 2400;
+    const wet = c.createGain();
+    wet.gain.value = 0.35;
+    out.connect(dl);
+    dl.connect(tail);
+    tail.connect(fb);
+    fb.connect(dl);
+    tail.connect(wet);
+    wet.connect(c.destination);
+  }
   const o = c.createOscillator();
-  const g = c.createGain();
+  if (c.createPeriodicWave && o.setPeriodicWave) {
+    if (!OCA.wave) {
+      const amps = [0, 1, 0.06, 0.18, 0.02, 0.05];
+      OCA.wave = c.createPeriodicWave(new Float32Array(amps.length), Float32Array.from(amps));
+    }
+    o.setPeriodicWave(OCA.wave);
+  } else {
+    o.type = 'sine';
+  }
+  // La nota "se acomoda" desde un pelito abajo, como al soplar una ocarina de verdad.
+  o.frequency.setValueAtTime(freq * 0.985, t);
+  o.frequency.exponentialRampToValueAtTime(freq, t + 0.05);
   const lfo = c.createOscillator();
   const lg = c.createGain();
-  o.type = 'sine';
-  o.frequency.setValueAtTime(freq, t);
-  lfo.frequency.value = 5.5;
-  lg.gain.value = freq * 0.012;
+  lfo.frequency.value = 5.2;
+  lg.gain.setValueAtTime(0, t);
+  lg.gain.setValueAtTime(0, t + 0.14);
+  lg.gain.linearRampToValueAtTime(freq * 0.011, t + 0.28);
   lfo.connect(lg).connect(o.frequency);
+  const g = c.createGain();
   g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(0.12, t + 0.04);
+  g.gain.exponentialRampToValueAtTime(0.12, t + 0.035);
+  g.gain.exponentialRampToValueAtTime(0.085, t + 0.15);
+  g.gain.setValueAtTime(0.085, t + dur * 0.7);
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  o.connect(g).connect(c.destination);
+  o.connect(g).connect(out);
   o.start(t);
   lfo.start(t);
   o.stop(t + dur + 0.05);
   lfo.stop(t + dur + 0.05);
+  // Soplido: ruido muy cortito filtrado cerca de la nota.
+  if (c.createBufferSource && c.createBiquadFilter) {
+    if (!OCA.air) {
+      const n = Math.floor(c.sampleRate * 0.12);
+      OCA.air = c.createBuffer(1, n, c.sampleRate);
+      const d = OCA.air.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    const src = c.createBufferSource();
+    src.buffer = OCA.air;
+    const bp = c.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = freq * 2;
+    bp.Q.value = 1.5;
+    const ag = c.createGain();
+    ag.gain.setValueAtTime(0.03, t);
+    ag.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+    src.connect(bp);
+    bp.connect(ag);
+    ag.connect(out);
+    src.start(t);
+    src.stop(t + 0.11);
+  }
+  setTimeout(() => {
+    try { out.disconnect(); if (tail) tail.disconnect(); } catch (e) { /* ya estaba suelto */ }
+  }, (dur + 1.6) * 1000);
 }
 
 // Juzga una nota: ¿llegó a tiempo? (función pura, se prueba en Node).
