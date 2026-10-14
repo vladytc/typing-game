@@ -60,6 +60,19 @@ TRAINERS.dani64 = {
   retry: ['* PROFESORA LETRA (desde las gradas): ¡Ya curé a tus Tecloides!', '* DANI: Revancha cuando quieras. Aquí te espero.'],
 };
 
+// ---------- Música: ayudas ----------
+// Deja una voz "plana" (sin paréntesis ni barras). La copia de Marco del mundo GameCube
+// (gcShadowTrack) recorta las voces ficha por ficha y no entiende "( ... )*n" ni la forma.
+function n64Flat(s) {
+  let out = s;
+  let prev;
+  do {
+    prev = out;
+    out = out.replace(/\(([^()]*)\)\s*\*\s*(\d+)/g, (m, body, n) => Array(Number(n)).fill(body).join(' '));
+  } while (out !== prev);
+  return out.replace(/\|/g, ' ').trim().split(/\s+/).join(' ');
+}
+
 // ---------- Enemigos normales: practican números y palabras alternadas (§7.3, §7.10) ----------
 const N64_BULLET_NUMS = '0123456789'.split('');
 
@@ -524,93 +537,288 @@ addWorld({
     ],
   },
 
-  // Música ORIGINAL (§14.2). Todas las voces de cada pista suman los mismos pasos.
+  // Música ORIGINAL (§14.2), era 'n64': ocarina, cuerdas, bajo cálido y reverb de sala.
+  // Todas las melodías son nuevas; solo el ESTILO recuerda a los juegos de la consola.
+  // Cada sección (A, B...) tiene 8 compases y todas las voces suman lo mismo (Music.check).
   tracks: {
-    // Batalla normal N64: Re menor, percusión seca, bajo "slap" (notas cortas), melodía angular.
-    n64battle: {
-      bpm: 148,
-      voices: [
-        {
-          wave: 'square', vol: 0.03,
-          notes: 'D5/2 A4/2 F5/2 D5/2 E5/2 C5/2 G5/4 F5/2 E5/2 D5/2 A5/2 G5/3 F5/1 E5/4 ' +
-            'A#4/2 D5/2 F5/2 A#5/2 A5/2 G5/2 F5/2 E5/2 C#5/2 E5/2 A5/4 G5/2 E5/2 C#5/4',
-        },
-        { wave: 'triangle', vol: 0.1, legato: 0.45, notes: rep('D2 D3 -/2', 4) + ' ' + rep('F2 F3 -/2', 4) + ' ' + rep('A#1 A#2 -/2', 4) + ' ' + rep('A1 A2 -/2', 4) },
-        { wave: 'sine', vol: 0.025, legato: 1, notes: 'D4/16 C4/16 A#3/16 A3/16' },
-        { wave: 'noise', vol: 0.028, notes: rep('x/2 -/2 x x -/2', 8) },
-      ],
-    },
-    // Circuito Isla: Mi mayor, ritmo de ska (acordes en contratiempo), campanas.
-    n64kart: {
-      bpm: 160,
-      voices: [
-        {
-          wave: 'square', vol: 0.03,
-          notes: 'E5/2 G#5/2 B5/2 G#5/2 A5/2 F#5/2 E5/4 C#5/2 E5/2 F#5/2 G#5/2 A5/3 G#5/1 F#5/4 ' +
-            'E5/2 G#5/2 B5/2 C#6/2 B5/2 A5/2 G#5/2 F#5/2 D#5/2 F#5/2 B5/4 A5/2 F#5/2 E5/4',
-        },
-        { wave: 'square', vol: 0.014, notes: rep('-/2 E4/2', 4) + ' ' + rep('-/2 C#4/2', 4) + ' ' + rep('-/2 E4/2', 4) + ' ' + rep('-/2 D#4/2', 4) },
-        { wave: 'triangle', vol: 0.1, notes: rep('E2/2 B2/2', 4) + ' ' + rep('A2/2 E3/2', 4) + ' ' + rep('E2/2 B2/2', 4) + ' ' + rep('B1/2 F#2/2', 4) },
-        { wave: 'sine', vol: 0.02, notes: 'B6/2 -/14 G#6/2 -/14 B6/2 -/14 D#6/2 -/14' },
-        { wave: 'noise', vol: 0.024, notes: rep('x - - - x - x -', 8) },
-      ],
-    },
-    // Templo de la Melodía: Fa mayor, 3/4 lento (8 compases de 12 pasos), flauta y pad.
-    n64temple: {
-      bpm: 80,
-      voices: [
-        {
-          wave: 'sine', vol: 0.045, legato: 0.95,
-          notes: 'F5/6 A5/3 G5/3 C6/6 A5/6 A#5/4 A5/4 G5/4 F5/9 -/3 ' +
-            'D5/6 F5/3 A5/3 G5/6 E5/6 F5/4 G5/4 A5/4 F5/12',
-        },
-        { wave: 'triangle', vol: 0.05, legato: 1, notes: 'F3/12 F3/12 A#2/12 C3/12 D3/12 C3/12 A#2/12 F2/12' },
-        { wave: 'sine', vol: 0.018, legato: 1, notes: 'A4/12 A4/12 D5/12 E5/12 F4/12 E4/12 D4/12 C4/12' },
-      ],
-    },
-    // Estadio Polígono: el reto de Tecloides con "público" (palmadas en 2 y 4) y pads.
-    n64estadio: {
-      bpm: 165,
-      voices: [
-        {
-          wave: 'square', vol: 0.03,
-          intro: '-/4 E5 F5 F#5 G5 G#5 A5 A#5 B5 C6/4',
-          notes: 'A5/2 E5/2 A5/2 C6/2 B5/2 G5/2 E5/4 F5/2 A5/2 C6/2 E6/2 D6/3 C6/1 B5/4 ' +
-            'A5/2 C6/2 B5/2 A5/2 G5/2 E5/2 F5/2 G5/2 G#5/2 B5/2 E6/4 D6/2 B5/2 A5/4',
-        },
-        { wave: 'triangle', vol: 0.11, intro: '-/8 E2/8', notes: rep('A2 A3 G3 A3', 4) + ' ' + rep('F2 F3 E3 F3', 4) + ' ' + rep('C3 C4 B3 C4', 4) + ' ' + rep('E2 E3 D3 E3', 4) },
-        { wave: 'sine', vol: 0.02, legato: 1, intro: '-/16', notes: 'A3/16 F3/16 C4/16 E3/16' },
-        { wave: 'noise', vol: 0.03, intro: 'x x x x -/12', notes: rep('x/2 x/2 x/4 x/2 -/2 x/4', 4) },
-      ],
-    },
-    // Pasillo del castillo: Sol mayor, un vals lento "disfrazado" de 4/4.
-    n64castle: {
-      bpm: 112,
-      voices: [
-        {
-          wave: 'square', vol: 0.026,
-          notes: 'G4/4 B4/2 D5/2 G5/4 F#5/2 E5/2 D5/6 B4/2 C5/4 A4/4 ' +
-            'B4/4 D5/2 G5/2 B5/4 A5/2 G5/2 F#5/4 A5/4 G5/8',
-        },
-        { wave: 'triangle', vol: 0.09, notes: 'G2/4 D3/4 B2/4 D3/4 C3/4 G3/4 A2/4 D3/4 G2/4 D3/4 E3/4 B2/4 D3/4 F#3/4 G2/8' },
-        { wave: 'sine', vol: 0.02, legato: 1, notes: 'B3/16 C4/16 B3/16 A3/8 B3/8' },
-        { wave: 'noise', vol: 0.015, notes: rep('x -/7', 8) },
-      ],
-    },
-    // Marco, Rey de los Cuadros: el tema del castillo en Sol menor a 150.
-    n64marco: {
-      bpm: 150,
-      voices: [
-        {
-          wave: 'square', vol: 0.032,
-          notes: 'G5/2 D5/2 A#5/2 G5/2 A5/2 F5/2 D5/4 D#5/2 G5/2 C6/2 A#5/2 A5/3 G5/1 F#5/4 ' +
-            'G5/2 A#5/2 D6/2 C6/2 A#5/2 A5/2 G5/2 F5/2 D#5/2 D5/2 F#5/2 A5/2 G5/8',
-        },
-        { wave: 'square', vol: 0.016, notes: rep('G4 D4', 8) + ' ' + rep('D#4 A#3', 8) + ' ' + rep('A#3 F3', 8) + ' ' + rep('D4 A3', 8) },
-        { wave: 'triangle', vol: 0.11, notes: rep('G2/2 G3/2', 4) + ' ' + rep('D#2/2 D#3/2', 4) + ' ' + rep('A#1/2 A#2/2', 4) + ' ' + rep('D2/2 D3/2', 4) },
-        { wave: 'noise', vol: 0.03, notes: rep('x x - x x/2 x/2', 8) },
-      ],
-    },
+    // Batalla normal: rock épico en Re menor a 148 (metales, cuerdas en semicorcheas, bajo que
+    // bombea). Golpe de entrada y forma A A' B A', 32 compases (~52 s).
+    n64battle: (() => {
+      const melA = 'D5/4! A4/2 D5/2 F5/4 E5/2 D5/2 | E5/3 F5/1 E5/2 C5/2 A4/6 -/2 | ' +
+        'Bb4/2 D5/2 F5/2 Bb5/4 A5/2 G5/2 F5/2 | G5/4 E5/2 C5/2 E5/2 G5/2 C6/2 Bb5/2 | ' +
+        'A5/4! F5/2 D5/2 A5/2 Bb5/2 A5/2 F5/2 | G5/3 F5/1 E5/2 F5/2 D5/8 | ' +
+        'F5/2 G5/2 A5/2 Bb5/2 D6/4 C6/2 Bb5/2 |';
+      const melB = 'C6/6 A5/2 F5/4 A5/4 | G5/6 E5/2 C5/4 E5/2 G5/2 | Bb5/6 G5/2 D5/4 G5/2 Bb5/2 | ' +
+        'A5/6 F5/2 D5/4 F5/2 A5/2 | D6/4! C6/2 Bb5/2 F6/4! D6/2 Bb5/2 | E6/4 C6/2 G5/2 C6/2 E6/2 G6/4! | ' +
+        'G#5/2 B5/2 D6/2 E6/2 F6/4 E6/2 D6/2 | C#6/2 E6/2 C#6/2 A5/2 E5/2 G5/2 A5/2 C#6/2';
+      const cA = ['Dm', 'Dm', 'Bb', 'C', 'Dm', 'Dm', 'Bb', 'A'];
+      const cB = ['F', 'C', 'Gm', 'Dm', 'Bb', 'C', 'E7', 'A'];
+      const R = { Dm: ['D2', 'A2', 'D3'], Bb: ['Bb1', 'F2', 'Bb2'], C: ['C2', 'G2', 'C3'], A: ['A1', 'E2', 'A2'], F: ['F2', 'C3', 'F3'], Gm: ['G2', 'D3', 'G3'], E7: ['E2', 'B2', 'E3'] };
+      const T = { Dm: ['D4', 'F4', 'A4'], Bb: ['D4', 'F4', 'Bb4'], C: ['E4', 'G4', 'C5'], A: ['C#4', 'E4', 'A4'], F: ['F4', 'A4', 'C5'], Gm: ['D4', 'G4', 'Bb4'], E7: ['D4', 'G#4', 'B4'] };
+      const CH = { Dm: 'D3+F3+A3', Bb: 'D3+F3+Bb3', C: 'E3+G3+C4', A: 'C#3+E3+A3', F: 'F3+A3+C4', Gm: 'D3+G3+Bb3', E7: 'D3+G#3+B3' };
+      const bass = (c) => { const [r, f, o] = R[c]; return `${r}/2. ${r}/2. ${o}/2. ${r}/2. ${r}/2. ${f}/2. ${o}/2. ${f}/2.`; };
+      const ost = (c) => { const [a, b, d] = T[c]; return `(${a} ${d} ${b} ${d})*4`; };
+      const hit = (c) => `${CH[c]}/3! -/7 ${CH[c]}/2. ${CH[c]}/4`;
+      const groove = 'k/2 h/2 s/2 h/2 k/1 k/1 h/2 s/2 h/2';
+      const fill = 'k/2 s/1 s/1 t/2 t/2 T/2 T/2 s/2! s/2!';
+      const drA = `c+${groove} (${groove})*6 ${fill}`;
+      const drB = `c+k/2 o/2 s/2 h/2 k/2 o/2 s/2 h/2 (k/2 o/2 s/2 h/2 k/2 o/2 s/2 h/2)*6 ${fill}`;
+      return {
+        bpm: 148, vol: 1.4, era: 'n64', intro: ['I'], form: ['A', 'A2', 'B', 'A2'],
+        voices: [
+          { wave: 'brass', vol: 0.045, vib: { rate: 5.5, depth: 0.2, delay: 0.25 }, parts: {
+            I: '-/16',
+            A: `${melA} A5/4 E5/2 C#5/2 E5/2 G5/2 A5/2 C#6/2`,
+            A2: `${melA} A5/8! C#6/2. E6/2. A5/4`,
+            B: melB } },
+          { wave: 'brass', vol: 0.02, env: 'stab', poly: true, fx: 0.5, parts: {
+            I: 'D3+A3+D4/2! -/2 D3+A3+D4/2! -/2 C3+G3+C4/2! -/2 C#3+E3+A3/4!',
+            A: cA.map(hit).join(' '), A2: cA.map(hit).join(' '),
+            B: cB.map((c) => `${CH[c]}/4! -/12`).join(' ') } },
+          { wave: 'sawtooth', vol: 0.016, env: 'stab', legato: 0.5, fx: 0.4, parts: {
+            A: cA.map(ost).join(' '), A2: cA.map(ost).join(' ') } },
+          { wave: 'sawtooth', vol: 0.015, env: 'pad', poly: true, unison: 12, parts: {
+            B: 'F4+A4+C5/16 E4+G4+C5/16 D4+G4+Bb4/16 D4+F4+A4/16 D4+F4+Bb4/16 E4+G4+C5/16 D4+G#4+B4/16 C#4+E4+A4/16' } },
+          { wave: 'triangle', vol: 0.075, fx: 0, parts: {
+            I: 'D2/2 -/2 D2/2 -/2 C2/2 -/2 A1/4',
+            A: cA.map(bass).join(' '), A2: cA.map(bass).join(' '), B: cB.map(bass).join(' ') } },
+          { wave: 'noise', vol: 0.018, fx: 0.2, parts: {
+            I: 'c+k/2! -/2 k/2! -/2 k/2! -/2 t/1 t/1 T/2', A: drA, A2: drA, B: drB } },
+        ],
+      };
+    })(),
+
+    // Circuito Isla: calipso de playa en Mi mayor a 160 (tambor de acero, metales a contratiempo
+    // como el ska, bajo de calipso). Forma A A' B C A', 40 compases (~60 s). C es el "derrape".
+    n64kart: (() => {
+      const melA = 'B4/2 E5/2 G#5/3 B5/1 -/2 G#5/2 B5/2 C#6/2 | C#6/3 B5/1 A5/2 E5/2 C#5/4 E5/2 A5/2 | ' +
+        'A5/2. A5/2 G#5/2 F#5/2 C#5/2 F#5/2 A5/4 | G#5/3 F#5/1 D#5/2 B4/2 D#5/2 F#5/2 A5/4 | ' +
+        'G#5/2 B5/2 E6/3 D#6/1 C#6/2 B5/2 G#5/4 | E5/2 G#5/2 C#6/4 B5/2 G#5/2 E5/4 | ' +
+        'A5/2 C#6/2 E6/2 C#6/2 B5/2 D#6/2 F#6/2 D#6/2 |';
+      const melB = 'E6/6 C#6/2 A5/4 C#6/4 | D#6/6 B5/2 F#5/4 B5/4 | D#6/3 C#6/1 B5/2 G#5/2 D#5/2 G#5/2 B5/4 | ' +
+        'C#6/6 G#5/2 E5/4 C#6/2 D#6/2 | E6/3 C#6/1 A5/2 C#6/2 F#6/4! E6/2 C#6/2 | D#6/3 B5/1 F#5/2 B5/2 D#6/4 F#6/4 | ' +
+        'G#6/4! E6/2 B5/2 A6/4! E6/2 C#6/2 | B5/2 A5/2 F#5/2 D#5/2 B4/2 C#5/2 D#5/2 F#5/2';
+      const r1 = 'G#5/3 G#5/3 E5/2 C#5/2 -/2 E5/2 G#5/2 | A5/3 A5/3 E5/2 C#5/2 -/2 C#5/2 E5/2 | ' +
+        'B5/3 B5/3 G#5/2 E5/2 -/2 G#5/2 B5/2 |';
+      const melC = `${r1} D#6/3 C#6/3 B5/2 F#5/2 -/2 G#5/2 A5/2 | ${r1} B4/2 C#5/2 D#5/2 E5/2 F#5/2 G#5/2 A5/2 B5/2!`;
+      const cA = ['E', 'A', 'F#m', 'B', 'E', 'C#m', ['A', 'B'], 'E'];
+      const cB = ['A', 'B', 'G#m', 'C#m', 'F#m', 'B', ['E', 'A'], 'B'];
+      const cC = ['C#m', 'A', 'E', 'B', 'C#m', 'A', 'E', 'B'];
+      const R = { E: ['E2', 'B2', 'E3'], A: ['A2', 'E3', 'A3'], 'F#m': ['F#2', 'C#3', 'F#3'], B: ['B1', 'F#2', 'B2'], 'C#m': ['C#2', 'G#2', 'C#3'], 'G#m': ['G#2', 'D#3', 'G#3'] };
+      const CH = { E: 'G#3+B3+E4', A: 'A3+C#4+E4', 'F#m': 'A3+C#4+F#4', B: 'A3+D#4+F#4', 'C#m': 'G#3+C#4+E4', 'G#m': 'G#3+B3+D#4' };
+      const bars = (list, full, half) => list.map((c) => (Array.isArray(c) ? c.map(half).join(' ') : full(c))).join(' ');
+      // Bajo de calipso: "bum... ba-bum" con la quinta al final.
+      const bass = (c) => { const [r, f, o] = R[c]; return `${r}/3 ${r}/1 ${f}/2 -/2 ${r}/3 ${o}/1 ${f}/4`; };
+      const bassH = (c) => { const [r, f] = R[c]; return `${r}/3 ${r}/1 ${f}/4`; };
+      const skank = (c) => `(-/2 ${CH[c]}/2.)*4`;
+      const skankH = (c) => `(-/2 ${CH[c]}/2.)*2`;
+      const pan2 = (c) => { const n = CH[c].split('+'); return `${n[0]}/4 ${n[1]}/4 ${n[2]}/4 ${n[1]}/4`; };
+      const pan2H = (c) => { const n = CH[c].split('+'); return `${n[0]}/4 ${n[2]}/4`; };
+      const groove = 'k/2 h/2 s/2 h/1 k/1 k/2 h/2 s/2 o/2';
+      const fill = 'k/2 s/1 s/1 t/2 t/2 T/2 T/2 s/2! s/2!';
+      const drA = `c+${groove} (${groove})*6 ${fill}`;
+      const drC = `k/4 h/2 h/2 s/4 h/2 k/2 (k/4 h/2 h/2 s/4 h/2 k/2)*6 ${fill}`;
+      return {
+        bpm: 160, vol: 1.3, era: 'n64', form: ['A', 'A2', 'B', 'C', 'A2'],
+        voices: [
+          // Tambor de acero: armónicos de "lata" y una caída larga.
+          { wave: [1, 0.55, 0.12, 0.3, 0, 0.08], vol: 0.04, env: { a: 0.003, d: 0.35, s: 0.3, r: 0.15 }, vib: 'light', parts: {
+            A: `${melA} E6/4! -/2 B5/2 G#5/2 E5/2 B4/2 D#5/2`,
+            A2: `${melA} E6/6 B5/2 E5/4. -/4`,
+            B: melB, C: melC } },
+          { wave: 'brass', vol: 0.02, env: 'stab', poly: true, fx: 0.5, parts: {
+            A: bars(cA, skank, skankH), A2: bars(cA, skank, skankH), B: bars(cB, skank, skankH), C: bars(cC, skank, skankH) } },
+          { wave: 'sawtooth', vol: 0.014, env: 'pad', poly: true, unison: 10, parts: {
+            B: bars(cB, (c) => `${CH[c]}/16`, (c) => `${CH[c]}/8`) } },
+          { wave: 'bell', vol: 0.02, env: 'bell', transpose: 12, fx: 0.7, parts: {
+            A2: bars(cA, pan2, pan2H), C: bars(cC, pan2, pan2H) } },
+          { wave: 'triangle', vol: 0.075, fx: 0, parts: {
+            A: bars(cA, bass, bassH), A2: bars(cA, bass, bassH), B: bars(cB, bass, bassH), C: bars(cC, bass, bassH) } },
+          { wave: 'noise', vol: 0.02, fx: 0.15, parts: { A: drA, A2: drA, B: drA, C: drC } },
+        ],
+      };
+    })(),
+
+    // Templo de la Melodía: vals lento y misterioso en La menor / Do mayor (flauta grave, arpa,
+    // coro y campanitas). Va en Do para que las notas de Ocarín (pentatónica de Do, ocarin.js)
+    // suenen siempre bien encima. Forma A B A C, 32 compases de 3/4 (~69 s); C deja aire.
+    n64temple: (() => {
+      const melA = 'E4/6 A4/3 C5/3 | C5/6 A4/3 F4/3 | G4/6 C5/3 E5/3 | D5/9 -/3 | ' +
+        'E5/6 D5/3 C5/3 | A4/6 C5/3 F5/3 | E5/4 D5/2 C5/3 A4/3 | B4/9 -/3';
+      const melB = 'A4/3 C5/3 F5/6 | G5/6 D5/3 B4/3 | E5/3 G5/3 B5/6 | A5/9 E5/3 | ' +
+        'F5/6 E5/3 C5/3 | D5/6 G5/3 B4/3 | C5/12 | -/12';
+      const cA = ['Am', 'F', 'C', 'G', 'Am', 'F', 'Dm', 'Em'];
+      const cB = ['F', 'G', 'Em', 'Am', 'F', 'G', 'C', 'C'];
+      const H = { Am: ['A2', 'E3', 'A3', 'C4'], F: ['F2', 'C3', 'F3', 'A3'], C: ['C3', 'G3', 'C4', 'E4'], G: ['G2', 'D3', 'G3', 'B3'], Dm: ['D3', 'A3', 'D4', 'F4'], Em: ['E3', 'B3', 'E4', 'G4'] };
+      const PAD = { Am: 'A3+C4+E4', F: 'A3+C4+F4', C: 'G3+C4+E4', G: 'G3+B3+D4', Dm: 'A3+D4+F4', Em: 'G3+B3+E4' };
+      const ROOT = { Am: 'A2', F: 'F2', C: 'C3', G: 'G2', Dm: 'D3', Em: 'E2' };
+      const harp = (c) => { const [a, b, d, e] = H[c]; return `${a}/2 ${b}/2 ${d}/2 ${e}/2 ${d}/2 ${b}/2`; };
+      const join = (list, f) => list.map(f).join(' ');
+      return {
+        bpm: 84, vol: 1.25, era: 'n64', form: ['A', 'B', 'A', 'C'],
+        fx: { reverb: { time: 2.6, mix: 0.32 }, filter: { type: 'lowpass', freq: 8000 }, comp: true },
+        voices: [
+          { wave: 'sine', vol: 0.032, legato: 0.95, vib: 'slow', parts: { A: melA, B: melB, C: '-/96' } },
+          // Arpa: armónicos que se apagan solos.
+          { wave: [1, 0.45, 0.2, 0.1, 0.05], vol: 0.02, env: { a: 0.002, d: 0.7, s: 0.05, r: 0.4 }, transpose: 12, parts: {
+            A: join(cA, harp), B: join(cB, harp), C: join(cA, harp) } },
+          { wave: 'vox', vol: 0.011, env: 'swell', poly: true, legato: 1, filter: 2400, parts: {
+            A: join(cA, (c) => `${PAD[c]}/12`), B: join(cB, (c) => `${PAD[c]}/12`), C: join(cA, (c) => `${PAD[c]}/12`) } },
+          { wave: 'triangle', vol: 0.05, legato: 0.95, fx: 0.2, parts: {
+            A: join(cA, (c) => `${ROOT[c]}/12`), B: join(cB, (c) => `${ROOT[c]}/12`), C: join(cA, (c) => `${ROOT[c]}/12`) } },
+          { wave: 'bell', vol: 0.016, env: 'bell', parts: {
+            B: '-/36 E6/6 A6/6 -/36 G6/6 C7/6', C: '(-/42 G6/3 E6/3)*2' } },
+        ],
+      };
+    })(),
+
+    // Estadio Polígono: rock de estadio en La menor a 165 (metales, guitarra de quintas, bajo en
+    // octavas y palmas del público). Sirena de entrada y forma A A' B C A', 40 compases (~58 s).
+    n64estadio: (() => {
+      const melA = 'E5/2 A5/2 C6/3 B5/1 A5/2 E5/2 A5/4 | F5/2 A5/2 C6/2 F6/2 E6/3 D6/1 C6/4 | ' +
+        'B5/3 C6/1 D6/2 B5/2 G5/4 D6/4 | E6/6 D6/2 B5/4 G5/4 | A5/2 C6/2 E6/3 D6/1 C6/2 B5/2 A5/4 | ' +
+        'C6/2 A5/2 F5/2 A5/2 C6/2 F6/2 E6/2 C6/2 | D6/3 C6/1 A5/2 F5/2 E5/2 G#5/2 B5/2 D6/2 |';
+      const melB = 'A5/6 C6/2 F6/4 E6/4 | D6/6 B5/2 G5/4 B5/4 | G5/2 B5/2 E6/4 D6/2 B5/2 G5/4 | A5/8 C6/2 B5/2 A5/2 G5/2 | ' +
+        'F5/2 A5/2 D6/4 F6/4 E6/2 D6/2 | D6/2 G6/4! F6/2 E6/2 D6/2 B5/4 | C6/2 E6/2 G6/4 B5/2 E6/2 G#6/4 | ' +
+        'A6/4! G#6/2 E6/2 D6/2 B5/2 G#5/2 E5/2';
+      const c3 = 'A5/2. A5/2. C6/2. A5/2. -/4 G5/2 A5/2 | B5/2. B5/2. D6/2. B5/2. -/4 A5/2 B5/2 | ' +
+        'C6/2. C6/2. F6/2. C6/2. -/4 B5/2 C6/2 |';
+      const melC = `${c3} B5/2. G#5/2. E5/2. G#5/2. B5/2. D6/2. E6/4! | ${c3} E6/2 D6/2 B5/2 G#5/2 E5/2 F#5/2 G#5/2 B5/2`;
+      const cA = ['Am', 'F', 'G', 'Em', 'Am', 'F', ['Dm', 'E'], 'Am'];
+      const cB = ['F', 'G', 'Em', 'Am', 'Dm', 'G', ['C', 'E'], 'E'];
+      const cC = ['Am', 'G', 'F', 'E', 'Am', 'G', 'F', 'E'];
+      const R = { Am: ['A2', 'E3', 'A3'], F: ['F2', 'C3', 'F3'], G: ['G2', 'D3', 'G3'], Em: ['E2', 'B2', 'E3'], Dm: ['D2', 'A2', 'D3'], E: ['E2', 'B2', 'E3'], C: ['C2', 'G2', 'C3'] };
+      const PC = { Am: 'A3+E4', F: 'F3+C4', G: 'G3+D4', Em: 'E3+B3', Dm: 'D3+A3', E: 'E3+B3', C: 'C4+G4' };
+      const CH = { F: 'F4+A4+C5', G: 'G4+B4+D5', Em: 'E4+G4+B4', Am: 'E4+A4+C5', Dm: 'D4+F4+A4', C: 'E4+G4+C5', E: 'E4+G#4+B4' };
+      const bars = (list, full, half) => list.map((c) => (Array.isArray(c) ? c.map(half).join(' ') : full(c))).join(' ');
+      const bass = (c) => { const [r, f, o] = R[c]; return `${r}/2 ${o}/2 ${r}/2 ${o}/2 ${r}/2 ${o}/2 ${f}/2 ${o}/2`; };
+      const bassH = (c) => { const [r, , o] = R[c]; return `${r}/2 ${o}/2 ${r}/2 ${o}/2`; };
+      const gtr = (c) => `${PC[c]}/2. ${PC[c]}/2. -/2 ${PC[c]}/2. ${PC[c]}/2. ${PC[c]}/2. -/2 ${PC[c]}/2`;
+      const gtrH = (c) => `${PC[c]}/2. ${PC[c]}/2. -/2 ${PC[c]}/2.`;
+      const groove = 'k/2 h/2 s+x/2 h/2 k/2 k/2 s+x/2 h/2';
+      const fill = 'k/2 s/1 s/1 t/2 t/2 T/2 T/2 s/2! s/2!';
+      const drA = `c+${groove} (${groove})*6 ${fill}`;
+      const drB = `c+k/2 o/2 s+x/2 o/2 k/2 o/2 s+x/2 o/2 (k/2 o/2 s+x/2 o/2 k/2 o/2 s+x/2 o/2)*6 ${fill}`;
+      // El público aplaude a coro en el puente.
+      const drC = `k/2 -/2 x/2 -/2 k/2 x/2 x/2 -/2 (k/2 -/2 x/2 -/2 k/2 x/2 x/2 -/2)*6 ${fill}`;
+      return {
+        bpm: 165, vol: 1.25, era: 'n64', intro: ['I'], form: ['A', 'A2', 'B', 'C', 'A2'],
+        voices: [
+          { wave: 'brass', vol: 0.045, vib: { rate: 5.5, depth: 0.2, delay: 0.25 }, parts: {
+            I: '-/16 E5/1 F5/1 F#5/1 G5/1 G#5/1 A5/1 A#5/1 B5/1 C6/2 B5/2 G#5/4!',
+            A: `${melA} C6/2 B5/2 A5/4 -/4 E5/2 G#5/2`,
+            A2: `${melA} A5/8! -/2 A4/2 B4/2 C5/2`,
+            B: melB, C: melC } },
+          // Guitarra de quintas: muchos armónicos y caída rápida.
+          { wave: [1, 0.7, 0.5, 0.4, 0.3, 0.25, 0.2, 0.15], vol: 0.02, env: 'pluck', poly: true, fx: 0.3, parts: {
+            I: '-/16 E3+B3/16', A: bars(cA, gtr, gtrH), A2: bars(cA, gtr, gtrH), B: bars(cB, gtr, gtrH), C: bars(cC, gtr, gtrH) } },
+          { wave: 'sawtooth', vol: 0.014, env: 'pad', poly: true, unison: 12, parts: {
+            B: bars(cB, (c) => `${CH[c]}/16`, (c) => `${CH[c]}/8`) } },
+          { wave: 'triangle', vol: 0.072, fx: 0, parts: {
+            I: '-/16 E2/2 E2/2 E2/2 E2/2 E2/4 E2/4',
+            A: bars(cA, bass, bassH), A2: bars(cA, bass, bassH), B: bars(cB, bass, bassH), C: bars(cC, bass, bassH) } },
+          { wave: 'noise', vol: 0.019, fx: 0.2, parts: {
+            I: 'k/4! k/4! k/4! k/4! s/1 s/1 s/1 s/1 s/2 s/2 t/2 t/2 T/2 T/2!', A: drA, A2: drA, B: drB, C: drC } },
+        ],
+      };
+    })(),
+
+    // Pasillo del castillo: vals señorial en Sol mayor a 112 (3/4 de verdad): ocarina, cuerdas
+    // que doblan y luego cantan el puente, arpa en "um-pa-pa" y coro. A A' B A', 32 compases (~51 s).
+    n64castle: (() => {
+      const mel = 'D5/6 G5/3 B5/3 | B5/6 A5/3 G5/3 | E5/6 G5/3 C6/3 | A5/9 F#5/3 | G5/6 B5/3 D6/3 | D#6/6 B5/3 A5/3 |';
+      const melA = `${mel} G5/4 B5/2 E6/3 C#6/3 | D6/6 C6/3 A5/3`;
+      const melA2 = `${mel} C6/4 E6/2 D6/3 C6/3 | B5/9 -/3`;
+      const melB = 'E6/6 D6/3 B5/3 | G5/6 B5/3 E6/3 | E6/6 D6/3 C6/3 | B5/6 G5/3 D5/3 | ' +
+        'C6/6 E6/3 A6/3 | A6/9! F#6/3 | G6/4 D6/2 E6/3 G#5/3 | A5/6 C6/3 F#5/3';
+      const cA = ['G', 'Em', 'C', 'D', 'G', 'B7', ['Em', 'A7'], 'D'];
+      const cA2 = ['G', 'Em', 'C', 'D', 'G', 'B7', ['Am', 'D7'], 'G'];
+      const cB = ['Em', 'Em', 'C', 'G', 'Am', 'D', ['G', 'E7'], ['Am', 'D7']];
+      const R = { G: ['G2', 'D3'], Em: ['E2', 'B2'], C: ['C2', 'G2'], D: ['D2', 'A2'], B7: ['B1', 'F#2'], A7: ['A1', 'E2'], Am: ['A1', 'E2'], D7: ['D2', 'A2'], E7: ['E2', 'B2'] };
+      const CH = { G: 'G3+B3+D4', Em: 'G3+B3+E4', C: 'G3+C4+E4', D: 'F#3+A3+D4', B7: 'F#3+A3+D#4', A7: 'G3+C#4+E4', Am: 'A3+C4+E4', D7: 'F#3+C4+D4', E7: 'G#3+D4+E4' };
+      const PAD = { G: 'B4+D5', Em: 'B4+E5', C: 'C5+E5', D: 'A4+D5', B7: 'A4+D#5', A7: 'A4+C#5', Am: 'A4+C5', D7: 'A4+C5', E7: 'G#4+D5' };
+      const bars = (list, full, half) => list.map((c) => (Array.isArray(c) ? c.map(half).join(' ') : full(c))).join(' ');
+      const bass = (c) => `${R[c][0]}/4 -/4 ${R[c][1]}/4?`;
+      const bassH = (c) => `${R[c][0]}/6`;
+      const oompa = (c) => `-/4 ${CH[c]}/4. ${CH[c]}/4.`;
+      const oompaH = (c) => `-/2 ${CH[c]}/2. ${CH[c]}/2.`;
+      const pad = (c) => `${PAD[c]}/12`;
+      const padH = (c) => `${PAD[c]}/6`;
+      const dr = '(k/4? h/4? h/4?)*7 k/4? t/4? T/4';
+      return {
+        bpm: 112, vol: 1.45, era: 'n64', form: ['A', 'A2', 'B', 'A2'],
+        voices: [
+          { wave: 'square', vol: 0.036, parts: { A: melA, A2: melA2, B: '-/96' } },
+          // Cuerdas: doblan la melodía una octava abajo en A' y cantan el puente.
+          { wave: 'sawtooth', vol: 0.02, env: { a: 0.06, d: 0.2, s: 0.8, r: 0.25 }, vib: 'light', transpose: -12, parts: {
+            A2: melA2, B: melB } },
+          { wave: [1, 0.45, 0.2, 0.1, 0.05], vol: 0.022, env: 'pluck', poly: true, parts: {
+            A: bars(cA, oompa, oompaH), A2: bars(cA2, oompa, oompaH), B: bars(cB, oompa, oompaH) } },
+          { wave: 'vox', vol: 0.014, env: 'pad', poly: true, filter: 2600, parts: {
+            B: bars(cB, pad, padH) } },
+          { wave: 'triangle', vol: 0.07, fx: 0.2, parts: {
+            A: bars(cA, bass, bassH), A2: bars(cA2, bass, bassH), B: bars(cB, bass, bassH) } },
+          { wave: 'noise', vol: 0.018, fx: 0.3, parts: { A2: dr, B: `c+${dr}` } },
+        ],
+      };
+    })(),
+
+    // Marco, Rey de los Cuadros: tema de jefe en Sol menor a 150 (órgano, coro, metales y un riff
+    // cromático en el bajo). Entrada de 2 compases y A A' B C A', 40 compases (~64 s).
+    // Sin acordes ni bemoles y con voces planas: la copia de Marco del mundo GameCube
+    // (gcShadowTrack) transporta y recorta estas voces ficha por ficha.
+    n64marco: (() => {
+      const mel = 'G5/6 D5/2 G5/2 A5/2 A#5/4 | A5/3 G5/1 F#5/2 G5/2 D5/8 | D#5/2 G5/2 A#5/4 D#6/4 D6/2 C6/2 | ' +
+        'D6/6 A5/2 F#5/4 D5/4 | G5/4! A#5/2 D6/2 G6/4 F6/2 D#6/2 | D6/3 C6/1 A#5/2 A5/2 G5/8 | ' +
+        'C6/2 D#6/2 G6/4 F#6/2 G6/2 D#6/2 C6/2 |';
+      const leadA = `${mel} D6/4 C6/2 A5/2 F#5/2 A5/2 C6/2 F#5/2`;
+      const leadA2 = `${mel} D6/8! -/2 D5/2 F#5/2 A5/2`;
+      const leadB = 'A#5/8 G5/4 D#5/4 | A5/8 F#5/4 D5/4 | G5/4 A5/4 A#5/4 C6/4 | B5/12 D6/4 | ' +
+        'D#6/4! D6/2 C6/2 A#5/4 G5/4 | F6/4! D#6/2 D6/2 C6/4 A5/4 | F#6/6 D6/2 A5/4 F#6/4 | ' +
+        'G6/4! F#6/2 D#6/2 D6/2 C6/2 A5/2 F#5/2';
+      const c4 = 'G5/2. G5/2. A#5/2 A5/2 G5/2 -/2 D6/4 | G5/2. G5/2. A#5/2 A5/2 G5/2 -/2 D#6/4 | ' +
+        'C6/2. C6/2. D#6/2 D6/2 C6/2 -/2 G6/4 |';
+      const leadC = `${c4} F#6/4 D6/2 A5/2 F#5/4 D5/4 | ${c4} D6/2 C6/2 A#5/2 A5/2 G5/2 F#5/2 D5/2 F#5/2`;
+      const cA = ['Gm', 'Gm', 'D#', 'D', 'Gm', 'Gm', 'Cm', 'D'];
+      const cB = ['D#', 'D', 'Cm', 'G', 'D#', 'F', 'D', 'D'];
+      const cC = ['Gm', 'D#', 'Cm', 'D', 'Gm', 'D#', 'C', 'D'];
+      const R = { Gm: ['G2', 'D3', 'G3'], 'D#': ['D#2', 'A#2', 'D#3'], D: ['D2', 'A2', 'D3'], Cm: ['C2', 'G2', 'C3'], F: ['F2', 'C3', 'F3'], G: ['G2', 'D3', 'G3'], C: ['C2', 'G2', 'C3'] };
+      const ORG = { Gm: ['G4', 'A#4', 'D5'], 'D#': ['G4', 'A#4', 'D#5'], D: ['F#4', 'A4', 'D5'], Cm: ['G4', 'C5', 'D#5'], F: ['F4', 'A4', 'C5'], G: ['G4', 'B4', 'D5'], C: ['G4', 'C5', 'E5'] };
+      // Riff del bajo: golpe, octava, quinta... con empuje de semicorcheas.
+      const riff = (c) => { const [r, f, o] = R[c]; return `${r}/2! ${r}/1 ${r}/1 ${o}/2. ${r}/2 ${f}/2! ${r}/2 ${o}/2. ${f}/2`; };
+      const org16 = (c) => { const [a, b, d] = ORG[c]; return rep(`${a} ${d} ${b} ${d}`, 4); };
+      const org4 = (c) => { const [a, b, d] = ORG[c]; return `${a}/4 ${b}/4 ${d}/4 ${b}/4`; };
+      const j = (list, f) => list.map(f).join(' ');
+      const g8 = (pat, fill) => `c+${rep(pat, 7)} ${fill}`;
+      const fill = 's/1 s/1 s/1 s/1 t/2 t/2 T/2 T/2 s/2! s/2!';
+      const drA = g8('k/2 h/2 s/2! h/2 k/1 k/1 k/2 s/2! h/2', fill);
+      const drB = g8('k/4 h/2 h/2 s/4! h/2 k/2', fill);
+      const drC = g8('k/1 k/1 t/2 s/2 t/2 k/1 k/1 T/2 s/2! T/2', fill);
+      const flat = (...secs) => n64Flat(secs.join(' '));
+      return {
+        bpm: 150, vol: 1.25, era: 'n64',
+        voices: [
+          { wave: 'brass', vol: 0.048, env: 'soft', vib: { rate: 5.5, depth: 0.22, delay: 0.25 },
+            intro: '-/16 D5/2. D5/2. D5/2. F#5/2. A5/2. C6/2. D6/4!',
+            notes: flat(leadA, leadA2, leadB, leadC, leadA2) },
+          { wave: 'vox', vol: 0.02, env: 'pad', legato: 1, filter: 2600,
+            intro: 'G4/16 F#4/16',
+            notes: flat('-/128', 'D4/16 D4/16 D#4/16 D4/16 D4/16 D4/16 D#4/16 C4/16',
+              'G4/16 F#4/16 G4/16 G4/16 G4/16 A4/16 A4/16 F#4/16',
+              'A#4/16 A#4/16 C5/16 A4/16 A#4/16 A#4/16 C5/16 A4/16',
+              'D4/16 D4/16 D#4/16 D4/16 D4/16 D4/16 D#4/16 C4/16') },
+          { wave: 'organ', vol: 0.014, env: 'organ', legato: 0.6, fx: 0.6,
+            intro: 'G4/8 F#4/8 G4/4 A#4/4 D5/4 C#5/4',
+            notes: flat(j(cA, org16), j(cA, org16), j(cB, org4), j(cC, org16), j(cA, org16)) },
+          { wave: 'warmbass', vol: 0.07, env: 'bass', fx: 0,
+            intro: 'G2/8 F#2/8 G2/2. G2/2. G2/2. G2/2. G2/2. G2/2. G2/4',
+            notes: flat(j(cA, riff), j(cA, riff), j(cB, riff), j(cC, riff), j(cA, riff)) },
+          { wave: 'noise', vol: 0.02, fx: 0.2,
+            intro: 'c+k/4! -/4 k/4! -/4 t/2 t/2 t/2 t/2 T/2 T/2 s/2! s/2!',
+            notes: [drA, drA, drB, drC, drA].join(' ') },
+        ],
+      };
+    })(),
   },
 });
 
