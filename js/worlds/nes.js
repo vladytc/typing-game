@@ -289,6 +289,273 @@ const PAJE_LINES = {
   ],
 };
 
+// ---------- Música (era 'nes') ----------
+// Ayudas para escribir las pistas del mundo (también las usan nes-mapa.js y secretos/nes.js).
+const NES_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+// Sube o baja una nota k semitonos: nesTr('A2', -1) → 'G#2'.
+function nesTr(n, k) {
+  const m = /^([A-G])([#b]?)(\d)$/.exec(n);
+  let i = NES_NOTES.indexOf(m[1]) + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0) + k;
+  const o = Number(m[3]) + Math.floor(i / 12);
+  i = ((i % 12) + 12) % 12;
+  return `${NES_NOTES[i]}${o}`;
+}
+// Baja todas las notas de un texto n octavas (n negativo, sube).
+const nesDown = (s, n = 1) => s.replace(/([A-G][#b]?)(\d)/g, (m, x, o) => `${x}${o - n}`);
+// La misma línea k pasos después y recortada al final: el "eco" del segundo pulso de la NES.
+function nesLate(mel, k) {
+  const ev = mel.replace(/\|/g, ' ').trim().split(/\s+/);
+  let cut = k;
+  while (cut > 0) {
+    const m = /^(.*?)\/(\d+)(.*)$/.exec(ev.pop());
+    const d = m ? Number(m[2]) : 1;
+    if (m && d > cut) { ev.push(`${m[1]}/${d - cut}${m[3]}`); cut = 0; } else cut -= d;
+  }
+  return `-/${k} ${ev.join(' ')}`;
+}
+// Un compás por acorde (o dos medios compases si viene [a, b]), separados por "|".
+const nesLine = (chords, bar, half) => chords.map((c) => (Array.isArray(c) ? c.map(half).join(' ') : bar(c))).join(' | ');
+
+const NES_TRACKS = {
+  // Batalla normal: rock de batalla en Sol menor, 168 BPM. Bajo de triángulo en corcheas, acordes
+  // de pulso 25 % y un puente a medio tiempo con la melodía larga. Forma A A' B C A' (40 compases, ~57 s).
+  nes_battle: (() => {
+    const B = { Gm: ['G2', 'D3', 'G3'], Eb: ['D#2', 'A#2', 'D#3'], F: ['F2', 'C3', 'F3'], D7: ['D2', 'A2', 'D3'], Cm: ['C2', 'G2', 'C3'], Ab: ['G#2', 'D#3', 'G#3'], D: ['D2', 'A2', 'D3'] };
+    const CH = { Gm: ['G4', 'A#4', 'D5'], Eb: ['G4', 'A#4', 'D#5'], F: ['A4', 'C5', 'F5'], D7: ['F#4', 'A4', 'C5'], Cm: ['G4', 'C5', 'D#5'], Ab: ['G#4', 'C5', 'D#5'], D: ['F#4', 'A4', 'D5'] };
+    const drive = (c) => { const [r, f, o] = B[c]; return `${r}/2 ${r}/2 ${o}/2 ${r}/2 ${f}/2 ${r}/2 ${o}/2 ${f}/2`; };
+    const slow = (c) => { const [r, f, o] = B[c]; return `${r}/4 -/2 ${r}/2 ${o}/4 ${f}/4`; };
+    const chug = (c) => rep(`-/2 ${CH[c].join('+')}/2.`, 4);
+    const roll = (c) => { const [a, b, d] = CH[c]; return rep(`${a}/1 ${b}/1 ${d}/1 ${b}/1`, 4); };
+    const chA = ['Gm', 'Eb', 'F', 'D7', 'Gm', 'Eb', 'Cm', 'D7'];
+    const chB = ['Cm', 'Gm', 'Ab', 'F', 'Eb', 'F', 'D', 'D7'];
+    const chC = ['Eb', 'F', 'Gm', 'Gm', 'Eb', 'F', 'D', 'D'];
+    const a1 = 'G5/2! D5/1 G5/1 A#5/2 A5/2 G5/1 F5/1 G5/2 D5/2 F5/2';
+    const a2 = 'G5/3 D#5/3 A#4/2 C5/2 D5/2 D#5/2 F5/2';
+    const a6 = `${a1} | ${a2} | A5/2! F5/1 A5/1 C6/2 A#5/2 A5/1 G5/1 F5/2 C5/2 D#5/2 | D5/3 F#5/3 A5/2 C6/4 A5/2 F#5/2 | ${a1} | ${a2} | ` +
+      'C6/2! A#5/1 G5/1 D#5/2 G5/2 A#5/2 C6/2 D6/2 D#6/2 |';
+    const melB = 'D#5/4 G5/4 C6/6 A#5/2 | A#5/4 G5/2 D5/2 G5/6 -/2 | C6/4 D#6/4 G#6/6 G6/2 | F6/4 D#6/2 D6/2 C6/4 A5/4 | ' +
+      'G5/2 A#5/2 D#6/2 G6/2 F6/2 D#6/2 D6/2 C6/2 | A5/2 C6/2 F6/2 A6/2 G6/2 F6/2 D#6/2 D6/2 | F#6/6! D6/2 A5/4 F#5/4 | ' +
+      'A5/1 C6/1 A5/1 F#5/1 D5/1 F#5/1 A5/1 C6/1 D6/4 -/4';
+    const melC = 'G5/12 F5/4 | A5/12 C6/4 | A#5/8 A5/4 G5/4 | D5/16 | D#5/12 G5/4 | F5/12 A5/4 | F#5/8 A5/8 | D6/8! C6/4 A5/4';
+    const beat = 'k/2 h/2 s/2 h/2 k/2 k/2 s/2 h/2';
+    const fill = 'k/2 s/1 s/1 s/2 s/1 s/1 t/2 t/2 T/2 T/2';
+    const dr16 = 'k/1 h/1 h/1 h/1 s/1 h/1 h/1 h/1 k/1 h/1 k/1 h/1 s/1 h/1 h/1 h/1';
+    const half = 'k/4 h/4 s/4 h/4';
+    return {
+      bpm: 168, era: 'nes', form: ['A1', 'A2', 'B', 'C', 'A2'],
+      voices: [
+        { wave: 'square', vol: 0.03, parts: {
+          A1: `${a6} D6/6 C6/2 A5/2 F#5/2 D5/4`, A2: `${a6} D6/3 A5/3 F#5/2 G5/8!`, B: melB, C: melC,
+        } },
+        { wave: 'pulse25', vol: 0.013, parts: {
+          A1: nesLine(chA, chug), A2: nesLine(chA, chug), B: nesLine(chB, roll), C: nesLine(chC, roll),
+        } },
+        { wave: 'triangle', vol: 0.1, parts: {
+          A1: nesLine(chA, drive), A2: nesLine(chA, drive), B: nesLine(chB, drive), C: nesLine(chC, slow),
+        } },
+        { wave: 'noise', vol: 0.02, parts: {
+          A1: `c+${beat} ${rep(beat, 6)} ${fill}`, A2: `c+${beat} ${rep(beat, 6)} ${fill}`,
+          B: `c+${dr16} ${rep(dr16, 6)} ${fill}`, C: `c+${half} ${rep(half, 6)} ${fill}`,
+        } },
+      ],
+    };
+  })(),
+
+  // Kongo Tambor: groove de selva en Mi menor, 132 BPM. Los tambores mandan (bombo-caja-bombo-bombo-caja
+  // y una voz de toms), el bajo rebota en pentatónica y la melodía deja huecos. Hay un corte solo de
+  // tambores. Forma A A B D A B (44 compases, ~80 s).
+  kongo: (() => {
+    const r1 = 'E2/2. -/1 E2/1. G2/2. -/2 A2/2. B2/2. D3/2. B2/2.';
+    const r2 = 'E2/2. -/1 E2/1. G2/2. -/2 A2/2. B2/1. A2/1. G2/2. D2/2.';
+    const riff = (n) => Array(n).fill(`${r1} | ${r2}`).join(' | ');
+    const B = { C: ['C2', 'G2', 'C3'], D: ['D2', 'A2', 'D3'], Bm: ['B1', 'F#2', 'B2'], Em: ['E2', 'B2', 'E3'], B7: ['B1', 'F#2', 'B2'] };
+    const CH = { C: 'C4+E4+G4', D: 'D4+F#4+A4', Bm: 'B3+D4+F#4', Em: 'E4+G4+B4', B7: 'B3+D#4+A4' };
+    const bounce = (c) => { const [r, f, o] = B[c]; return `${r}/2. -/1 ${r}/1. ${f}/2. -/2 ${o}/2. ${f}/2. ${r}/2. ${f}/2.`; };
+    const chB = ['C', 'D', 'Bm', 'Em', 'C', 'D', 'B7', 'B7'];
+    const k1 = 'E5/2! G5/2 -/2 A5/1 B5/1 -/4 D6/2 B5/2';
+    const melA = `${k1} | A5/3 G5/3 E5/2 -/8 | E5/2! G5/2 -/2 A5/1 B5/1 -/4 D6/2 E6/2 | D6/3 B5/3 A5/2 G5/2 A5/2 B5/4 | ` +
+      `${k1} | A5/3 G5/3 E5/2 -/4 E5/1 G5/1 A5/2 | B5/2 A5/2 G5/2 D6/2 E6/4 D6/2 B5/2 | A5/2 B5/1 A5/1 G5/2 E5/10`;
+    const melB = 'G5/4 E5/2 G5/2 C6/6 B5/2 | A5/4 F#5/2 A5/2 D6/6 C6/2 | B5/3 A5/3 F#5/2 D5/2 F#5/2 A5/2 B5/2 | G5/8 E5/8 | ' +
+      'C6/2 D6/2 E6/4 G6/4 E6/4 | F#6/2 E6/2 D6/4 A5/4 D6/4 | D#6/4! F#6/4 B6/6 A6/2 | F#6/2 D#6/2 B5/2 A5/2 F#5/2 D#5/2 B4/4';
+    const stab = (x) => `-/4 ${x}/2. -/2 -/2 ${x}/1. ${x}/1. -/4`;
+    const stabA = [1, 2, 3, 4, 5, 6, 7, 8].map((i) => stab(i % 4 === 0 ? 'D4+G4+B4' : CH.Em)).join(' | ');
+    const kit = 'k/2 h/2 s/2 k/2 k/2 h/2 s/2 h/2';
+    const toms = 'T/2 -/1 t/1 -/2 t/2 T/2 -/1 t/1 t/2 -/2';
+    const tomFill = 'T/1 T/1 t/1 t/1 T/1 T/1 t/1 t/1 T/2! t/2! T/2! -/2';
+    const brk = 'T/2 t/1 t/1 T/2 t/2 T/1 T/1 t/2 T/2 t/2';
+    return {
+      bpm: 132, era: 'nes', form: ['A', 'A', 'B', 'D', 'A', 'B'],
+      voices: [
+        { wave: 'square', vol: 0.03, parts: { A: melA, B: melB } },
+        { wave: 'pulse12', vol: 0.016, env: 'stab', parts: { A: stabA, B: chB.map((c) => rep(`${CH[c]}/4`, 4)).join(' | ') } },
+        { wave: 'triangle', vol: 0.12, parts: { A: riff(4), B: nesLine(chB, bounce), D: riff(2) } },
+        { wave: 'noise', vol: 0.022, parts: {
+          A: `c+${kit} ${rep(kit, 7)}`, B: `c+${kit} ${rep(kit, 7)}`, D: `${rep('k/4', 12)} k/2 s/1 s/1 s/2 s/2 c+k/4 -/4`,
+        } },
+        { wave: 'noise', vol: 0.024, parts: { A: `${rep(toms, 7)} ${tomFill}`, B: `${rep(toms, 7)} ${tomFill}`, D: `${rep(brk, 3)} ${tomFill}` } },
+      ],
+    };
+  })(),
+
+  // Mazmorra de Llaves: misterio de mazmorra en La menor, 100 BPM. Un ostinato de pulso 12 % que no
+  // para, bajo de lamento que baja por semitonos, latido de bombo y el eco de la melodía en el segundo
+  // pulso, un tiempo después. Forma A A' B C (28 compases, ~67 s).
+  mazmorra: (() => {
+    const AR = {
+      Am: ['A3', 'C4', 'E4', 'A4', 'C5'], Fo: ['F#3', 'A3', 'C4', 'E4', 'A4'], F: ['F3', 'A3', 'C4', 'F4', 'A4'], E: ['E3', 'G#3', 'B3', 'E4', 'G#4'],
+      Dm: ['D3', 'F3', 'A3', 'D4', 'F4'], G: ['G3', 'B3', 'D4', 'G4', 'B4'], Em: ['E3', 'G3', 'B3', 'E4', 'G4'], Bb: ['A#3', 'D4', 'F4', 'A#4', 'D5'],
+      E7: ['E3', 'G#3', 'D4', 'E4', 'G#4'],
+    };
+    const osti = (c) => { const [a, b, d, e, f] = AR[c]; return rep(`${a}/1 ${b}/1 ${d}/1 ${e}/1 ${f}/1 ${e}/1 ${d}/1 ${b}/1`, 2); };
+    const chA = ['Am', 'Am', 'Am', 'Fo', 'F', 'E', 'Dm', 'E'];
+    const chB = ['F', 'G', 'Em', 'Am', 'Dm', 'Bb', 'E', 'E7'];
+    const chC = ['Am', 'Am', 'F', 'E'];
+    const low = (r) => `${r}/12 ${r}/2. ${r}/2.`;
+    const basA = ['A2', 'G#2', 'G2', 'F#2', 'F2', 'E2', 'D2', 'E2'].map(low).join(' | ');
+    const basB = ['F2', 'G2', 'E2', 'A2', 'D2', 'A#1', 'E2', 'E2'].map(low).join(' | ');
+    const a6 = 'A4/6 C5/2 B4/6 A4/2 | G#4/6 B4/2 E5/8 | F5/6 E5/2 D#5/6 E5/2 | C5/16 | A4/6 C5/2 B4/6 A4/2 | G#4/4 B4/4 D5/4 F5/4 |';
+    const melA1 = `${a6} E5/6 D5/2 C5/4 B4/4 | A4/12 -/4`;
+    const melA2 = `${a6} E5/4 F5/4 G#5/4 B5/4 | A5/12 -/4`;
+    const melB = 'C6/6 A5/2 F5/8 | D6/6 B5/2 G5/8 | E6/6 B5/2 G5/4 E5/4 | A5/16 | F6/6 D6/2 A5/4 F5/4 | F6/4 E6/4 D6/4 A#5/4 | ' +
+      'G#5/6 B5/2 E6/8! | D6/2 C6/2 B5/2 G#5/2 E5/8';
+    const drips = '-/6 E6/1? -/9 | -/10 B5/1? -/5 | -/3 C6/1? -/12 | -/8 G#5/1? -/7';
+    const beat = 'k/2 k/2? -/12';
+    const beatB = 'k/2 k/2? -/4 h/2? -/2 h/2? -/2';
+    return {
+      bpm: 100, era: 'nes', form: ['A1', 'A2', 'B', 'C'],
+      voices: [
+        { wave: 'square', vol: 0.03, legato: 0.95, vib: 'slow', parts: { A1: melA1, A2: melA2, B: melB } },
+        { wave: 'square', vol: 0.011, legato: 0.95, parts: { A1: nesLate(melA1, 4), A2: nesLate(melA2, 4), B: nesLate(melB, 4), C: drips } },
+        { wave: 'pulse12', vol: 0.017, env: 'pluck', parts: {
+          A1: nesLine(chA, osti), A2: nesLine(chA, osti), B: nesLine(chB, osti), C: nesLine(chC, osti),
+        } },
+        { wave: 'triangle', vol: 0.1, parts: { A1: basA, A2: basA, B: basB, C: ['A2', 'A2', 'F2', 'E2'].map(low).join(' | ') } },
+        { wave: 'noise', vol: 0.018, parts: { A1: rep(beat, 8), A2: rep(beat, 8), B: rep(beatB, 8), C: rep(beat, 4) } },
+      ],
+    };
+  })(),
+
+  // Campeón Puñín: rock de ring en Si bemol mayor, 170 BPM. Golpes de metal con silencios para los
+  // avisos, bajo con séptima rockera, un B en Sol menor que sube hasta el La#6 y un "entrenamiento"
+  // de boogie con pregunta y respuesta entre los dos pulsos. Forma A A' B C A' (40 compases, ~56 s).
+  punin: (() => {
+    const B = {
+      Bb: ['A#1', 'F2', 'A#2', 'G#2'], Ab: ['G#1', 'D#2', 'G#2', 'F#2'], Eb: ['D#2', 'A#2', 'D#3', 'C#3'], F: ['F1', 'C2', 'F2', 'D#2'],
+      Gm: ['G1', 'D2', 'G2', 'F2'], Cm: ['C2', 'G2', 'C3', 'A#2'], D7: ['D2', 'A2', 'D3', 'C3'],
+    };
+    const CH = { Bb: 'D4+F4+A#4', Ab: 'C4+D#4+G#4', Eb: 'D#4+G4+A#4', F: 'C4+F4+A4', Gm: 'D4+G4+A#4', Cm: 'C4+D#4+G4', D7: 'D4+F#4+C5' };
+    const rock = (c) => { const [r, f, o, s] = B[c]; return `${r}/2 ${o}/2 ${r}/2 ${o}/2 ${f}/2 ${o}/2 ${s}/2 ${o}/2`; };
+    const BOOG = { Bb: ['A#1', 'D2', 'F2', 'G2', 'G#2'], Eb: ['D#2', 'G2', 'A#2', 'C3', 'C#3'], F: ['F1', 'A1', 'C2', 'D2', 'D#2'] };
+    const boogie = (c) => { const [r, t, f, s, b7] = BOOG[c]; return `${r}/2 ${t}/2 ${f}/2 ${s}/2 ${b7}/2 ${s}/2 ${f}/2 ${t}/2`; };
+    const hit = (c) => `${CH[c]}/2.! -/2 ${CH[c]}/1. ${CH[c]}/1. -/10`;
+    const roll = (c) => { const [a, b, d] = CH[c].split('+'); return rep(`${a}/1 ${b}/1 ${d}/1 ${b}/1`, 4); };
+    const chA = ['Bb', 'Ab', 'Eb', 'F', 'Bb', 'Ab', 'Eb', 'F'];
+    const chB = ['Gm', 'Gm', 'Eb', 'F', 'Gm', 'Eb', 'Cm', 'D7'];
+    const chC = ['Bb', 'Bb', 'Eb', 'Bb', 'F', 'Eb', 'Bb', 'F'];
+    const p1 = 'A#5/2! -/2 A#5/1 A#5/1 -/2 F5/2 G5/2 A#5/2 C6/2';
+    const a7 = `${p1} | C6/4 A#5/2 G#5/2 -/8 | G5/2! -/2 G5/1 G5/1 -/2 D#5/2 F5/2 G5/2 A#5/2 | A5/4 C6/4! -/8 | ` +
+      `${p1} | D#6/4 C6/2 A#5/2 G#5/2 A#5/2 C6/4 | A#5/2 G5/2 D#5/2 G5/2 A#5/2 D#6/2 D6/2 C6/2 |`;
+    const melB = 'D6/6 A#5/2 G5/8 | A5/2 A#5/2 C6/2 D6/2 D#6/4 D6/4 | G6/6! D#6/2 A#5/8 | A5/2 C6/2 F6/4 D#6/4 D6/4 | ' +
+      'D6/6 A#5/2 G5/4 A#5/4 | D#6/2 F6/2 G6/4 A#6/6! G6/2 | F6/2 D#6/2 D6/2 C6/2 D#6/4 C6/4 | D6/2 -/2 D6/1 D6/1 -/2 F#5/2 A5/2 C6/4';
+    const melC = 'F5/1. F5/1. -/2 G#5/2. A5/2 C6/2. -/6 | -/16 | A#5/1. A#5/1. -/2 C#6/2. D6/2 F6/2. -/6 | -/16 | ' +
+      'C6/2. C6/2. A5/2. F5/2. G5/2 A5/2 A#5/4 | D#6/2. C6/2. A#5/2. G5/2. G#5/2 A5/2 A#5/4 | F6/4! D6/2 A#5/2 F5/2 D5/2 A#4/4 | ' +
+      'C5/2 D5/2 F5/2 A5/2 C6/4 -/4';
+    const ansC = '-/16 | D5/2. D5/2. F5/2. D5/2. C5/2 A#4/2 -/4 | -/16 | G5/2. G5/2. A#5/2. G5/2. F5/2 D#5/2 -/4';
+    const beat = 'k/2 h/2 s/2 h/2 k/2 h/2 s/2 k/2';
+    const fill = 'k/2 s/1 s/1 s/2 s/1 s/1 t/2 t/2 T/2! T/2!';
+    const shuffle = 'k/3 h/1 s/3 h/1 k/3 k/1 s/3 h/1';
+    return {
+      bpm: 170, era: 'nes', form: ['A1', 'A2', 'B', 'C', 'A2'],
+      voices: [
+        { wave: 'square', vol: 0.03, parts: { A1: `${a7} C6/6 A5/2 F5/8`, A2: `${a7} A#5/4! F5/2 D5/2 A#4/4 -/4`, B: melB, C: melC } },
+        { wave: 'pulse25', vol: 0.016, parts: {
+          A1: nesLine(chA, hit), A2: nesLine(chA, hit), B: nesLine(chB, roll), C: ansC,
+        } },
+        { wave: 'triangle', vol: 0.1, parts: {
+          A1: nesLine(chA, rock), A2: nesLine(chA, rock), B: nesLine(chB, rock), C: nesLine(chC, boogie),
+        } },
+        { wave: 'noise', vol: 0.02, parts: {
+          A1: `c+${beat} ${rep(beat, 6)} ${fill}`, A2: `c+${beat} ${rep(beat, 6)} ${fill}`, B: `c+${beat} ${rep(beat, 6)} ${fill}`,
+          C: `c+${shuffle} ${rep(shuffle, 6)} ${fill}`,
+        } },
+      ],
+    };
+  })(),
+
+  // Patos de Letras: hoedown de campo en Do mayor, 152 BPM. Violín de pulso con semicorcheas, bajo
+  // "bum-chic" que alterna raíz y quinta, rasgueo a contratiempo, banjo de pulso 25 % en 3 contra 8
+  // y batería de tren. Forma A A' B A' (32 compases, ~51 s).
+  patos: (() => {
+    const B = { C: ['C3', 'G2'], F: ['F2', 'C3'], Am: ['A2', 'E2'], D7: ['D3', 'A2'], G: ['G2', 'D3'] };
+    const CH = { C: 'E4+G4+C5', F: 'F4+A4+C5', Am: 'E4+A4+C5', D7: 'F#4+A4+C5', G: 'D4+G4+B4' };
+    const BJ = { C: ['G4', 'C5', 'E5'], F: ['A4', 'C5', 'F5'], Am: ['A4', 'C5', 'E5'], D7: ['F#4', 'A4', 'D5'], G: ['G4', 'B4', 'D5'] };
+    const boomH = (c) => `${B[c][0]}/2. -/2 ${B[c][1]}/2. -/2`;
+    const boom = (c) => `${boomH(c)} ${boomH(c)}`;
+    const chickH = (c) => rep(`-/2 ${CH[c]}/2.`, 2);
+    const chick = (c) => `${chickH(c)} ${chickH(c)}`;
+    const banjo = (c) => { const [a, b, d] = BJ[c]; return rep(`${a}/1 ${b}/1 ${d}/1 ${a}/1 ${b}/1 ${d}/1 ${a}/1 ${b}/1`, 2); };
+    const chA1 = ['C', 'C', 'F', 'C', 'C', 'Am', 'D7', 'G'];
+    const chA2 = ['C', 'C', 'F', 'C', 'C', 'Am', 'D7', 'C'];
+    const chB = ['F', 'C', 'G', 'C', 'F', 'C', ['D7', 'G'], 'C'];
+    const f1 = 'E5/1 F5/1 G5/2 C6/2 G5/2 E5/2 G5/2 C5/2 E5/2';
+    const a7 = `${f1} | D5/1 E5/1 F5/2 E5/2 D5/2 C5/4 G4/4 | A4/1 B4/1 C5/2 F5/2 C5/2 A5/2 G5/2 F5/2 A5/2 | G5/2 E5/2 C5/2 E5/2 G5/6 -/2 | ` +
+      `${f1} | A5/1 G5/1 E5/2 C5/2 E5/2 A5/4 C6/4 | D6/2 C6/2 A5/2 F#5/2 D5/2 F#5/2 A5/2 C6/2 |`;
+    const melB = 'A5/4 F5/2 A5/2 C6/4 A5/4 | G5/4 E5/2 G5/2 C6/8 | B5/2 C6/2 D6/2 B5/2 G5/2 A5/2 B5/2 G5/2 | C6/4 E6/4 G6/6 -/2 | ' +
+      'A6/4! G6/2 F6/2 C6/4 A5/4 | G6/4 E6/2 C6/2 G5/4 E5/4 | F#5/2 A5/2 D6/2 C6/2 B5/2 D6/2 G6/2 F6/2 | E6/4 D6/2 B5/2 C6/4 -/4';
+    const harB = 'C5/16 | G4/16 | D5/8 B4/8 | E5/8 G5/6 -/2 | C6/8 A5/8 | G5/8 E5/8 | A5/8 B5/8 | G5/8 -/8';
+    const train = 'k/1 h/1 h/1 h/1 s/1 h/1 h/1 h/1';
+    const fill = `${train} s/1 s/1 s/1 s/1 t/2 T/2`;
+    const dr = `c+${train} ${rep(train, 13)} ${fill}`;
+    return {
+      bpm: 152, era: 'nes', form: ['A1', 'A2', 'B', 'A2'],
+      voices: [
+        { wave: 'square', vol: 0.03, parts: {
+          A1: `${a7} B5/3 A5/3 G5/2 -/2 G4/2 A4/2 B4/2`, A2: `${a7} C6/3 G5/3 E5/2 C5/4! -/4`, B: melB,
+        } },
+        { wave: 'pulse25', vol: 0.012, parts: { A2: nesLine(chA2, banjo), B: harB } },
+        { wave: 'pulse12', vol: 0.015, env: 'stab', parts: {
+          A1: nesLine(chA1, chick), A2: nesLine(chA2, chick), B: nesLine(chB, chick, chickH),
+        } },
+        { wave: 'triangle', vol: 0.1, parts: {
+          A1: nesLine(chA1, boom), A2: nesLine(chA2, boom), B: nesLine(chB, boom, boomH),
+        } },
+        { wave: 'noise', vol: 0.018, parts: { A1: dr, A2: dr, B: dr } },
+      ],
+    };
+  })(),
+};
+
+// Lord Caparazón: marcha de jefe en Do menor, 120 BPM, con el pulso del metrónomo marcado en cada
+// tiempo (acordes en negra, bombo y caja). Forma A B A' (24 compases, ~48 s).
+// Ojo: las voces van en `notes` sin paréntesis ni "|", porque la copia de sombra del mundo GC
+// (gcShadowTrack en gc.js) recorta las fichas una por una.
+// caparazon2 es la misma más rápida; en caparazon3 el rey se "traba": cada 4 compases la melodía
+// repite su primera nota como disco rayado.
+function nesCaparazon(bpm, stuck) {
+  const melA = ['C5/4! D#5/2 G5/2 C6/6 G5/2', 'G#5/4 G5/2 F5/2 D#5/4 D5/4', 'C5/4 D#5/2 G#5/2 C6/6 D#6/2', 'D6/8 B5/4 G5/4',
+    'C6/4! A#5/2 G5/2 D#6/6 D6/2', 'D6/4 C6/2 A#5/2 F5/4 D5/4', 'D#5/4 G#5/2 C6/2 F6/6 D#6/2'];
+  const melB = ['F5/6 G#5/2 C6/8', 'D#6/6 D6/2 C6/8', 'C#6/4 F6/4 G#6/6 F6/2', 'G6/12! -/4',
+    'G#6/4 G6/2 F6/2 C6/4 G#5/4', 'C6/4 D#6/4 G#6/4 C7/4', 'C#7/6 C7/2 G#6/4 F6/4', 'G6/2 F6/2 D#6/2 D6/2 B5/2 G5/2 F5/2 D5/2'];
+  const bars = [...melA, 'D6/4 B5/4 G5/4 F5/2 D5/2', ...melB, ...melA, 'D6/2 B5/2 G5/2 B5/2 C6/8!'];
+  const mel = bars.map((b, i) => (stuck && i % 4 === 3 ? rep(`${b.split(/[/ ]/)[0]}/2`, 8) : b)).join(' ');
+  const chords = ['Cm', 'Cm', 'Ab', 'G', 'Cm', 'Bb', 'Ab', 'G', 'Fm', 'Cm', 'Db', 'G', 'Fm', 'Ab', 'Db', 'G7', 'Cm', 'Cm', 'Ab', 'G', 'Cm', 'Bb', 'Ab', 'G'];
+  const CH = { Cm: 'C4+D#4+G4', Ab: 'C4+D#4+G#4', G: 'B3+D4+G4', Bb: 'A#3+D4+F4', Fm: 'C4+F4+G#4', Db: 'C#4+F4+G#4', G7: 'B3+D4+F4' };
+  const R = { Cm: 'C2', Ab: 'G#1', G: 'G1', Bb: 'A#1', Fm: 'F1', Db: 'C#2', G7: 'G1' };
+  const march = 'k+h/2 h/2 s+h/2 h/2 k+h/2 k/2 s+h/2 h/2';
+  const fill = 'k/2 s/1 s/1 s/2 s/2 t/2 t/2 T/2! T/2!';
+  const eight = `c+${march} ${rep(march, 6)} ${fill}`;
+  return {
+    bpm, era: 'nes',
+    voices: [
+      { wave: 'square', vol: 0.032, notes: mel },
+      { wave: 'pulse25', vol: 0.014, env: 'stab', notes: chords.map((c) => rep(`${CH[c]}/2. -/2`, 4)).join(' ') },
+      { wave: 'triangle', vol: 0.11, notes: chords.map((c) => rep(`${R[c]}/2 ${nesTr(R[c], 12)}/2`, 4)).join(' ') },
+      { wave: 'noise', vol: 0.022, notes: rep(eight, 3) },
+    ],
+  };
+}
+NES_TRACKS.caparazon1 = nesCaparazon(120, false);
+
 addWorld({
   id: 'nes',
   order: 2,
@@ -498,72 +765,8 @@ addWorld({
   sprites: NES_SPRITES.sprites,
   palettes: NES_SPRITES.palettes,
 
-  // Música original al estilo NES (LORE §14): melodía en cuadrada, bajo en triángulo, ruido corto.
-  tracks: {
-    // Batalla normal NES: Sol menor, riff de 1 compás, acorde nuevo cada 2 compases.
-    nes_battle: {
-      bpm: 165,
-      voices: [
-        {
-          wave: 'square', vol: 0.03,
-          notes: rep('G4 A#4 D5 G5/2 F5 D5/2 A#4 C5 D5/2 A#4 G4/2 F4', 2) + ' ' +
-            rep('G4 A#4 D#5 G5/2 F5 D#5/2 A#4 C5 D#5/2 A#4 G4/2 A#4', 2) + ' ' +
-            rep('G4 C5 D#5 G5/2 F5 D#5/2 C5 D5 D#5/2 C5 G4/2 C5', 2) + ' ' +
-            rep('F#4 A4 D5 F#5/2 E5 D5/2 A4 C5 D5/2 C5 A4/2 F#4', 2),
-        },
-        { wave: 'triangle', vol: 0.1, notes: rep('G2/2 G3/2', 8) + ' ' + rep('D#2/2 D#3/2', 8) + ' ' + rep('C2/2 C3/2', 8) + ' ' + rep('D2/2 D3/2', 8) },
-        { wave: 'noise', vol: 0.024, notes: rep('x -/3 x/2 x/2 x -/3 x/2 x/2', 8) },
-      ],
-    },
-    // Kongo Tambor: Mi menor, los tambores mandan (bombo-caja-bombo-bombo-caja).
-    kongo: {
-      bpm: 132,
-      voices: [
-        { wave: 'square', vol: 0.03, notes: 'E5/2 -/2 G5/2 -/2 A5/2 G5/2 E5/4 D5/2 -/2 E5/2 -/2 G5/2 E5/2 D5/4 E5/2 -/2 G5/2 -/2 A5/2 G5/2 E5/4 B4/2 -/2 D5/2 -/2 E5/8' },
-        { wave: 'triangle', vol: 0.14, notes: rep('E2/2 -/6 E2/2 E2/2 -/4', 4) },
-        { wave: 'noise', vol: 0.035, notes: rep('-/4 x/2 -/6 x/2 -/2', 4) },
-      ],
-    },
-    // Mazmorra de Llaves: La menor, misteriosa; la segunda voz es el eco un tiempo después.
-    mazmorra: {
-      bpm: 100,
-      voices: [
-        { wave: 'square', vol: 0.03, notes: 'A4/4 C5/4 E5/4 D5/4 C5/4 B4/4 G#4/8 A4/4 E5/4 F5/4 E5/4 D5/4 C5/4 B4/8' },
-        { wave: 'square', vol: 0.012, notes: '-/4 A4/4 C5/4 E5/4 D5/4 C5/4 B4/4 G#4/8 A4/4 E5/4 F5/4 E5/4 D5/4 C5/4 B4/4' },
-        { wave: 'triangle', vol: 0.1, notes: 'A2/16 F2/16 D2/16 E2/16' },
-        { wave: 'noise', vol: 0.015, notes: rep('x -/15', 4) },
-      ],
-    },
-    // Campeón Puñín: Si bemol mayor, fanfarria de gimnasio con silencios para los avisos.
-    punin: {
-      bpm: 170,
-      voices: [
-        { wave: 'square', vol: 0.03, notes: 'A#4 D5 F5 A#5/5 -/2 A5 A#5/2 G5/2 F5 D#5/2 F5/2 G5/2 A5/2 A#5/4 -/4 C5 D#5 G5 C6/5 -/2 A#5 C6/2 A5/2 F5 G5/2 A5/2 A#5/2 C6/2 A#5/4 -/4' },
-        { wave: 'square', vol: 0.014, notes: 'D5/8 -/8 G4/8 -/8 D#5/8 -/8 F5/8 -/8' },
-        { wave: 'triangle', vol: 0.1, notes: rep('A#2 A#3', 8) + ' ' + rep('D#2 D#3', 8) + ' ' + rep('C3 C4', 8) + ' ' + rep('F2 F3', 8) },
-        { wave: 'noise', vol: 0.025, notes: rep('x -/3 x/2 -/2', 8) },
-      ],
-    },
-    // Patos de Letras: Do mayor, saltarina, de campo.
-    patos: {
-      bpm: 150,
-      voices: [
-        { wave: 'square', vol: 0.03, notes: 'C5 E5 G5 E5 C5/2 G4/2 A4 C5 E5 C5 A4/4 F4 A4 C5 A4 F4/2 C5/2 B4 G4 D5 B4 G4/4 C5 E5 G5 E5 C5/2 G4/2 A4 C5 E5 C5 A4/4 D5 C5 B4 A4 G4/2 B4/2 C5/8' },
-        { wave: 'triangle', vol: 0.1, notes: rep('C3/2 G3/2', 4) + ' ' + rep('F2/2 C3/2', 4) + ' ' + rep('C3/2 G3/2', 4) + ' ' + rep('G2/2 D3/2', 2) + ' C3/8' },
-        { wave: 'noise', vol: 0.02, notes: rep('x -/3 x/2 -/2', 8) },
-      ],
-    },
-    // Lord Caparazón: Do menor, grandiosa y con pulso marcado (el metrónomo del jefe).
-    caparazon1: {
-      bpm: 120,
-      voices: [
-        { wave: 'square', vol: 0.032, notes: 'C5/4 D#5/4 G5/6 F5/2 D#5/4 D5/4 C5/4 G4/4 G#4/4 C5/4 D#5/6 D5/2 C5/4 D5/4 B4/8' },
-        { wave: 'square', vol: 0.014, notes: 'G4/16 G4/16 D#4/16 D4/16' },
-        { wave: 'triangle', vol: 0.12, notes: 'C3/4 C3/4 C3/4 C3/4 C3/4 C3/4 G2/4 G2/4 G#2/4 G#2/4 G#2/4 G#2/4 G2/4 G2/4 G2/4 G2/4' },
-        { wave: 'noise', vol: 0.03, notes: rep('x -/3', 16) },
-      ],
-    },
-  },
+  // Música original al estilo NES (pistas en NES_TRACKS, arriba).
+  tracks: NES_TRACKS,
 
   quests: {
     // mundo_<id> se activa sola cuando Bit anuncia la tubería nueva.
@@ -589,11 +792,6 @@ addWorld({
   },
 });
 
-// Variaciones del jefe: más rápida en la fase 2; en la fase 3 se "traba" (nota repetida cada 4 compases).
+// Variaciones del jefe: más rápida en la fase 2; en la fase 3 se "traba" (ver nesCaparazon).
 TRACKS.caparazon2 = { ...TRACKS.caparazon1, bpm: 135 };
-TRACKS.caparazon3 = {
-  bpm: 150,
-  voices: TRACKS.caparazon1.voices.map((v, i) => (i === 0
-    ? { ...v, notes: 'C5/4 D#5/4 G5/6 F5/2 D#5/4 D5/4 C5/4 G4/4 G#4/4 C5/4 D#5/6 D5/2 C5/4 D5/4 B4 B4 B4 B4 -/4' }
-    : v)),
-};
+TRACKS.caparazon3 = nesCaparazon(150, true);
