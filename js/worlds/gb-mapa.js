@@ -11,7 +11,8 @@
 //   | B1 bosque            |-Linkito---Pilabat-|
 //   |---Pixelito---        | C2 Pasto Alto     |
 //   | A: tubería al pueblo |    Grande         |
-//   +----------------------------------------+
+//   +-----------:----------------------------+   camino del sur (12, 29): a la Isla Koholint
+//   Nombres de Nintendo (js/worlds/gb-nintendo.js): A = Aldea Mabe, C3 = Pueblo Paleta.
 
 const GB_FACTS = CONSOLES.find((c) => c.id === 'gameboy').facts;
 
@@ -49,7 +50,7 @@ const GB_VALLE_MAP = [
   'T..:.S.....,,,T,,,,,**,,,,,,,,.,,,,,,,,T',
   'T..P..**...,,,TTT,,,,,,,TTT,,,S,,,,,,,,T',
   'T..........,,,T,,,,,,,,,,,,,,,,,,,,,,,,T',
-  'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
+  'TTTTTTTTTTTT:TTTTTTTTTTTTTTTTTTTTTTTTTTT',
 ];
 
 const GB_CUEVA_MAP = [
