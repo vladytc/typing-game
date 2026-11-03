@@ -298,11 +298,11 @@ Scenes.carrera = {
       const best = (d.arcade || {}).pistacero || 0;
       if (meters > best) { d.arcade.pistacero = meters; lines.push('¡NUEVO RÉCORD!'); } else lines.push(`Récord: ${best} M`);
       Stats.addBattle({ enemy: 'pistacero', wpm, acc, date: Date.now() });
-      // Misión "Piloto de pruebas": ganar en Normal sin errores los primeros 20 segundos.
-      if (won && d.difficulty === 'normal' && this.errors20 === 0 && Quests.state('snes_piloto') === 'active') {
+      // Misión "Piloto de pruebas": ganar en Normal (o Automática) sin errores los primeros 20 segundos.
+      if (won && ['normal', 'auto'].includes(d.difficulty) && this.errors20 === 0 && Quests.state('snes_piloto') === 'active') {
         Quests.complete('snes_piloto');
         if (!d.treasures.control_colores) { d.treasures.control_colores = true; lines.push('Recibiste: CONTROL DE COLORES'); }
-      } else if (won && this.errors20 === 0 && d.difficulty !== 'normal') lines.push('(La misión de piloto se cumple en Normal.)');
+      } else if (won && this.errors20 === 0 && !['normal', 'auto'].includes(d.difficulty)) lines.push('(La misión de piloto se cumple en Normal.)');
       items = [{ label: 'Otra vez', go: () => Game.go('carrera', { arcade: true, back: this.back }) }, { label: 'Salir', go: () => Game.go(this.back) }];
     } else if (won) {
       Music.play('victory');

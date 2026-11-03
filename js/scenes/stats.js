@@ -34,6 +34,7 @@ Scenes.stats = {
           <div class="tile"><b>${accAvg}%</b><span>PRECISION</span></div>
           <div class="tile"><b>${s.battles.length}</b><span>BATALLAS</span></div>
         </div>
+        <div class="chart-label">Dificultad: ${esc(diff().name)}</div>
         <div class="chart">
           ${last.length ? last.map((b) => `<div class="cbar" style="height:${(b.wpm / maxW) * 100}%"><em>${b.wpm}</em></div>`).join('')
             : '<p class="dim">Juega una batalla para ver tu progreso aquí.</p>'}

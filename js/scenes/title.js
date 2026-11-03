@@ -15,13 +15,21 @@ Scenes.title = {
       </div>`;
     $('.title-sprite').appendChild(spriteCanvas('pixelito', 5, false, 'bounce'));
     const items = [
-      { label: started ? 'Continuar' : 'Comenzar', go: () => Game.go(started ? 'town' : 'dificultad', { next: 'story' }) },
+      { label: started ? 'Continuar' : 'Comenzar', go: () => (started ? this.continuar() : Game.go('dificultad', { next: 'story' })) },
       { label: 'Vitrina', go: () => Game.go('vitrina', { back: 'title' }) },
       { label: 'Estadísticas', go: () => Game.go('stats', { back: 'title' }) },
       { label: `Dificultad: ${diff().name}`, go: () => Game.go('dificultad', { next: 'title' }) },
       { label: `Sonido: ${Sfx.muted ? 'NO' : 'SI'}`, go: () => this.toggleSound() },
     ];
     this.menu = new ListMenu($('.title-menu'), items, { onPick: (i) => items[i].go(), start: this.lastPick || 0 });
+  },
+  // Partidas de antes de que existiera Automática: preguntar una sola vez si se quieren cambiar.
+  continuar() {
+    const d = Save.data;
+    if (d.difficulty === 'auto' || d.flags.autoPreguntado) { Game.go('town'); return; }
+    d.flags.autoPreguntado = true;
+    Save.write();
+    Game.go('autoPregunta', { then: ['town', {}], ask: Auto.shouldSuggest() ? 'rapido' : 'nueva' });
   },
   toggleSound() {
     Sfx.muted = !Sfx.muted;
@@ -79,12 +87,42 @@ Scenes.dificultad = {
       onMove: show,
       onPick: (i) => {
         Save.data.difficulty = ids[i];
+        Save.data.flags.autoPreguntado = true; // ya eligió: no volver a preguntar por Automática
         Save.write();
         Game.go(next);
       },
       onCancel: next === 'title' ? () => Game.go('title') : null,
     });
     show(start);
+  },
+  onKey(e) { this.menu.key(e); },
+};
+
+// Pregunta corta de una vez: cambiarse a Automática (partida vieja) o subir porque va muy rápido.
+Scenes.autoPregunta = {
+  music: 'title',
+  enter({ then = ['town', {}], ask = 'rapido' }) {
+    const d = Save.data;
+    const text = ask === 'nueva'
+      ? '* ¡Novedad! Dificultad AUTOMÁTICA: se ajusta sola a tu velocidad real.\n* ¿Quieres cambiarte? (Puedes cambiarla después desde el título.)'
+      : '* ¡Wow! Vas a más de 60 PPM: tus dedos son muy rápidos para esta dificultad.\n* ¿Quieres subirle?';
+    const opts = ask === 'nueva'
+      ? [{ label: 'Sí, Automática', id: 'auto' }, { label: `No, seguir en ${diff().name}`, id: null }]
+      : [{ label: 'Automática', id: 'auto' }, { label: 'Experto', id: 'experto' }, { label: `Seguir en ${diff().name}`, id: null }];
+    if (ask !== 'nueva') { d.flags.autoSugerido = true; Save.write(); }
+    Game.root.innerHTML = `
+      <div class="title diff">
+        <h2>DIFICULTAD</h2>
+        <div class="box diff-desc">${esc(text).replace(/\n/g, '<br>')}</div>
+        <div class="diff-menu"></div>
+      </div>`;
+    this.menu = new ListMenu($('.diff-menu'), opts, {
+      onPick: (i) => {
+        if (opts[i].id) d.difficulty = opts[i].id;
+        Save.write();
+        Game.go(then[0], then[1]);
+      },
+    });
   },
   onKey(e) { this.menu.key(e); },
 };
