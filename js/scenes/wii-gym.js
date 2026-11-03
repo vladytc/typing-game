@@ -3,10 +3,12 @@
 //   1. BOLICHE: cada letra de la palabra cae en el metrónomo (90 BPM). Todas en ventana = ¡CHUZA!
 //      10 tiros; se pasa con 60 pinos o más.
 //   2. TENIS: cada golpe es una palabra de UNA sola mano (izquierda o derecha, según el lado de la
-//      cancha). Dos errores en el mismo golpe o llegar tarde = punto para Mi. Gana quien llegue a 7.
+//      cancha). Dos errores en el mismo golpe o llegar tarde = punto para el rival. Gana quien llegue a 7.
+//      Rivales: ELISA y SARAH, la pareja campeona de tenis de Wii Sports (en Wii Sports el tenis es de dobles).
 //      (El primer error de cada golpe es un "¡uy!": con un solo error, un niño de ~30 PPM no ganaba ni en Fácil.)
 //   3. BOX: "izq", "der" y "agacha" llegan al compás (100 BPM). Escríbelas antes del golpe;
 //      si terminas justo en un tiempo, ¡vale doble! 20 golpes antes de recibir 5.
+//      Rival: MATT, el campeón de box de Wii Sports. (Solo cambian las caras y los textos: el balance es el mismo.)
 // Con { arcade: 'boliche' | 'tenis' | 'box' } es el minijuego suelto (récord en Save.data.arcade).
 // La dificultad cambia el tempo y las ventanas (diff().time). ESC = PAUSA.
 //
@@ -504,9 +506,9 @@ class WiiTennis {
 
   rules() {
     return [
-      '* PRUEBA 2: TENIS SENSOR.\n* ENTRENADOR MI: ¡Cada golpe usa UNA sola mano!',
+      '* PRUEBA 2: TENIS SENSOR.\n* ENTRENADOR MI: ¡Contra ELISA y SARAH, las campeonas! ¡Cada golpe usa UNA sola mano!',
       '* Si la pelota viene a la IZQUIERDA, la palabra es de la mano izquierda (casa, verde...).\n* Si viene a la DERECHA, de la mano derecha (pollo, kilo...).',
-      `* Escríbela antes de que llegue la pelota.\n* Un error se perdona... ¡pero DOS y el punto es mío! ${this.s.arcade ? 'Juega hasta que yo haga 3 puntos.' : 'Gana el primero que llegue a 7.'}`,
+      `* Escríbela antes de que llegue la pelota.\n* Un error se perdona... ¡pero DOS y el punto es de ellas! ${this.s.arcade ? 'Juega hasta que yo haga 3 puntos.' : 'Gana el primero que llegue a 7.'}`,
     ];
   }
 
@@ -528,14 +530,14 @@ class WiiTennis {
     const w = this.word;
     const hand = this.side === 'left' ? 'MANO IZQUIERDA ←' : 'MANO DERECHA →';
     if (w) this.s.showWord(w.text, w.pos, { label: `${hand}  ·  golpe ${this.rally + 1}/${this.need()}` });
-    this.s.hud(`<span>${WII_GYM_NAMES.tenis}</span><span>TU ${this.me}</span><span>MI ${this.mi}</span><span>${this.s.arcade ? `RACHA ${this.streak}` : 'A 7 PUNTOS'}</span>`);
+    this.s.hud(`<span>${WII_GYM_NAMES.tenis}</span><span>TU ${this.me}</span><span>ELISA+SARAH ${this.mi}</span><span>${this.s.arcade ? `RACHA ${this.streak}` : 'A 7 PUNTOS'}</span>`);
   }
 
   key(k, now) {
     const w = this.word;
     if (!w || !this.ball || this.ball.dir !== 'in') return;
     if (!this.s.check(w.text[w.pos], k)) {
-      if (++w.errors >= 2) { this.point('mi', now, '¡ERROR! Punto para Mi'); return; }
+      if (++w.errors >= 2) { this.point('mi', now, '¡ERROR! Punto para Elisa y Sarah'); return; }
       this.s.pop('¡uy!', 'bad'); // el primero se perdona
       return;
     }
@@ -574,7 +576,7 @@ class WiiTennis {
     if (b.dir === 'in' && k >= 1) { this.point('mi', now, '¡Llegó tarde!'); return; }
     if (b.dir === 'out' && k >= 1) {
       if (b.miss) { this.point('me', now, '¡PUNTO PARA TI!'); return; }
-      // Mi la regresa al otro lado: ahora toca la otra mano.
+      // Elisa y Sarah la regresan al otro lado: ahora toca la otra mano.
       this.side = this.side === 'left' ? 'right' : 'left';
       this.serve(now);
     }
@@ -583,7 +585,7 @@ class WiiTennis {
   end() {
     const lines = this.s.arcade
       ? [`* Hiciste ${this.me} puntos. Tu mejor racha: ${this.bestStreak} seguidos.`]
-      : [this.me >= 7 ? `* ¡Ganaste el set ${this.me} a ${this.mi}!` : `* Mi ganó el set ${this.mi} a ${this.me}.`];
+      : [this.me >= 7 ? `* ¡Ganaste el set ${this.me} a ${this.mi}!` : `* Elisa y Sarah ganaron el set ${this.mi} a ${this.me}.`];
     this.s.finishGame(this.s.arcade ? true : this.me >= 7, lines);
   }
 
@@ -621,11 +623,12 @@ class WiiTennis {
       g.fillStyle = WIIC.navy;
       g.fillText(b.side === 'left' ? '← IZQUIERDA' : 'DERECHA →', xAt(260, f), 270);
     }
-    // Mi al fondo y tú adelante.
-    wiiPaint(g, 'entrenadormi', 296, top - 30, 3);
+    // Elisa y Sarah al fondo (Sarah es zurda: a la izquierda) y tú adelante.
+    wiiPaint(g, 'wii_sarah', 266, top - 30, 3);
+    wiiPaint(g, 'wii_elisa', 326, top - 30, 3);
     const myX = b && b.dir === 'in' ? (b.side === 'left' ? 170 : 410) : 290;
     wiiPaint(g, 'heroe', myX, 216, 4);
-    // La pelota: de Mi hacia tu lado (o de regreso), con sombra y un arco.
+    // La pelota: de ellas hacia tu lado (o de regreso), con sombra y un arco.
     if (b) {
       const k = Math.max(0, Math.min(1, (now - b.from) / b.dur));
       const f = b.side === 'left' ? -0.55 : 0.55;
@@ -666,7 +669,7 @@ class WiiBoxing {
 
   rules() {
     return [
-      '* PRUEBA 3: BOX SENSOR.\n* ENTRENADOR MI: ¡Guantes arriba! ¡Escucha el compás!',
+      '* PRUEBA 3: BOX SENSOR.\n* ENTRENADOR MI: ¡Contra MATT, el campeón! ¡Guantes arriba! ¡Escucha el compás!',
       '* En cada tiempo puede llegar un aviso: IZQ, DER o AGACHA.\n* Escríbelo antes de que caiga el golpe (la barrita se llena).',
       `* Si terminas JUSTO en un tiempo: ¡AL COMPAS! (vale doble).\n* ${this.s.arcade ? 'Pega todo lo que puedas antes de recibir 5.' : 'Necesitas 20 golpes antes de recibir 5.'}`,
     ];
@@ -743,7 +746,7 @@ class WiiBoxing {
   end() {
     const ok = this.hits >= 20;
     const lines = this.s.arcade ? [`* ¡${this.hits} golpes antes de recibir 5!`]
-      : [ok ? `* ¡${this.hits} golpes! Mi se sienta en la esquina a tomar agua.` : `* Recibiste 5 golpes (llevabas ${this.hits}).`];
+      : [ok ? `* ¡${this.hits} golpes! Matt se sienta en la esquina a tomar agua. ...Y sonríe.` : `* Recibiste 5 golpes (llevabas ${this.hits}).`];
     this.s.finishGame(this.s.arcade ? true : ok, lines);
   }
 
@@ -758,10 +761,10 @@ class WiiBoxing {
     g.strokeStyle = WIIC.red;
     g.lineWidth = 4;
     [130, 155, 180].forEach((y) => { g.beginPath(); g.moveTo(0, y); g.lineTo(640, y); g.stroke(); });
-    // Mi, grandote, en guardia (se mueve según tu golpe).
+    // Matt, grandote, en guardia (se mueve según tu golpe).
     const shift = this.pose === 'izq' ? 40 : this.pose === 'der' ? -40 : 0;
     const dip = this.pose === 'hurt' ? -6 : this.pose === 'agacha' ? 0 : Math.sin(now / 200) * 3;
-    wiiPaint(g, 'entrenadormi', 232 + shift, 20 + dip, 11);
+    wiiPaint(g, 'wii_matt', 232 + shift, 20 + dip, 11);
     // Tus guantes (abajo, como si fueras tú).
     const pump = (side) => (this.pose === side ? -50 : 0);
     const duck = this.pose === 'agacha' ? 30 : 0;

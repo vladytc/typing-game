@@ -7,7 +7,7 @@
 // gigante de la plaza: se prende cuando ganas ahí. El último tramo es el espacio (planetitas y
 // puentes de estrellas), guiño al juego de 2007 del plomero entre planetas.
 //
-//   PLAZA CANAL (28×20)                         DISTRITO DEPORTES (30×22)
+//   PLAZA CANAL (28×20)                         ISLA WUHU (30×22)
 //   BBBBB[ PANTALLA GIGANTE: canales ]BBBBB     KKKKKKKKKKKKKK[Mi]KKKKKKKKKKKKKKK  -> estadio
 //   BT"""::::::::::::::::::::::::"TBB            K iiiiiii mmmm:mmmm gwwwwnwwwg K  gimnasio:
 //   B"C.: S (fuente ~~) S :.C"BB  (cofre)        K LLLLLLL mZmm:mmmm gwgggnggwg K  boliche, balanza,
@@ -15,7 +15,7 @@
 //   T A: tubería P   BBBB  C: parque ,,,,, :      KKKKKKKKKKKKKKKKKKKKKKK[Sensorín]KKK
 //   T                BBBB  ::::::[Canal Clima]->  ->[Correíta]  calle  [Nunchuquín] tele ,,,,
 //
-//   ESTADIO SENSOR (26×22)                       CANAL GALAXIA (30×24, en el espacio)
+//   ESTADIO SENSOR (26×22)                       OBSERVATORIO COMETA (30×24, el Canal Galaxia)
 //   B "  S  (Estrella lanzadora U) -> galaxia    vvvvvvvvvv ooo[CANAL VACIO]ooo vvvvvvvvvv
 //   EEEEEEEEEEEEE:EEEEEEEEEEEE                   vvvvvvvvvvvvvv + (puente de estrellas)
 //   E GGGG (gradas) : GGGG E   cancha            vvvvvvvvvvvvvv [Capitán Cometa]
@@ -188,8 +188,136 @@ Object.assign(SPRITES, {
   wii_estrellin: wiiArt(SPRITES.estrellita_capitan.slice()),
 });
 
+// ---------- Invitados de Nintendo (dibujo propio; ver los NPC de cada mapa) ----------
+// Letras extra: T piel morena, H café, A aguamarina, Z rubio platino.
+const WII_PAL_X = { ...WII_PAL, T: '#C68B59', H: '#6B4226', A: '#6FD9CF', Z: '#FFF3B0' };
+Object.assign(SPRITES, {
+  // Matt: el único Mii pelón de Wii Sports, piel morena, cejas gruesas y su color favorito, naranja.
+  wii_matt: wiiArt([
+    '................',
+    '.....KKKKKK.....',
+    '....KTTTTTTK....',
+    '...KTTTTTTTTK...',
+    '...KTKKTTKKTK...',
+    '...KTTTTTTTTK...',
+    '...KTKTTTTKTK...',
+    '...KTTTTTTTTK...',
+    '....KTTKKTTK....',
+    '.....KKKKKK.....',
+    '....KOOOOOOK....',
+    '..KTKOOOOOOKTK..',
+    '...KKOOOOOOKK...',
+    '....KNNKKNNK....',
+    '....KNNKKNNK....',
+    '....KKK..KKK....',
+  ], WII_PAL_X),
+  // Wario (WarioWare: Smooth Moves): gorra amarilla, bigote en zigzag, overol morado.
+  wii_wario: wiiArt([
+    '....KKKKKKK.....',
+    '...KYYYYYYYK....',
+    '..KYYYKWKYYYK...',
+    '..KKKKKKKKKKK...',
+    '...KFFFFFFFK....',
+    '..KFKWFFFWKFK...',
+    '..KFFFPPPFFFK...',
+    '..KKHKHKHKHKK...',
+    '...KFWWWWWFK....',
+    '....KKKKKKK.....',
+    '..KYMMYYYMMYK...',
+    '.KFKMMMMMMMKFK..',
+    '..KKMMYMYMMKK...',
+    '...KMMMKMMMK....',
+    '...KVVVKVVVK....',
+    '...KKKK.KKKK....',
+  ], WII_PAL_X),
+  // Rosalina (Super Mario Galaxy): fleco que le tapa el ojo derecho, corona plateada, vestido aguamarina.
+  wii_rosalina: wiiArt([
+    '......KGPGK.....',
+    '.....KZZZZZK....',
+    '....KZZZZZZZK...',
+    '....KZZZZFFFK...',
+    '....KZZZZFKFK...',
+    '....KZZZZFFFK...',
+    '....KZZZKKKK..Y.',
+    '...KZZKAAAK..YKY',
+    '...KZKAAAAAK..G.',
+    '....KAAAAAAAK.G.',
+    '...KFKAAAAAKFG..',
+    '...KAAAAAAAAAK..',
+    '..KAAAAAAAAAAAK.',
+    '..KAAAAAAAAAAAK.',
+    '.KAAAAAAAAAAAAAK',
+    '.KKKKKKKKKKKKKKK',
+  ], WII_PAL_X),
+  // Capitán Toad (Super Mario Galaxy): lamparita de minero, mochila enorme y chaleco azul.
+  wii_captoad: wiiArt([
+    '.....KKKKKK.....',
+    '...KKRRYYRRKK...',
+    '..KRWWRYYRWWRK..',
+    '.KRRWWRRRRWWRRK.',
+    '.KRRRRRRRRRRRRK.',
+    '..KKKKKKKKKKKK..',
+    '....KFFFFFFK....',
+    '....KFKFFKFK....',
+    '....KFFFFFFK....',
+    '.....KKKKKK.....',
+    '.HHKBBWWWWBBK...',
+    '.HHKFBBBBBBKF...',
+    '.HHKKBBBBBBKK...',
+    '.HH.KWWWWWWK....',
+    '....KHHKKHHK....',
+    '....KKK..KKK....',
+  ], WII_PAL_X),
+  // Pit (Super Smash Bros. Brawl): pelo café, laurel, túnica blanca y alas.
+  wii_pit: wiiArt([
+    '.....KKKKKK.....',
+    '....KVHVHVHK....',
+    '....KHHHHHHK....',
+    '...KHFFFFFFHK...',
+    '...KFKFFFFKFK...',
+    '...KFFFFFFFFK...',
+    '....KFFKKFFK....',
+    'WW...KKKKKK...WW',
+    'WWW.KWWWWWWK.WWW',
+    '.WWWKWWYYWWKWWW.',
+    '..WKFKWWWWKFKW..',
+    '....KWWWWWWK....',
+    '....KWWWWWWK....',
+    '.....KFKKFK.....',
+    '.....KHKKHK.....',
+    '.....KK..KK.....',
+  ], WII_PAL_X),
+  // Premio de los microjuegos de Wario.
+  wii_ajo: wiiArt([
+    '.......K........',
+    '......KVK.......',
+    '......KVK.......',
+    '.....KWWWK......',
+    '....KWWLWWK.....',
+    '...KWWLWWLWK....',
+    '..KWWLWWWWLWK...',
+    '..KWLWWWWWWLK...',
+    '..KWLWWWWWWLK...',
+    '..KWLWWWWWWLK...',
+    '...KWLWWWWLK....',
+    '....KKWWWKK.....',
+    '......KGK.......',
+    '.....KG.GK......',
+    '................',
+    '................',
+  ]),
+});
+SPRITES.wii_elisa = wiiRecolor(SPRITES.munequito, { N: 'K', S: 'M' }); // Elisa: su color favorito es el morado
+SPRITES.wii_sarah = wiiRecolor(SPRITES.munequito, { N: 'O', S: 'R' }); // Sarah: el rojo
+SPRITES.wii_luma = wiiArt(SPRITES.estrellita_capitan.slice());
+SPRITES.wii_luma_glotona = wiiRecolor(SPRITES.estrellita_capitan, { Y: 'P' });
+
+Object.assign(TREASURES, {
+  wii_ajo: { room: 'wii', name: 'Ajo de Wario', desc: 'Premio de 5 microjuegos seguidos. A Wario le ENCANTA el ajo. Huele... a victoria. Y a ajo.' },
+});
+
 // ---------- Música ORIGINAL de las zonas (era 'wii'; ayudantes wiiUp/wiiHarp en js/worlds/wii.js) ----------
-// Distrito Deportes: pop deportivo de metales en Fa mayor, 132 BPM, como entrar a la cancha con tenis
+// Isla Wuhu (wii-deportes): pop deportivo de metales en Fa mayor, 132 BPM, como entrar a la cancha con tenis
 // nuevos. Bajo saltarín, golpes de cuerdas a contratiempo y glockenspiel en el clímax. A A' B A' (~58 s).
 TRACKS.wii_deportes = (() => {
   const mel7 = 'C5/2. F5/2. A5/2. C6/4! A5/2. C6/2 -/2 | D6/4 C6/2. A#5/2. A5/2. A#5/2. D6/4 | ' +
@@ -411,7 +539,7 @@ addMaps('wii', {
       encounters: [
         { enemy: 'zumbito', x: 4, y: 11, say: ['* ¡Bzz! ¡Bzz! Este pasillo tiene RITMO.\n* Pasa al compás... ¡o no pasas! Bzz.'] },
         { enemy: 'munequito', x: 22, y: 10, say: ['* ¡Hola! ¡Hola! (Te saluda. Tú saludas. Te saluda otra vez.)', '* ¿Quieres ir al parque? ¡Primero repite lo que yo digo!\n* ...¡Primero repite lo que yo digo!'] },
-        { enemy: 'canalclima', x: 26, y: 15, say: ['* ¡Interrumpimos la caminata para dar el PRONOSTICO!', '* Hacia el Distrito Deportes: 100% de probabilidad de... ¡pelea!\n* Y un 20% de llovizna. Trae paraguas.'] },
+        { enemy: 'canalclima', x: 26, y: 15, say: ['* ¡Interrumpimos la caminata para dar el PRONOSTICO!', '* Hacia la Isla Wuhu: 100% de probabilidad de... ¡pelea!\n* Y un 20% de llovizna. Trae paraguas.'] },
       ],
       chests: [
         { id: 'wii_clasico', x: 24, y: 7, treasure: 'wii_clasico', word: 'virtual' },
@@ -421,7 +549,7 @@ addMaps('wii', {
         '2,13': ['* CIUDAD SENSOR · PLAZA CANAL\n* (La tubería al Pueblo Vitrina está aquí abajo.)', '* La Wii salió en 2006.', `* ${WII_FACTS[0]}`],
         '9,4': ['* PANTALLA GIGANTE DE LA CIUDAD\n* Cada canal es una zona. Los apagados... los apagó alguien morado.', `* ${WII_FACTS[4]}`],
         '17,4': ['* CANAL TIENDA (CERRADO)', '* "Aquí se compraban juegos viejitos para jugarlos en la nueva.\n* Se llamaba Consola Virtual."'],
-        '25,14': ['* → DISTRITO DEPORTES\n* Gimnasio Sensor · Estadio del Torneo', `* ${WII_FACTS[2]}`],
+        '25,14': ['* → MUELLE A LA ISLA WUHU\n* Gimnasio Sensor · Estadio del Torneo', `* ${WII_FACTS[2]}`],
       },
       looks: wiiLooks(() => !!Save.data.done.canalclima),
       bitTips: [
@@ -457,16 +585,71 @@ addMaps('wii', {
             await ctx.say(lines[ctx.counter('wiiNoticiasN') % lines.length], who);
           },
         },
+        // WARIO (WarioWare: Smooth Moves, 2006/2007): microjuegos de tecleo, cada vez más rápidos.
+        {
+          id: 'wii_wario', sprite: 'wii_wario', x: 19, y: 5,
+          wiiModel: (v) => WII_GUEST.wario(v),
+          async talk(ctx) {
+            const who = 'WARIO';
+            const f = Save.data.flags;
+            if (!ctx.flag('wiiWario')) {
+              ctx.setFlag('wiiWario');
+              await ctx.say([
+                '* ¡WAH! Un Splunk me robó mis dulces. Lo perseguí hasta el Templo de la Forma...\n* ...¡y encontré la BATUTA DE LA FORMA! Se parece MUCHO a tu control.',
+                '* Con ella hice 205 microjuegos. Duran segundos. ¡Gana 5 seguidos y te doy un premio!',
+              ], who);
+            }
+            const i = await ctx.choose(['microjuegos', 'un dato', 'adiós'], who);
+            if (i === 1) {
+              await ctx.say([rand([
+                '* Dato: en mi juego de Wii hay 19 POSES para agarrar el control.\n* El Elefante, la Sombrilla, el Samurái... ¡Yo inventé todas! (No.)',
+                '* Dato: si desbloqueas TODOS mis microjuegos, sale Pyoro S.\n* Un pajarito que dispara para arriba. ¡Juegazo!',
+                '* Dato: mi juego salió primero en Japón, en diciembre de 2006.\n* Allá se llama "Odoru Made in Wario". O sea: "Made in Wario que BAILA".',
+              ])], who);
+              return;
+            }
+            if (i === 2) { await ctx.say(['* ¡Wah-ha-ha! Si ves ajo, es mío.'], who); return; }
+            // Cada microjuego: una pose y una orden. Cada vez hay menos tiempo (¡MÁS RÁPIDO!).
+            const MICRO = [
+              ['¡POSE DEL ELEFANTE! Control en la nariz:', 'trompa'],
+              ['¡LA SOMBRILLA! Que no te mojes:', 'paraguas'],
+              ['¡EL SAMURAI! Desenvaina:', 'espada'],
+              ['¡EL CHOFER! Agarra el volante:', 'maneja'],
+              ['¡EL MESERO! Sin tirar la charola:', 'charola'],
+              ['¡LA PESA! Arriba, arriba:', 'levanta'],
+              ['¡EL BOXEADOR! Guantes arriba:', 'golpea'],
+            ].sort(() => Math.random() - 0.5);
+            let n = 0;
+            while (n < 5) {
+              const [label, word] = MICRO[n];
+              const res = await ctx.challenge({ label: `${n + 1}/5 ${label}`, texts: [word], timeLimit: word.length * (420 - n * 45) + 1300 });
+              if (!res.completed) break;
+              n++;
+              Sfx.coin();
+            }
+            f.wiiWarioRecord = Math.max(f.wiiWarioRecord || 0, n);
+            Save.write();
+            if (n < 5) {
+              await ctx.say([`* ¡WAAAH! ${n} de 5. ¡Se acabó el tiempo!\n* (Tu récord: ${f.wiiWarioRecord}.) ¡Otra vez!`], who);
+              return;
+            }
+            if (!Save.data.treasures.wii_ajo) {
+              await ctx.say(['* ¡5 DE 5! ...Ugh. Un trato es un trato.\n* Toma lo más valioso que tengo.'], who);
+              await ctx.give('wii_ajo');
+            } else await ctx.say(['* ¡5 DE 5 OTRA VEZ! ...Ya no te doy más ajo. Es MÍO.'], who);
+          },
+        },
       ],
     },
 
     'wii-deportes': {
-      name: 'Distrito Deportes',
+      name: 'Isla Wuhu',
       render: '3d',
       view3d: { edge: 'grass', sky: '#DDF1FC', fogColor: '#EEF7FD', fog: [34, 120], cam: [11.5, 9.5] },
-      wii3d: { sky: 'menu', on: () => !!Save.data.done.entrenadormi },
+      // wuhu: mar alrededor, playa y el volcán Maka Wuhu a lo lejos (wiiEdge).
+      wii3d: { sky: 'menu', wuhu: true, on: () => !!Save.data.done.entrenadormi },
       intro: [
-        '* ¡El DISTRITO DEPORTES! Huele a pelota nueva y a tenis recién lavados.',
+        '* ¡La ISLA WUHU! La de los deportes de la Wii. Huele a mar, a pelota nueva y a bloqueador.\n* ¿Ves el volcán? Es el MAKA WUHU.',
         '* Allá al fondo está el GIMNASIO SENSOR.\n* Dicen que el Entrenador Mi no deja pasar a nadie sin sus tres pruebas.',
       ],
       music: 'wii_deportes',
@@ -512,8 +695,8 @@ addMaps('wii', {
       ],
       wild: ['zumbito', 'correita', 'nunchuquin', 'sensorin'],
       signs: {
-        '2,14': ['* DISTRITO DEPORTES\n* ← Plaza Canal · Gimnasio Sensor: al norte, pasando la Sala Sensor.', `* ${WII_FACTS[1]}`],
-        '10,13': ['* CALLE DE LA CORREA\n* "Póngase la correa. Por su tele." —El Ayuntamiento'],
+        '2,14': ['* ISLA WUHU · PUEBLO WUHU\n* ← Plaza Canal · Gimnasio Sensor: al norte, pasando la Sala Sensor.', '* El nombre viene de "¡woo-hoo!". La isla salió primero en Wii Fit (2007), cuando salías a trotar.\n* Luego llegó con todo en Wii Sports Resort (2009).', `* ${WII_FACTS[1]}`],
+        '10,13': ['* CALLE DE LA CORREA\n* "Póngase la correa. Por su tele." —El Ayuntamiento de Wuhu', '* Abajo, otro letrero: "Hotel Cocoba: ping-pong junto a la alberca".'],
         '2,9': ['* GIMNASIO SENSOR\n* Prueba 1: BOLICHE · Prueba 2: TENIS · Prueba 3: BOX', '* "¡El deporte es ritmo! ¡El tecleo es ritmo!" —Entrenador Mi'],
       },
       looks: wiiLooks(() => !!Save.data.done.entrenadormi),
@@ -541,9 +724,62 @@ addMaps('wii', {
               ['* Antes yo no jugaba videojuegos. Luego llegó una consola que se jugaba MOVIENDO el brazo.\n* ¡Hasta las abuelas podíamos!'],
               ['* ¿Sabías? En Wii Sports había cinco deportes:\n* boliche, tenis, box, golf y béisbol. Yo soy de boliche, obvio.'],
               ['* Cuando el control vuela, la tele llora.\n* Por eso le hago caso a Correíta. Siempre.'],
+              ['* Aquí en la isla el boliche tiene un modo de CIEN pinos.\n* ¡Cien! Yo los tiro todos. A veces.'],
             ];
             if (Save.data.done.entrenadormi) lines.push(['* ¡Le ganaste al Entrenador Mi! A mí me tardó tres semanas.\n* Bueno, dos. No le digas.']);
             await ctx.say(lines[ctx.counter('wiiAbuelaN') % lines.length], who);
+          },
+        },
+        // MATT: el Mii campeón de box de Wii Sports y de espadas de Wii Sports Resort. Es el rival del BOX del gimnasio.
+        {
+          id: 'wii_matt', sprite: 'wii_matt', x: 12, y: 8,
+          wiiModel: (v) => WII_GUEST.matt(v),
+          async talk(ctx) {
+            const who = 'MATT';
+            if (!ctx.flag('wiiMatt')) {
+              ctx.setFlag('wiiMatt');
+              await ctx.say([
+                '* ...Soy MATT. Número 1 en box. Y número 1 en espadas, aquí en la isla.\n* Soy el único Mii campeón de DOS deportes.',
+                '* ¿En tenis? Número 55. ...No hablemos de tenis.',
+              ], who);
+            } else {
+              await ctx.say([rand([
+                '* En el gimnasio de box hay recortes de periódico de cuando yo era boxeador joven.\n* Salgo guapo.',
+                '* En las espadas de la isla, a veces también hago de réferi.\n* Corto cosas. Muy rápido.',
+                '* Elisa es la segunda mejor en box. Siempre llega a la final. Siempre pierde conmigo.',
+              ])], who);
+            }
+            const i = await ctx.choose(['un round', 'adiós'], who);
+            if (i === 0) Game.go('wiigym', { arcade: 'box', back: 'town' });
+          },
+        },
+        // ELISA y SARAH: la pareja campeona de tenis de Wii Sports (Elisa es la 1, Sarah la 2). Rivales del TENIS del gimnasio.
+        {
+          id: 'wii_elisa', sprite: 'wii_elisa', x: 21, y: 8,
+          wiiModel: (v) => WII_GUEST.elisa(v),
+          async talk(ctx) {
+            const who = 'ELISA';
+            if (!ctx.flag('wiiElisa')) {
+              ctx.setFlag('wiiElisa');
+              await ctx.say([
+                '* Soy ELISA, campeona de tenis. Sarah y yo siempre jugamos JUNTAS.\n* En box soy la segunda. ...Por culpa de Matt.',
+                '* Te espero en la cancha del gimnasio. Una pista: Sarah es ZURDA.\n* Pero aquí da igual: cada golpe es de UNA sola mano.',
+              ], who);
+              return;
+            }
+            const i = await ctx.choose(['un set', 'adiós'], who);
+            if (i === 0) Game.go('wiigym', { arcade: 'tenis', back: 'town' });
+          },
+        },
+        {
+          id: 'wii_sarah', sprite: 'wii_sarah', x: 26, y: 8,
+          wiiModel: (v) => WII_GUEST.sarah(v),
+          async talk(ctx) {
+            await ctx.say([rand([
+              '* Soy SARAH. Número 2 del tenis... y zurda.\n* Si Elisa falla, yo la cubro. Nunca falla.',
+              '* Dato: en Wii Sports el tenis SIEMPRE es de dobles.\n* Por eso Elisa y yo no nos separamos ni para comer.',
+              '* Matt dice que no habla de tenis. Es porque le ganamos 6 a 0.',
+            ])], 'SARAH');
           },
         },
       ],
@@ -633,17 +869,43 @@ addMaps('wii', {
               : `* Dato del locutor: ${WII_FACTS[3]}`], who);
           },
         },
+        // PIT (Super Smash Bros. Brawl, 2008): invitado del torneo, junto a la Estrella Lanzadora.
+        {
+          id: 'wii_pit', sprite: 'wii_pit', x: 20, y: 3,
+          wiiModel: (v) => WII_GUEST.pit(v),
+          async talk(ctx) {
+            const who = 'PIT';
+            if (!ctx.flag('wiiPit')) {
+              ctx.setFlag('wiiPit');
+              await ctx.say([
+                '* ¡Soy PIT, el ángel de la diosa Palutena! Vine al torneo de invitado.\n* En la Wii debuté en Super Smash Bros. Brawl (2008). ¡Mi primera vez como luchador en Smash!',
+                '* Palutena me dio su arco... ¡y se parte en DOS espadas!\n* En el aire doy TRES saltos más y luego planeo. ¿Me esquivas?',
+              ], who);
+            }
+            const i = await ctx.choose(['esquivar flechas', 'adiós'], who);
+            if (i === 1) { await ctx.say(['* ¡Nos vemos en la próxima pelea de estrellas!'], who); return; }
+            const res = await ctx.challenge({ label: '¡Esquiva las flechas de Pit!', texts: ['flecha', 'flecha', 'espada', 'escudo', 'planeo'], timeLimit: 8500 });
+            const f = Save.data.flags;
+            if (!res.completed) { await ctx.say(['* ¡Te di! ...Con una flecha de luz. No duele. Hace cosquillas.'], who); return; }
+            Sfx.coin();
+            f.wiiPitGano = (f.wiiPitGano || 0) + 1;
+            Save.write();
+            await ctx.say([f.wiiPitGano === 1
+              ? '* ¡Ni una te tocó! Hasta mi Escudo Espejo se quedó con las ganas.\n* En Brawl, cuando salgo volando grito "¡Estoy acabado!". ...No lo voy a gritar ahorita.'
+              : `* ¡Otra vez! Van ${f.wiiPitGano}. Palutena se está riendo de mí. La oigo.`], who);
+          },
+        },
       ],
     },
 
     'wii-galaxia': {
-      name: 'Canal Galaxia',
+      name: 'Observatorio Cometa',
       render: '3d',
       view3d: { edge: 'void', sky: '#0B1638', fogColor: '#0B1638', fog: [60, 220], cam: [12.5, 10] },
       wii3d: { sky: 'space', on: () => !!Save.data.done.cometa },
       intro: [
         '* ¡WOOOAAAH! ¡La estrella nos lanzó hasta el ESPACIO!',
-        '* Planetitas, puentes de estrellas... y allá arriba, el OBSERVATORIO del Capitán Cometa.\n* Ahí debe estar la Wii.',
+        '* Planetitas, puentes de estrellas... ¡y el OBSERVATORIO COMETA de Rosalina, de visita!\n* Allá arriba, la cúpula del Capitán Cometa. Ahí debe estar la Wii.',
         '* Tranquilo: aquí todavía se camina normal.\n* ...Por ahora. El Glitch le robó la gravedad al Capitán.',
       ],
       music: 'wii_galaxia',
@@ -683,8 +945,8 @@ addMaps('wii', {
         { enemy: 'cometa', x: 14, y: 6, say: ['* CAPITAN COMETA: ¡Alto ahí! ...Perdón. Es que todo se me cae.\n* Hacia arriba. Hacia los lados. Hacia todos lados.', '* CAPITAN COMETA: El Glitch se llevó mi gravedad.\n* Solo un tecleo MUY estable puede restaurar mi órbita. ¡En guardia!'] },
       ],
       signs: {
-        '2,12': ['* PLANETITA DEL OESTE\n* Gravedad: un poquito. Saltos: muchos.', '* En 2007 salió un juego de Wii en el que un plomero saltaba de planetita en planetita.\n* Cada una tenía su propia gravedad.'],
-        '27,12': ['* PLANETITA DEL ESTE · MIRADOR', '* En ese juego del plomero espacial había 120 estrellas por juntar.\n* Aquí solo hay 7. Pero son del Capitán.'],
+        '2,12': ['* PLANETITA DEL OESTE · CAMPAMENTO DE LA BRIGADA TOAD\n* Gravedad: un poquito. Saltos: muchos.', '* En 2007 salió un juego de Wii en el que un plomero saltaba de planetita en planetita.\n* Cada una tenía su propia gravedad.'],
+        '27,12': ['* PLANETITA DEL ESTE · MIRADOR DE ROSALINA', '* En ese juego del plomero espacial había 120 estrellas por juntar.\n* Aquí solo hay 7. Pero son del Capitán.'],
         '17,2': () => (Save.data.flags.finalAbierto
           ? ['* CANAL VACIO\n* (Este letrero no estaba aquí ayer.)', '* Abajo, con letra muy chiquita: "Te espero."']
           : '* El letrero está en blanco.'),
@@ -724,6 +986,80 @@ addMaps('wii', {
               '* Bit dice que antes de entrar vayan al pueblo.\n* Que tus amigos te quieren decir algo. ¡Yo también iría!',
               '* A veces, de ese canal sale un ruidito... como alguien tecleando.',
             ])], who);
+          },
+        },
+        // ROSALINA (Super Mario Galaxy, 2007) y sus Lumas, en la planetita del este.
+        {
+          id: 'wii_rosalina', sprite: 'wii_rosalina', x: 26, y: 10,
+          wiiModel: (v) => WII_GUEST.rosalina(v),
+          async talk(ctx) {
+            const who = 'ROSALINA';
+            if (!ctx.flag('wiiRosalina')) {
+              ctx.setFlag('wiiRosalina');
+              await ctx.say([
+                '* Hola. Soy ROSALINA. (En España me dicen Estela.)\n* Mi Observatorio Cometa pasa cerca de tu mundo cada cien años.',
+                '* Allá abajo creen que es un cometa y hacen un Festival de las Estrellas.\n* ...No les digas que es mi casa. Se ponen nerviosos.',
+              ], who);
+              return;
+            }
+            const lines = [
+              ['* De niña encontré a un Luma en una nave oxidada. La arreglamos juntos para buscar a su mamá.\n* Así empezó mi familia.'],
+              ['* El faro del observatorio funciona con Grandes Estrellas.\n* Con cinco, se vuelve cometa y vuela al centro del universo.'],
+              ['* Polari es mi consejero de más confianza: un Luma viejito. Lo sabe TODO.\n* (Y lo dice muy despacito.)'],
+              ['* Dato: en Mario Kart Wii yo aparecía MÁS RÁPIDO si en la consola había una partida de Super Mario Galaxy.\n* Las consolas también se cuentan secretos.'],
+            ];
+            if (Save.data.done.cometa) lines.push(['* Le devolviste su gravedad al Capitán. Mis Lumas y sus estrellitas ya juegan juntos.\n* Gracias.']);
+            await ctx.say(lines[ctx.counter('wiiRosalinaN') % lines.length], who);
+          },
+        },
+        {
+          id: 'wii_luma', sprite: 'wii_luma', x: 28, y: 10,
+          wiiModel: (v) => WII_GUEST.luma(WIIC.yellow)(v),
+          async talk(ctx) {
+            await ctx.say([rand([
+              '* ¡Hola! ¡Soy un LUMA! ¡Rosalina es como nuestra mamá!\n* ...¿Tú tienes mamá? ¿Escribe tan rápido como tú?',
+              '* Cuando un Luma come muchos trocitos de estrella... ¡se convierte en una planetita!\n* O en una galaxia entera. Yo quiero ser galaxia.',
+              '* Las cúpulas del observatorio son seis: Terraza, Fuente, Cocina, Recámara, Sala de Máquinas y Jardín.\n* ¡Yo vivo en la Cocina! Por razones obvias.',
+            ])], 'LUMA');
+          },
+        },
+        // El Luma hambriento: si le "das de comer" escribiendo, se transforma (de mentiritas).
+        {
+          id: 'wii_luma_glotona', sprite: 'wii_luma_glotona', x: 24, y: 12,
+          wiiModel: (v) => WII_GUEST.luma(WIIC.pink)(v),
+          async talk(ctx) {
+            const who = 'LUMA HAMBRIENTO';
+            await ctx.say(['* ¡TENGO HAMBRE! ¡Trocitos de estrella! ¡Escríbelos rapidito!'], who);
+            const res = await ctx.challenge({ label: 'Dale de comer al Luma:', texts: ['trocitos', 'de', 'estrella', '¡ñam!'], timeLimit: 9000 });
+            if (!res.completed) { await ctx.say(['* ...¿Eso fue todo? Mi pancita sigue haciendo "grrr".'], who); return; }
+            Sfx.coin();
+            const n = ctx.counter('wiiLumaComidas') + 1;
+            await ctx.say([n === 1
+              ? '* ¡ÑAM! (El Luma brilla, gira... ¡y se convierte en una PLANETITA!)\n* ...Una planetita del tamaño de una canica. Pero planetita. ¡Gracias!'
+              : `* ¡ÑAM! Ya van ${n} comidas. Sigo siendo canica.\n* Los Lumas de verdad comen MUCHOS más trocitos para volverse galaxia.`], who);
+          },
+        },
+        // CAPITAN TOAD (Super Mario Galaxy): jefe de la Brigada Toad. Valiente... de palabra. Da la pista de las 7 estrellitas.
+        {
+          id: 'wii_captoad', sprite: 'wii_captoad', x: 3, y: 10,
+          wiiModel: (v) => WII_GUEST.captoad(v),
+          async talk(ctx) {
+            const who = 'CAPITAN TOAD';
+            if (!ctx.flag('wiiCapToad')) {
+              ctx.setFlag('wiiCapToad');
+              await ctx.say([
+                '* ¡CAPITAN TOAD, jefe de la Brigada Toad! ¡Nosotros NO le tenemos miedo a NADA!\n* (Un meteorito pasa lejos. El Capitán se esconde detrás de su mochila.)',
+                '* ...Ejem. Pista de capitán: con el Capitán Cometa, cada palabra PERFECTA en LUCHAR rescata una estrellita.\n* ¡Junta las 7 en una sola pelea! Yo te cubro desde aquí. Por estrategia.',
+              ], who);
+              return;
+            }
+            const lines = [
+              ['* Nuestra nave es la STARSHROOM. ¡Una nave con forma de hongo!\n* Los Lumas nos ayudaron a armarla.'],
+              ['* Mi lamparita de minero va SIEMPRE prendida.\n* Aquí arriba está oscurísimo. No es miedo. Es precaución.'],
+              ['* El Toad morado de la Brigada es el cartero. Y le encanta bucear buscando monedas moradas.\n* Yo no buceo. Por... estrategia.'],
+              ['* Pista otra vez: las 7 estrellitas se rescatan en UNA sola batalla.\n* Si fallas una letra, esa palabra ya no cuenta. ¡Sin prisa, sin errores!'],
+            ];
+            await ctx.say(lines[ctx.counter('wiiCapToadN') % lines.length], who);
           },
         },
       ],
@@ -1162,6 +1498,147 @@ const WII_FOE_MODELS = {
   },
 };
 
+// Invitados de Nintendo en 3D (los usan los NPC con `wiiModel: WII_GUEST.<x>`). Todo dibujado aquí,
+// redondito como los muñequitos de la ciudad.
+const WII_GUEST = {
+  // Matt: pelón, piel morena, cejas gruesas y camiseta naranja (su color favorito).
+  matt(v) {
+    const tan = '#C68B59';
+    const g = WiiPoly.models.mii(v, { hair: tan, shirt: WIIC.orange, skin: tan, pants: WIIC.navy });
+    [-1, 1].forEach((s) => {
+      const brow = v.s(new THREE.BoxGeometry(0.32, 0.09, 0.08), WIIC.black, g.userData.face);
+      brow.position.set(s * 0.28, 0.3, 0.8);
+      brow.rotation.z = s * -0.15;
+    });
+    return g;
+  },
+  elisa: (v) => WiiPoly.models.mii(v, { hair: '#3A2A1E', shirt: WIIC.purple, pants: WIIC.navy }),
+  sarah: (v) => WiiPoly.models.mii(v, { hair: WIIC.orange, shirt: WIIC.red, pants: WIIC.gray }),
+  // Wario: cabezón, gorra amarilla con la W, nariz rosa, bigote en zigzag y overol morado.
+  wario(v) {
+    const g = new THREE.Group();
+    const body = v.s(WiiPoly.sphere(0.85), WIIC.purple, g);
+    body.scale.set(1.15, 0.95, 1);
+    const shirt = v.s(WiiPoly.sphere(0.6), WIIC.yellow, g);
+    shirt.position.set(0, 0.45, 0.25);
+    const head = v.s(WiiPoly.sphere(0.72), WIIC.skin, g);
+    head.position.y = 1.35;
+    const cap = v.s(new THREE.SphereGeometry(0.76, 20, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), WIIC.yellow, g);
+    cap.position.y = 1.45;
+    const brim = v.s(new THREE.CylinderGeometry(0.45, 0.45, 0.07, 16, 1, false, -Math.PI / 2, Math.PI), WIIC.yellow, g);
+    brim.position.set(0, 1.5, 0.55);
+    const badge = v.s(new THREE.CircleGeometry(0.2, 16), WIIC.white, g);
+    badge.position.set(0, 1.85, 0.66);
+    badge.rotation.x = -0.4;
+    const w = v.s(new THREE.TorusGeometry(0.1, 0.035, 4, 3), WIIC.blue, g); // la "W", de juguete
+    w.position.set(0, 1.85, 0.69);
+    w.rotation.x = -0.4;
+    const nose = v.s(WiiPoly.sphere(0.24, 12, 8), WIIC.pink, g);
+    nose.position.set(0, 1.3, 0.72);
+    WiiPoly.models.dots(v, g, { y: 1.5, z: 0.62, x: 0.22, r: 0.07 });
+    [-1, 1].forEach((s) => {
+      const m = v.s(new THREE.ConeGeometry(0.12, 0.42, 4), '#3A2A1E', g);
+      m.position.set(s * 0.28, 1.13, 0.66);
+      m.rotation.z = s * 1.9;
+    });
+    const grin = v.s(new THREE.BoxGeometry(0.42, 0.1, 0.05), WIIC.white, g);
+    grin.position.set(0, 0.96, 0.66);
+    [-0.3, 0.3].forEach((x) => {
+      const shoe = v.s(WiiPoly.sphere(0.26, 10, 8), WIIC.green, g);
+      shoe.position.set(x, -0.8, 0.1);
+      shoe.scale.set(1, 0.6, 1.4);
+    });
+    g.userData.anim = (t) => {
+      g.position.y = Math.abs(Math.sin(t * 3)) * 0.15;
+      g.rotation.y = Math.sin(t * 1.2) * 0.5; // presumiendo
+    };
+    return g;
+  },
+  // Rosalina: vestido largo aguamarina, cabello rubio platino con fleco, corona plateada y varita de estrella.
+  rosalina(v) {
+    const g = new THREE.Group();
+    const dress = v.s(new THREE.CylinderGeometry(0.35, 1.0, 2.2, 20), '#6FD9CF', g);
+    dress.position.y = 0.1;
+    const head = v.s(WiiPoly.sphere(0.55), WIIC.skin, g);
+    head.position.y = 1.65;
+    const hair = v.s(new THREE.SphereGeometry(0.6, 20, 10, 0, Math.PI * 2, 0, Math.PI * 0.55), '#FFF3B0', g);
+    hair.position.y = 1.7;
+    const back = v.s(WiiPoly.sphere(0.5), '#FFF3B0', g);
+    back.position.set(0, 1.25, -0.3);
+    back.scale.set(1.1, 1.4, 0.6);
+    const bang = v.s(WiiPoly.sphere(0.32, 12, 8), '#FFF3B0', g); // el fleco le tapa el ojo derecho
+    bang.position.set(-0.22, 1.66, 0.4);
+    bang.scale.set(0.9, 1.3, 0.5);
+    const eye = v.s(WiiPoly.sphere(0.07, 8, 6), WIIC.black, g);
+    eye.position.set(0.2, 1.68, 0.52);
+    const crown = v.s(new THREE.CylinderGeometry(0.22, 0.26, 0.2, 5), WIIC.light, g);
+    crown.position.y = 2.28;
+    const gem = v.s(WiiPoly.sphere(0.06, 8, 6), WIIC.pink, g);
+    gem.position.set(0, 2.28, 0.25);
+    const wand = v.s(new THREE.CylinderGeometry(0.03, 0.03, 1.0, 6), WIIC.light, g);
+    wand.position.set(0.75, 0.9, 0.2);
+    const star = WiiPoly.models.star(v, WIIC.yellow, 0.2);
+    star.position.set(0.75, 1.5, 0.2);
+    g.add(star);
+    g.userData.anim = (t) => { g.position.y = 0.15 + Math.sin(t * 1.4) * 0.1; star.rotation.y = t * 2; }; // flota, no camina
+    return g;
+  },
+  // Luma: estrellita redonda con ojitos (los de verdad no tienen boca a la vista).
+  luma(color) {
+    return (v) => {
+      const g = new THREE.Group();
+      const s = WiiPoly.models.star(v, color, 0.75);
+      s.scale.set(1, 1, 1.8);
+      g.add(s);
+      const core = v.s(WiiPoly.sphere(0.45, 14, 10), color, g);
+      core.scale.set(1, 1, 0.8);
+      WiiPoly.models.dots(v, g, { y: 0.08, z: 0.38, x: 0.16, r: 0.08 });
+      g.userData.anim = (t) => { g.position.y = 0.6 + Math.sin(t * 3) * 0.2; g.rotation.z = Math.sin(t * 2) * 0.25; };
+      return g;
+    };
+  },
+  // Capitán Toad: hongo rojo con manchas blancas, lamparita de minero, chaleco azul y mochila enorme.
+  captoad(v) {
+    const g = new THREE.Group();
+    const cap = v.s(WiiPoly.sphere(0.95), WIIC.red, g);
+    cap.position.y = 1.55;
+    cap.scale.set(1.15, 0.75, 1.15);
+    [[0, 0.55, 0.75], [-0.75, 0.35, 0.35], [0.75, 0.35, 0.35], [0, 0.35, -0.85]].forEach(([x, y, z]) => {
+      const spot = v.s(WiiPoly.sphere(0.25, 10, 8), WIIC.white, g);
+      spot.position.set(x, 1.55 + y, z);
+      spot.scale.set(1, 0.5, 1);
+    });
+    const lamp = v.mesh(WiiPoly.sphere(0.14, 10, 8), v.glow(WIIC.yellow), null, g);
+    lamp.position.set(0, 1.75, 0.95);
+    const face = v.s(WiiPoly.sphere(0.5), WIIC.skin, g);
+    face.position.y = 1.0;
+    WiiPoly.models.dots(v, g, { y: 1.05, z: 0.45, x: 0.16, r: 0.06 });
+    const vest = v.s(new THREE.CylinderGeometry(0.38, 0.5, 0.75, 14), WIIC.blue, g);
+    vest.position.y = 0.3;
+    const pack = v.s(new THREE.BoxGeometry(0.9, 1.1, 0.6), '#8B6A44', g);
+    pack.position.set(0, 0.55, -0.55);
+    g.userData.anim = (t) => { g.rotation.y = Math.sin(t * 2.2) * 0.4; }; // mira a todos lados, por si acaso
+    return g;
+  },
+  // Pit: muñequito de túnica blanca con laurel y alas que aletean.
+  pit(v) {
+    const g = WiiPoly.models.mii(v, { hair: '#6B4226', shirt: WIIC.white, pants: WIIC.light });
+    const laurel = v.s(new THREE.TorusGeometry(0.82, 0.07, 6, 20), WIIC.green, g);
+    laurel.position.y = 1.6;
+    laurel.rotation.x = Math.PI / 2;
+    const wingMat = v.soft(WIIC.white, { side: THREE.DoubleSide });
+    const wings = [-1, 1].map((s) => {
+      const w = v.s(new THREE.CircleGeometry(0.7, 12, 0, Math.PI), wingMat, g);
+      w.position.set(s * 0.35, 0.35, -0.5);
+      w.rotation.set(0, s * 0.7, s * -0.6);
+      return w;
+    });
+    const anim = g.userData.anim;
+    g.userData.anim = (t, dt) => { anim(t, dt); wings.forEach((w, i) => { w.rotation.y = (i ? 1 : -1) * (0.7 + Math.sin(t * 6) * 0.3); }); };
+    return g;
+  },
+};
+
 // Modelo 3D de un personaje de la Ciudad Sensor (o null: entonces sale lo de siempre, un cartón).
 function wiiBody(r3, e) {
   if (e.id === 'player' || e.id === 'bit' || e.kind === 'chest') return null;
@@ -1410,12 +1887,28 @@ function wiiEdge(r3) {
   const S = T3S;
   const MW = W * S;
   const MH = H * S;
-  const R = 160;
+  // En la Isla Wuhu el pasto se acaba pronto: luego playa y mar (y el volcán Maka Wuhu al norte).
+  const z = wiiZone(r3.sc);
+  const wuhu = !!(z && z.wuhu);
+  const R = wuhu ? 30 : 160;
   const flat = new T3Bake();
-  [[-R, -R, MW + R, 0], [-R, MH, MW + R, MH + R], [-R, 0, 0, MH], [MW, 0, MW + R, MH]].forEach(([x0, z0, x1, z1]) => {
-    flat.quad([x0, -0.02, z1], [x1, -0.02, z1], [x1, -0.02, z0], [x0, -0.02, z0], WII3.grassD);
+  const ring = (r0, r, y, color) => [[-r, -r, MW + r, -r0], [-r, MH + r0, MW + r, MH + r], [-r, -r0, -r0, MH + r0], [MW + r0, -r0, MW + r, MH + r0]].forEach(([x0, z0, x1, z1]) => {
+    flat.quad([x0, y, z1], [x1, y, z1], [x1, y, z0], [x0, y, z0], color);
   });
+  ring(0, R, -0.02, WII3.grassD);
+  if (wuhu) {
+    ring(R, R + 8, -0.04, '#F3E2B3');   // playa
+    ring(R + 8, 420, -0.3, '#3DB6E8');  // mar
+  }
   const sm = new WiiBake();
+  if (wuhu) {
+    // Maka Wuhu: cono verde con la punta pelona y un cráter oscuro.
+    const vx = MW * 0.65;
+    const vz = -70;
+    sm.add(new THREE.CylinderGeometry(9, 34, 22, 18, 1, true), T3M(vx, 11, vz), '#5DAE4A');
+    sm.add(new THREE.CylinderGeometry(5, 9.4, 8, 18, 1, true), T3M(vx, 26, vz), '#A47A58');
+    sm.add(new THREE.CylinderGeometry(4.6, 4.6, 0.4, 18), T3M(vx, 29.6, vz), '#5A4636');
+  }
   for (let i = 0; i < 44; i++) {
     const a = T3Hash(i, 7, 3) * Math.PI * 2;
     const d = 2 + T3Hash(i, 8, 3) * 14;
