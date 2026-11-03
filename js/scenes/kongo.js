@@ -53,7 +53,9 @@ function kongoHeroX(beam, step) {
 // cuenta como letra y media: es SHIFT otra vez); cada viga y cada ronda, 8 % más rápido.
 function kongoBarrelTime(word, beam, level) {
   const letters = word.length + Math.max(0, word.replace(/[^A-ZÁÉÍÓÚÑ]/g, '').length - 1) * 0.5;
-  return ((1.3 + letters * 0.55) * diff().time * pace('kongo')) / ((1 + 0.08 * beam) * (1 + 0.08 * (level - 1)));
+  const t = ((1.3 + letters * 0.55) * diff().time * pace('kongo')) / ((1 + 0.08 * beam) * (1 + 0.08 * (level - 1)));
+  // Piso humano: ~0.7 s para ver la palabra y reaccionar, más ~0.15 s por letra aunque escribas a 100 PPM.
+  return Math.max(t, 0.7 + letters * 0.15);
 }
 
 Scenes.kongo = nesScene({

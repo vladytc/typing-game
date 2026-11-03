@@ -99,12 +99,14 @@ const Auto = {
       return Object.assign(o, { time: lerp(N.time, F.time, t), speed: lerp(N.speed, F.speed, t), dmg: lerp(N.dmg, F.dmg, t) });
     }
     const t = clamp((ppm - 40) / 32, 0, 1.3); // hasta 40 → Normal, 72 medidos (≈ 80 reales) → Experto, tope ≈ 82
-    o.time = Math.max(0.4, lerp(N.time, E.time, t));
+    // Arriba de Experto ya no se recorta el tiempo: leer la palabra y reaccionar (~0.5 s) no se acelera
+    // aunque los dedos vayan más rápido. Lo que sigue apretando es la velocidad de la lluvia y el daño.
+    o.time = Math.max(E.time, lerp(N.time, E.time, t));
     o.speed = Math.min(2.4, lerp(N.speed, E.speed, t));
     o.dmg = Math.min(1.3, lerp(N.dmg, E.dmg, t));
     o.hit = Math.max(0.45, lerp(1, E.hit, t));
     o.pace = {};
-    for (const k in E.pace) o.pace[k] = clamp(lerp(1, E.pace[k], t), 0.45, 1.05);
+    for (const k in E.pace) o.pace[k] = clamp(lerp(1, E.pace[k], Math.min(1, t)), 0.45, 1.05);
     return o;
   },
   refresh() {

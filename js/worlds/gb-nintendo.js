@@ -285,6 +285,13 @@ MAPS['gb-valle'].regions = [
 // El camino del sur de la Aldea Mabe baja a la playa, como en Koholint.
 Object.assign(MAPS['gb-valle'].exits, { '12,29': { map: 'gb-koholint', spawn: [17, 1, 'down'] } });
 MAPS['gb-valle'].bitTips.push('* Por el camino del sur de la aldea se oye el mar...\n* ¿Una isla? ¿Aquí?');
+// Letrero junto al hueco del sur (si no, casi nadie encuentra la isla).
+{
+  const put = (rows) => { rows[28] = rows[28].slice(0, 11) + 'S' + rows[28].slice(12); };
+  put(MAPS['gb-valle'].map);
+  (MAPS['gb-valle'].variants || []).forEach((v) => put(v.map));
+  MAPS['gb-valle'].signs['11,28'] = '* ↓ ISLA KOHOLINT\n* (Se oyen gaviotas... y algo enorme roncando.)';
+}
 
 MAPS['gb-valle'].npcs.push(
   {
