@@ -84,7 +84,7 @@ Scenes.battle = {
 
   exit() {
     this.cleanup();
-    if (this.def.onExit) this.def.onExit(this);
+    if (this.def && this.def.onExit) this.def.onExit(this); // (def falta si la escena falló al arrancar)
   },
 
   cleanup() {
