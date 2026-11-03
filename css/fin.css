@@ -199,9 +199,25 @@
   --c2: #550000;
   --c3: #000000;
 }
-.theme-vb #device { background: #1c1c1c; box-shadow: inset 0 -6px 0 #0c0c0c, 0 20px 50px rgba(0, 0, 0, 0.6); }
-.theme-vb #screen-frame { background: #0c0c0c; }
-.theme-vb #device-label { color: #aa0000; }
+/* Marco de la consola: el visor. Negro mate con la franja roja de arriba, el hueco de los ojos
+   como antifaz (esquinas muy redondas, orilla de hule) y sin foquito: aquí solo existe el rojo. */
+.theme-vb #device {
+  padding: 28px 30px 16px;
+  border-radius: 36px 36px 54px 54px;
+  background:
+    linear-gradient(180deg, #c4001a 0 9px, #7a0010 9px 12px, transparent 12px),
+    linear-gradient(180deg, #262626, #1a1a1a 60%, #121212);
+  box-shadow: inset 0 -6px 0 #0c0c0c, 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+.theme-vb #screen-frame {
+  background: #000;
+  border-radius: 46px / 40px;
+  box-shadow: 0 0 0 6px #0a0a0a, 0 0 0 8px #3a0008, inset 0 0 30px #000, inset 0 0 0 3px #140003;
+}
+.theme-vb #led { display: none; }
+.theme-vb #device-label { color: #aa0000; text-align: center; }
+.theme-vb #device-label span { display: none; }
+.theme-vb #device-label::after { content: ' · VISIÓN EN ROJO · DESCANSA LOS OJOS ·'; color: #770000; }
 .theme-vb .c.ok, .theme-vb .w.done, .theme-vb .bullet .t { color: #aa0000; }
 .town.era-vb .tmap { filter: drop-shadow(3px 0 0 rgba(85, 0, 0, 0.9)); }
 .town.era-vb .ent canvas,
