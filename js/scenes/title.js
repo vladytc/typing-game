@@ -20,8 +20,16 @@ Scenes.title = {
       { label: 'Estadísticas', go: () => Game.go('stats', { back: 'title' }) },
       { label: `Dificultad: ${diff().name}`, go: () => Game.go('dificultad', { next: 'title' }) },
       { label: `Sonido: ${Sfx.muted ? 'NO' : 'SI'}`, go: () => this.toggleSound() },
+      { label: `Peleas en el pasto: ${d.flags.wild ? 'SI' : 'NO'}`, go: () => this.toggleWild() },
     ];
     this.menu = new ListMenu($('.title-menu'), items, { onPick: (i) => items[i].go(), start: this.lastPick || 0 });
+  },
+  // Peleas de práctica en el pasto alto (apagadas de inicio: explorar no debe ser tedioso).
+  toggleWild() {
+    Save.data.flags.wild = !Save.data.flags.wild;
+    Save.write();
+    this.lastPick = 5;
+    this.enter();
   },
   toggleSound() {
     Sfx.muted = !Sfx.muted;

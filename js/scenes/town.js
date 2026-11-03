@@ -420,7 +420,8 @@ Scenes.town = {
     }
     this.savePos();
     const rate = this.m.wildRate || (this.pueblo ? 0.1 : 0.07);
-    if (t.tall && !this.grace && Math.random() < rate && this.wildPool().length) { this.wildEncounter(); return; }
+    // Las peleas en el pasto son repeticiones de enemigos ya vencidos: solo salen si el jugador las prende (título).
+    if (t.tall && Save.data.flags.wild && !this.grace && Math.random() < rate && this.wildPool().length) { this.wildEncounter(); return; }
     if (this.held) this.step(this.held);
   },
 
@@ -454,9 +455,11 @@ Scenes.town = {
   // En los mundos salen los de `wild` que ya venciste; en el pueblo, Pixelito y los normales vencidos.
   wildPool() {
     const d = Save.data;
-    if (this.m.wild) return this.m.wild.filter((id) => ENEMIES[id] && d.done[id]);
+    // Los amigos (perdonados) no salen a pelear: ya viven en el pueblo.
+    const foe = (id) => ENEMIES[id] && d.done[id] && !d.spared[id];
+    if (this.m.wild) return this.m.wild.filter(foe);
     if (!this.pueblo) return [];
-    return ['pixelito', ...Object.keys(ENEMIES).filter((id) => d.done[id] && !ENEMIES[id].boss && !ENEMIES[id].mode)];
+    return ['pixelito', ...Object.keys(ENEMIES).filter((id) => foe(id) && !ENEMIES[id].boss && !ENEMIES[id].mode)];
   },
 
   wildEncounter() {
