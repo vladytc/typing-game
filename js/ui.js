@@ -153,6 +153,10 @@ const Game = {
   scene: null,
   go(name, params = {}) {
     if (this.scene && this.scene.exit) this.scene.exit();
+    // Dificultad automática: se recalcula entre escenas (nunca a mitad de una pelea).
+    Auto.refresh();
+    // Va muy rápido en Normal o Fácil: al volver al pueblo o al mapa, ofrecerle una vez subir.
+    if ((name === 'town' || name === 'map') && Auto.shouldSuggest()) { params = { then: [name, params] }; name = 'autoPregunta'; }
     this.scene = Scenes[name];
     this.root.className = `scene-${name}`;
     // Por defecto, la estética de la era del pueblo; los mundos y niveles ponen la suya.
@@ -161,5 +165,6 @@ const Game = {
     this.lockUntil = performance.now() + 300;
     this.scene.enter(params);
     if (this.scene.music) Music.play(this.scene.music);
+    if (Auto.note) { toast(Auto.note); Auto.note = null; }
   },
 };

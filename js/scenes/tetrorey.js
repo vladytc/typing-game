@@ -512,7 +512,7 @@ Scenes.tetrorey = Object.assign(Object.create(Scenes.battle), {
     this.tvsLanded('rey', cells, TVS.cols - 1, y);
     res.rows.forEach((r) => this.tvsFx('rey', 'tvs-clear', r));
     this.tvsDraw('rey');
-    const n = Math.min(TVS.send[res.lines], TVS.reyCap[Save.data.difficulty] || 4);
+    const n = Math.min(TVS.send[res.lines], TVS.reyCap[diffKey()] || 4);
     if (n) {
       v.got += n;
       v.queue.push({ n, hole: Math.floor(Math.random() * TVS.cols) });
