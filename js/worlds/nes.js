@@ -1,5 +1,5 @@
 // MUNDO 2 — Castillo 8-Bit (NES, 1985). Diseño en docs/LORE.md §5.
-// Zonas: Patio de Ladrillos → Castillo 1 (Kongo Tambor) → Bosque Oscuro (Patos de Letras)
+// Zonas: Patio de Ladrillos → Castillo 1 (Kongo Tambor) → Bosque Perdido (Patos de Letras)
 //        → Castillo 2 (Mazmorra de Llaves + Tragabombas) → Ring de la Plaza (Campeón Puñín)
 //        → Castillo 3 (Lord Caparazón, rescata la NES).
 // Aquí se practican las MAYUSCULAS con SHIFT (nombres propios, inicio de frase) y el punto final.
@@ -629,7 +629,7 @@ addWorld({
       keysHint: 'Palabras con mayúscula inicial (Barril, Viga)',
     },
 
-    // ---------- Bosque Oscuro ----------
+    // ---------- Bosque Perdido ----------
     bombita: {
       name: 'Bombita Mecha',
       sprite: 'bombita',
@@ -638,7 +638,7 @@ addWorld({
       fightWords: 4, fightTime: 0.8, // ¡tiene prisa! 20 % menos tiempo
       words: ['Bum', 'Pum', 'Uno', 'Dos', 'Tres', 'mecha', 'chispa', 'fuego', 'humo', 'luz', 'zas', 'Bomba', 'ya', 'corre', 'Fiu'],
       blurb: 'Una bomba con la mecha corta y MUCHA prisa. Aquí hay menos tiempo para escribir.',
-      intro: '* ¡Bombita Mecha corre en círculos por el Bosque Oscuro!\n* "¡No hay tiempo! ¡NO HAY TIEMPO!"',
+      intro: '* ¡Bombita Mecha corre en círculos por el Bosque Perdido!\n* "¡No hay tiempo! ¡NO HAY TIEMPO!"',
       check: '* BOMBITA MECHA - ATQ 4 DEF 0\n* Siempre tiene prisa. Nadie sabe a dónde va tan rápido.',
       idle: ['* La mecha de Bombita hace fssssss.', '* Bombita mira su reloj. No tiene reloj.', '* Huele a cerillo recién apagado.'],
       calm: '* La mecha de Bombita se apagó solita. Está tranquila.',
@@ -677,7 +677,7 @@ addWorld({
       sprite: 'toby',
       mode: 'patos', // js/scenes/patos.js
       xp: 20,
-      blurb: 'Toby te acompaña al Bosque Oscuro. Atrapa patos con tu red de letras: ¡escribe la letra de cada pato!',
+      blurb: 'Toby te acompaña al Bosque Perdido. Atrapa patos con tu red de letras: ¡escribe la letra de cada pato!',
       keysHint: 'Letras sueltas, reacción rápida',
     },
 
@@ -716,7 +716,7 @@ addWorld({
       blurb: 'Un dinosaurio que come bombas.',
       intro: '* ¡TRAGABOMBAS sale de las sombras!\n* "¿Tienes bombas? Me encantan las bombas."\n* (Escribe "bomba" SIN ERRORES y se la tragará.)',
       check: '* TRAGABOMBAS - ATQ 4 DEF 1\n* Come bombas. Escribe "bomba" perfecto y le hará daño triple. ¡A Tragabombas no le gusta el humo!',
-      idle: ['* Tragabombas eructa humo.', '* "Es peligroso ir solo. Por eso como acompañado."', '* Huele a pólvora y a zanahoria.'],
+      idle: ['* Tragabombas eructa humo. Es primo del Dodongo de Hyrule.', '* "Es peligroso ir solo. Por eso como acompañado."', '* Huele a pólvora y a zanahoria.'],
       calm: '* Tragabombas se acaricia la panza. Ya está lleno.',
       taunts: ['¿Tienes bombas? ¡Me encantan las bombas!', 'Es peligroso ir solo. Por eso como acompañado.', '¡ÑAM ÑAM!'],
       acts: [
@@ -776,7 +776,7 @@ addWorld({
     },
     patos_toby: {
       name: 'Los patos de Toby',
-      desc: 'Toby quiere ver cuántos patos atrapas con tu red de letras en el Bosque Oscuro. ¡Atrapa 20!',
+      desc: 'Toby quiere ver cuántos patos atrapas con tu red de letras en el Bosque Perdido. ¡Atrapa 20!',
       progress: () => `${Math.min(20, Save.data.flags.nesDucks || 0)}/20`,
     },
     tres_llaves: {
