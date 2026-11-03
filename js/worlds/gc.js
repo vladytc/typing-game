@@ -295,20 +295,20 @@ addWorld({
   music: 'gc_map',
   requires: 'n64',
   console: 'gamecube',
-  // Isla Celeste → Jardín Brotitos → Pueblo de Bellota → Estación Visor → Arena Final.
+  // Isla Initia → Jardín Brotitos → Pueblo de Bellota → Estación Visor → Arena Final.
   // Entre zona y zona aparece una Copia de Sombra.
   nodes: ['cubito', 'disquin', 'brotitos', 'capbrotes', 'sombra_tetro', 'delfinito', 'correo', 'sombra_cap',
     'fantasmita', 'sombracel', 'sombra_nebula', 'casco', 'sombra_marco', 'guante'],
   enemies: {
-    // ===== Isla Celeste =====
+    // ===== Isla Initia =====
     cubito: {
       ...GC_BASE,
       name: 'Cubito', sprite: 'cubito', model: 'cubito',
       hp: 100, atk: 6, def: 4, xp: 42,
       fightWords: 2, fightTime: 1.1,
       words: ['El cubo tiene manija.', 'Llévame a casa.', 'Soy índigo, no morado.', 'Tengo cuatro puertos.', 'Mi tapa se abre.',
-        'Juguemos con amigos.', 'Mi disco es chiquito.', 'Cárgame, por favor.', 'Soy un cubo feliz.', 'Hola, Isla Celeste.'],
-      blurb: 'ISLA CELESTE. Un cubo índigo con manija. Quiere que lo cargues a casa de un amigo.',
+        'Juguemos con amigos.', 'Mi disco es chiquito.', 'Cárgame, por favor.', 'Soy un cubo feliz.', 'Hola, Isla Initia.'],
+      blurb: 'ISLA INITIA. Un cubo índigo con manija. Quiere que lo cargues a casa de un amigo.',
       keysHint: 'Frases completas: El cubo tiene manija.',
       intro: '* ¡Un Cubito rueda hacia ti!\n* Te ofrece su manija. "¿Me cargas?"',
       check: '* CUBITO - ATQ 6 DEF 4\n* Un cubo con manija. Técnicamente es portátil. Técnicamente.',
@@ -331,7 +331,7 @@ addWorld({
       hp: 95, atk: 5, def: 3, xp: 40,
       fightWords: 3,
       words: ['disco', 'gira', 'vuelta', 'centro', 'mareo', 'órbita', 'rueda', 'espiral', 'redondo', 'círculo', 'Ocho', 'Giro', 'Mini'],
-      blurb: 'ISLA CELESTE. Un disco de 8 cm que gira y gira... y se marea. Sus letras salen en círculo.',
+      blurb: 'ISLA INITIA. Un disco de 8 cm que gira y gira... y se marea. Sus letras salen en círculo.',
       keysHint: 'Letras en círculo: se escriben en orden',
       intro: '* ¡Disquín llega girando!\n* "¡No puedo parar! ¡El mundo gira! ¿O soy yo?"',
       check: '* DISQUIN - ATQ 5 DEF 3\n* Un disco de 8 cm. Sus letras giran: empieza por la de ARRIBA y sigue como reloj.',
