@@ -368,6 +368,141 @@ Object.assign(SPRITES, {
     '....KKKKKKKK....',
   ]),
 
+  // ---------- Personajes de Nintendo (dibujados aquí, al estilo de 16 bits) ----------
+  // Yoshi de perfil, con su silla roja y sus zapatos naranjas (Super Mario World, 1990).
+  snes_yoshi: snesArt([
+    '................',
+    '...KKKK.........',
+    '..KGGGGK.KKKK...',
+    '.KGWWWGGKGGGGK..',
+    '.KGWWKGGGGGGGGK.',
+    '.KGWWKGGGGGHGGK.',
+    '.KGGGGGGGGGGGGK.',
+    '..KGGGGWWWWWWK..',
+    '...KKGGGKKKKK...',
+    '..KRKGWWGK......',
+    '.KRRKGWWWGK.....',
+    '..KKRRGWWGGK....',
+    '...KRRGWWGGGK...',
+    '....KGGGGKKGGK..',
+    '...KOOKKOOK.KK..',
+    '...KKKK.KKKK....',
+  ]),
+  // Lakitu en su nube con cara (en aquel juego, si lo tumbabas con fuego, te subías a la nube).
+  snes_lakitu: snesArt([
+    '................',
+    '.....KKKKK......',
+    '....KYYYYYK.....',
+    '...KYKKYKKYK....',
+    '...KYKWKWKYK....',
+    '...KYYYYYYYK....',
+    '....KYYOYYK.....',
+    '...KgGGGGGgK....',
+    '..KgGHGGGGGgK...',
+    '.KKKKWWWKKWWKK..',
+    'KWWWWWWWWWWWWWWK',
+    'KWWKWWWWWWWKWWSK',
+    'KWWWWWKKKWWWWWSK',
+    '.KWWWWWWWWWWWSK.',
+    '..KKSSSKKSSSKK..',
+    '....KKKK..KKKK..',
+  ]),
+  // Kirby (Kirby Super Star, 1996): bolita rosa, ojos con brillo azul y zapatos rojos.
+  snes_kirby: snesArt([
+    '................',
+    '................',
+    '.....KKKKKK.....',
+    '...KKIIIIIIKK...',
+    '..KIIIIIIIIIIK..',
+    '.KIIIIIKIIKIIIK.',
+    '.KIIIIIKIIKIIIK.',
+    'KIIIIIIBIIBIIIIK',
+    'KIRRIIIIIIIIRRIK',
+    'KIIIIIIKKIIIIIIK',
+    '.KIIIIIIIIIIIIK.',
+    '.KIIIIIIIIIIIIK.',
+    '..KIIIIIIIIIIK..',
+    '.KRRRKKKKKKRRRK.',
+    'KRRRRRK..KRRRRRK',
+    '.KKKKK....KKKKK.',
+  ]),
+  // Fox McCloud (Star Fox, 1993): audífonos, chaqueta blanca y el broche del equipo.
+  snes_fox: snesArt([
+    '..K.........K...',
+    '.KnK.......KnK..',
+    '.KnnK.....KnnK..',
+    '.KnOOKKKKKOOnK..',
+    '..KOOOOOOOOOK...',
+    '.pKOgWOOOWgOKp..',
+    '.pKOKWOOOWKOKp..',
+    '.pKOOWWWWWOOKp..',
+    '..KOWWWKWWWOK...',
+    '...KWWWWWWWK....',
+    '..KKKWWWWWKKK...',
+    '.KWWSKKKKKSWWK..',
+    'KWWSSSSRSSSSWWK.',
+    'KpKWWSSSSSSWKpK.',
+    '..KWWWKKWWWK....',
+    '..KKKK..KKKK....',
+  ]),
+  // Donkey Kong con su corbata roja (la estrenó en Donkey Kong Country, 1994).
+  snes_donkeykong: snesArt([
+    '................',
+    '.....KKKKKK.....',
+    '....KNNNNNNK....',
+    '...KNNNNNNNNK...',
+    '..KNNnnnnnnNNK..',
+    '..KNnWKnnKWnNK..',
+    '..KNnnnnnnnnNK..',
+    '..KNNnnKKnnNNK..',
+    '.KNNNKnnnnKNNNK.',
+    'KNNNNNKRRKNNNNNK',
+    'KnNNNNKRRKNNNNnK',
+    'KnKNNNRYYRNNNKnK',
+    'KnKNNNNRRNNNNKnK',
+    '.KKNNNNNNNNNNKK.',
+    '..KNNNK..KNNNK..',
+    '..KKKKK..KKKKK..',
+  ]),
+  // Diddy Kong: gorra roja, playera roja con estrellas amarillas.
+  snes_diddy: snesArt([
+    '................',
+    '................',
+    '.....KKKKKK.....',
+    '....KRRRRRRK....',
+    '...KRRRWRRRRK...',
+    '...KKKKKKKKRRK..',
+    '...KNnnnnnNK....',
+    'KK.KnWKnWKnK.KK.',
+    'KnKKnnnnnnnKKnK.',
+    '.KK.KnnKKnK..K..',
+    '....KKnnnnKK....',
+    '...KRYRRRYRK....',
+    '..KnKRRYRRKnK...',
+    '..KKKRRRRRKKK...',
+    '....KNNKNNK.....',
+    '....KKK.KKK.....',
+  ]),
+  // Samus Aran con el Traje Varia (Super Metroid, 1994): hombreras redondas, visor verde y su cañón.
+  snes_samus: snesArt([
+    '.....KKKKKK.....',
+    '....KOOOOOOK....',
+    '...KOORRRROOK...',
+    '...KORGGGGROK...',
+    '...KORGHGGROK...',
+    '...KOORRRROOK...',
+    '.KKKKOOOOOOKKKK.',
+    'KOOOOKKRRKKOOOOK',
+    'KOYYOKRRRRKOYYOK',
+    'KOOOOKRYYRKOOOOK',
+    '.KKKKRRRRRRKpppK',
+    '...KRRRRRRRKpSpK',
+    '...KRRKKKRRKKpK.',
+    '...KOOK.KOOK....',
+    '..KOOOK.KOOOK...',
+    '..KKKKK.KKKKK...',
+  ]),
+
   // ---------- Tesoros de las zonas ----------
   pluma_capa: snesArt([
     '................',
@@ -609,8 +744,8 @@ addMaps('snes', {
   entry: { map: 'snes-colinas', spawn: [3, 20, 'up'] },
   maps: {
     'snes-colinas': {
-      name: 'Colinas Dinosaurio',
-      intro: ['* ¡¡COLORES!! ¡Mira cuántos colores!', '* Pasto de dos verdes, flores rosas, cielo azul...\n* Bienvenido al REINO 16-BIT. Aquí los acentos sí cuentan, ¿eh?'],
+      name: 'Dinosaur Land',
+      intro: ['* ¡¡COLORES!! ¡Mira cuántos colores!', '* Pasto de dos verdes, colinas con ojos...\n* ¡Es DINOSAUR LAND! Bienvenido al REINO 16-BIT. Aquí los acentos sí cuentan, ¿eh?'],
       music: 'snes_map',
       ground: 's16_pasto',
       map: SNES_COLINAS_MAP,
@@ -638,8 +773,8 @@ addMaps('snes', {
       ],
       wild: ['dinohuevin', 'modosiete', 'gema', 'setita'],
       signs: {
-        '5,21': ['* REINO 16-BIT\n* COLINAS DINOSAURIO\n* (Tubería al Pueblo Vitrina)', `* ${SNES_FACTS[2]}`],
-        '3,6': ['* MIRADOR DE LAS COLINAS', '* El juego del dinosaurio verde tenía 96 salidas para descubrir.\n* ¡Y sus colinas tenían ojos! Como estas.'],
+        '5,21': ['* REINO 16-BIT\n* DINOSAUR LAND: COLINAS DINOSAURIO\n* (Tubería al Pueblo Vitrina)', `* ${SNES_FACTS[2]}`],
+        '3,6': ['* MIRADOR DE LAS COLINAS', '* Super Mario World tenía 96 salidas para descubrir.\n* ¡Y sus colinas tenían ojos! Como estas.'],
         '19,9': ['* RIO DE LOS REFLEJOS\n* (Prohibido presumir colores. Firma: la Gema.)', '* La Super Nintendo salió en Japón el 21 de noviembre de 1990.'],
         '29,12': ['* BOSQUE DE LOS DINOSAURIOS', '* Dicen que aquí se esconde algo que no tiene nombre.\n* ...Y que no es un dinosaurio.'],
       },
@@ -667,6 +802,51 @@ addMaps('snes', {
               ['* Por ahora ando en camiseta. Es bastante cómodo.\n* No se lo digas a nadie de mi familia.'],
             ];
             await ctx.say(lines[ctx.counter('snesTortuga') % lines.length], 'TORTUGA PELONA');
+          },
+        },
+        // YOSHI de verdad (Dino Huevín es su fan número uno). Da moras, un chisme y una pista.
+        {
+          id: 'yoshi', sprite: 'snes_yoshi', x: 9, y: 17,
+          async talk(ctx) {
+            if (!ctx.flag('snesYoshi')) {
+              ctx.setFlag('snesYoshi');
+              await ctx.say([
+                '* ¡Yoshi! Mi primer mensaje en Super Mario World fue:\n* "¡Hurra! Gracias por rescatarme. Me llamo Yoshi."',
+                '* "...Iba a rescatar a mis amigos y Bowser me encerró en ese huevo."\n* Era un huevo chiquito. Ni me hagas recordar.',
+              ], 'YOSHI');
+              return;
+            }
+            const i = await ctx.choose(['moras', 'chisme', 'adios'], 'YOSHI');
+            if (i === 2) { await ctx.say(['* ¡Yoshi! (Saca la lengua para despedirse.)'], 'YOSHI'); return; }
+            if (i === 1) {
+              await ctx.say([
+                '* ¿Mario me pega en la cabeza para que saque la lengua?\n* El manual decía que solo SEÑALABA hacia adelante...',
+                '* ...pero en 2017 Tezuka y Hino, de los que me crearon, contaron que en la idea original sí era un coscorrón.\n* ¡Yoshi! Ya lo perdoné.',
+              ], 'YOSHI');
+              return;
+            }
+            await ctx.say(['* ¡Las moras de los árboles son lo mejor!\n* Escríbelas rápido y me las como. ¡Con todo y acentos!'], 'YOSHI');
+            const res = await ctx.challenge({ label: 'Moras para Yoshi:', texts: snesSigns(['mora roja', 'mora rosa', 'mora verde', '¡ñam!'])(), timeLimit: 9000, strict: true });
+            if (!res.completed) { await ctx.say(['* ...Se cayeron del árbol. ¡Otra vez!'], 'YOSHI'); return; }
+            Sfx.coin();
+            await ctx.say([
+              '* ¡Ñam! Dato: 10 rojas y pongo un huevo con champiñón.\n* 2 rosas, y sale una nube que tira monedas.',
+              '* Las VERDES daban 20 segundos más de tiempo...\n* y para jugar solo salían en un nivel: FUNKY. Uno de una zona muy, muy especial.',
+            ], 'YOSHI');
+          },
+        },
+        // LAKITU en su nube, junto al mirador. Su meteorito no lleva a ningún lado... por ahora.
+        {
+          id: 'lakitu', sprite: 'snes_lakitu', x: 5, y: 5,
+          async talk(ctx) {
+            if (ctx.counter('snesLakitu') % 2 === 0) {
+              await ctx.say([
+                '* ¡Ey! Desde mi nube veo TODO Dinosaur Land.\n* Anoche vi caer un METEORITO en una colina, muy lejos. ¡PUM!',
+                '* Nadie ha ido a ver. Yo no voy: las nubes no aterrizan.',
+              ], 'LAKITU');
+              return;
+            }
+            await ctx.say(['* Dato: en Super Mario World, si me tumbabas con fuego o con la capa,\n* mi nube se quedaba sola... ¡y te podías subir! Qué abuso.'], 'LAKITU');
           },
         },
       ],
@@ -749,11 +929,39 @@ addMaps('snes', {
             else await ctx.say(['* ...Energía en reserva. BIP.\n* No pasa nada: hasta las naves rápidas paran en los pits.'], 'ROBOT DE PITS');
           },
         },
+        // KIRBY (Kirby Super Star): no habla, pero te reta a una Carrera Gourmet de comida.
+        {
+          id: 'kirby', sprite: 'snes_kirby', x: 6, y: 13,
+          async talk(ctx) {
+            if (ctx.flag('snesKirbyGana') && ctx.counter('snesKirby') % 2 === 0) {
+              await ctx.say([
+                '* (Kirby trae puesto un casco de piloto. Le queda ENORME.)',
+                '* Dato: en Kirby Super Star, la Gran Cueva Ofensiva escondía 60 tesoros.\n* Uno era el CASCO DE FALCON, el de F-Zero. ¡Por eso anda por aquí!',
+              ], 'KIRBY');
+              return;
+            }
+            await ctx.say(['* (Kirby se infla, señala la pista y se frota la panza.)\n* ...¿Una CARRERA GOURMET? ¡Gana quien coma más rápido!'], 'KIRBY');
+            if (await ctx.choose(['correr', 'luego'], 'KIRBY') === 1) return;
+            const food = ['plátano', 'sandía', 'melón', 'pastel', 'limón', 'jamón', 'tomate'];
+            const texts = food.sort(() => Math.random() - 0.5).slice(0, 5);
+            const res = await ctx.challenge({ label: 'Carrera Gourmet:', texts, timeLimit: texts.join('').length * 420 + 2500, strict: true });
+            if (!res.completed) {
+              await ctx.say(['* ¡El Rey Dedede llegó primero y se comió todo!\n* (Kirby se desinfla, triste. Quiere la revancha.)'], 'KIRBY');
+              return;
+            }
+            Sfx.coin();
+            ctx.setFlag('snesKirbyGana');
+            await ctx.say([
+              '* ¡Ganaste por un bocado! El Rey Dedede se queda sin postre.',
+              '* Dato: en la Gourmet Race de Kirby Super Star (1996), cada comida valía 1 punto\n* y llegar primero a la meta, ¡30!',
+            ], 'KIRBY');
+          },
+        },
       ],
     },
 
     'snes-hangar': {
-      name: 'Hangar del Escuadrón',
+      name: 'Hangar de Corneria',
       music: 'snes_vulpino',
       ground: 's16_metal',
       map: SNES_HANGAR_MAP,
@@ -779,7 +987,7 @@ addMaps('snes', {
         { enemy: 'dani3', x: 29, y: 4, say: ['* DANI: ¡Por fin! El Planeta Oscuro está detrás de mí...', '* DANI: ...y para llegar tienes que ganarme en MI arena.\n* ¡Esta vez traigo TRES Tecloides!'] },
       ],
       signs: {
-        '2,9': ['* HANGAR DEL ESCUADRON\n* Solo pilotos con dedos rápidos.', `* ${SNES_FACTS[3]}`],
+        '2,9': ['* HANGAR DE CORNERIA\n* Solo pilotos con dedos rápidos.', `* ${SNES_FACTS[3]}`],
         '24,19': ['* ARENA MODO 7\n* Hoy: DANI TURBO contra... ¿quién?', '* El chip de sonido de la Super Nintendo lo hizo Sony.\n* Tocaba 8 sonidos a la vez... ¡y hasta tenía eco!'],
       },
       looks: {
@@ -817,6 +1025,66 @@ addMaps('snes', {
               '* ¿Ves esas cajas? Dicen "POLIGONOS".\n* Cuando se acaben, las naves serán puros cuadritos.',
             ];
             await ctx.say([lines[ctx.counter('snesConejo') % lines.length]], 'CONEJO PILOTO');
+          },
+        },
+        // FOX McCLOUD (Star Fox, 1993). Las frases entre comillas son las del juego de Super Nintendo.
+        {
+          id: 'fox', sprite: 'snes_fox', x: 8, y: 9,
+          async talk(ctx) {
+            if (!ctx.flag('snesFox')) {
+              ctx.setFlag('snesFox');
+              await ctx.say([
+                '* Fox McCloud, del equipo STAR FOX.\n* Este hangar está en CORNERIA: de aquí despegamos en 1993.',
+                '* Antes de cada misión yo decía: "¡Todas las naves, repórtense!"\n* ¿Me ayudas con el pase de lista? Háblame otra vez.',
+              ], 'FOX');
+              return;
+            }
+            const i = await ctx.choose(['pase de lista', 'platica'], 'FOX');
+            if (i === 1) {
+              const lines = [
+                ['* ¿"Haz un giro de barril"? Eso lo dijo Peppy en OTRA consola.\n* Aquí, Falco gritaba: "¡Rueda, Fox! ¡Rock and roll!"'],
+                ['* En Europa nuestro juego no se llamó Star Fox: se llamó STAR WING.\n* Mismo zorro, otro nombre.'],
+                ['* Slippy dice "ribbit" al final de todo.\n* "¡Pan c-c-comido! ¡Ribbit!" Así hablaba en el juego. Te lo juro.'],
+                ['* Ese CAPITAN VULPINO me copió las orejas. Y la chaqueta.\n* El estilo no se copia, ¿eh?'],
+              ];
+              await ctx.say(lines[ctx.counter('snesFoxPlatica') % lines.length], 'FOX');
+              return;
+            }
+            await ctx.say(['* "¡Todas las naves, repórtense!"\n* Contesta por Falco, Slippy y Peppy. ¡Rápido!'], 'FOX');
+            const res = await ctx.challenge({ label: 'Pase de lista:', texts: snesSigns(['¡Listo, Fox!', '¡OK!', '¡Sí, vamos!'])(), timeLimit: 9000, strict: true });
+            if (!res.completed) { await ctx.say(['* ...¿Slippy? ¿SLIPPY? Se quedó dormido otra vez.'], 'FOX'); return; }
+            Sfx.coin();
+            await ctx.say(['* ¡Todos reportados! Eso contestaban en el juego, casi igualito.\n* (Y el General Pepper decía: "¡Buena suerte!")'], 'FOX');
+          },
+        },
+        // DONKEY KONG y DIDDY KONG: llegaron de la Isla Donkey Kong por un barril cañón.
+        {
+          id: 'donkeykong', sprite: 'snes_donkeykong', x: 20, y: 8,
+          async talk(ctx) {
+            const lines = [
+              ['* DONKEY KONG: ¡Uh, uh! (Te enseña su corbata roja: dice "DK".)', '* Dato: la corbata la estrenó en Donkey Kong Country (1994).\n* Antes andaba sin nada. Como todos los gorilas.'],
+              ['* DONKEY KONG: ¡UH! (Golpea el piso. Las cajas de "POLIGONOS" brincan.)\n* (Diddy dice que así saluda.)'],
+            ];
+            await ctx.say(lines[ctx.counter('snesDK') % lines.length], 'DONKEY KONG');
+          },
+        },
+        {
+          id: 'diddy', sprite: 'snes_diddy', x: 21, y: 8,
+          async talk(ctx) {
+            if (!ctx.flag('snesDiddy')) {
+              ctx.setFlag('snesDiddy');
+              await ctx.say([
+                '* ¡Hola! Soy DIDDY KONG. Venimos de la ISLA DONKEY KONG.\n* Nos metimos a un barril cañón, ¡PUM!, y aparecimos en Corneria.',
+                '* Una noche DK me dejó cuidando sus plátanos...\n* llegaron los Kremlings de K. Rool, se los llevaron y a mí me encerraron en un barril.',
+              ], 'DIDDY KONG');
+              return;
+            }
+            const lines = [
+              ['* El abuelo CRANKY dice que él era el Donkey Kong de la maquinita de 1981.\n* Y que en sus tiempos los juegos eran mejores. Lo dice DIARIO.'],
+              ['* En Donkey Kong Country, nuestra isla tiene forma de la cabeza de DK.\n* Él dice que es pura casualidad.'],
+              ['* ¿Ves ese MONO BARRIL de la puerta? Dice que todos los barriles son suyos.\n* Que se lo diga a DK. A ver.'],
+            ];
+            await ctx.say(lines[ctx.counter('snesDiddyCuenta') % lines.length], 'DIDDY KONG');
           },
         },
       ],
@@ -882,6 +1150,31 @@ addMaps('snes', {
             await ctx.say([q === 'done'
               ? '* ¡Ya nos sabes a todas! Mamá dice que eres de confianza.\n* Crecer no es irse. Ahora lo sabemos.'
               : '* Mamá ya no está triste.\n* Ese señor morado nos mintió. ¿Quién será?'], 'MEDUSITA');
+          },
+        },
+        // SAMUS ARAN (Super Metroid, 1994): sabe de crías que creen que eres su mamá.
+        {
+          id: 'samus', sprite: 'snes_samus', x: 5, y: 3,
+          async talk(ctx) {
+            if (!ctx.flag('snesSamus')) {
+              ctx.setFlag('snesSamus');
+              await ctx.say([
+                '* ...Samus Aran. Cazarrecompensas.\n* "El último Metroid está en cautiverio. La galaxia está en paz."',
+                '* Así empezaba mi juego de 1994. Duró poquito la paz.\n* Oye: a la reina del fondo no le pegues primero. Escúchala.',
+              ], 'SAMUS');
+              return;
+            }
+            if (Save.data.done.nebula && !ctx.flag('snesSamusNebula')) {
+              ctx.setFlag('snesSamusNebula');
+              await ctx.say(['* Hiciste bien. Una cría de Metroid creyó que yo era su mamá...\n* y al final me salvó de Mother Brain. Las crías no son malas.'], 'SAMUS');
+              return;
+            }
+            const lines = [
+              ['* En Zebes, unos animalitos, los ETECOONS, me enseñaron a saltar entre paredes.\n* Y un DACHORA, el shinespark. Si vuelves por ellos al final, se salvan.'],
+              ['* Esto no es Zebes. Pero huele igual.\n* A cueva. Y a algo que late.'],
+              ['* Esa frase del principio la decía una voz grabada, en inglés...\n* ¡hasta en la versión japonesa!'],
+            ];
+            await ctx.say(lines[ctx.counter('snesSamusCuenta') % lines.length], 'SAMUS');
           },
         },
       ],
