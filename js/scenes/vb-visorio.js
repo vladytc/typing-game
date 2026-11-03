@@ -182,10 +182,8 @@ class VbDodge extends Dodge {
       this.field.classList.remove('vb-warn');
       this.bullets.forEach((b) => this.layer(b));
     }
-    if (this.spawned < this.cfg.count && this.elapsed >= this.nextSpawn) {
-      this.spawn();
-      this.nextSpawn += this.gap / diff().speed; // como la lluvia normal: no más seguido de lo que alcanza un niño
-    }
+    // Como la lluvia normal: espaciado mínimo, pero sin esperar si ya no queda nada (spawnDue).
+    if (this.spawnDue()) this.spawn();
     for (const b of [...this.bullets]) {
       b.y += this.cfg.speed * diff().speed * dt * (b.r === this.front ? 1 : 0.8);
       b.el.style.transform = `translate(${b.x}px, ${b.y}px)`;
@@ -269,11 +267,9 @@ Scenes.visorio = Object.assign(Object.create(Scenes.battle), {
         this.st.ms += res.ms;
         if (this.p.hp <= 0) return;
         if (this.e.hp <= 0) { this.later(() => this.win(false), 700); return; }
-        const pages = [];
-        if (dealt === 0) pages.push('* No le hiciste daño. ¿Escribiste la capa de atrás?');
-        else if (res.completed) pages.push(`* ¡Capa de adelante completa! Hiciste ${dealt} de daño.`);
-        else pages.push(`* Se acabó el tiempo. Hiciste ${dealt} de daño.`);
-        this.say(pages, () => this.enemyTurn());
+        // Sin daño se explica por qué (la pista importa); con daño, número flotante y sigue.
+        if (dealt === 0) { this.say(['* No le hiciste daño. ¿Escribiste la capa de atrás?'], () => this.enemyTurn()); return; }
+        this.afterFight(dealt, res);
       },
     });
     this.task.start();

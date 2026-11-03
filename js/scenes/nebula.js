@@ -91,10 +91,8 @@ class SpiralDodge extends Dodge {
     const dt = Math.max(0, Math.min(50, ts - this.last)) / 1000;
     this.last = ts;
     this.elapsed += dt * 1000;
-    if (this.spawned < this.cfg.count && this.elapsed >= this.nextSpawn) {
-      this.spawn();
-      this.nextSpawn += this.gap / diff().speed; // el mismo espaciado mínimo que el Dodge normal
-    }
+    // Como la lluvia normal: espaciado mínimo, pero sin esperar si ya no queda nada (spawnDue).
+    if (this.spawnDue()) this.spawn();
     for (const b of [...this.bullets]) {
       b.r += this.cfg.speed * diff().speed / pace('nebula') * dt;
       b.a += 1.1 * dt;
@@ -300,9 +298,7 @@ Object.assign(Scenes.nebula, {
         },
         onDone: (res) => {
           if (this.e.hp <= 0) { this.later(() => this.win(false), 700); return; }
-          const msg = dealt === 0 ? '* ¡Se acabó el tiempo! No lograste atacar.'
-            : res.completed ? `* ¡Ráfaga completa a oscuras! Hiciste ${dealt} de daño.` : `* Se acabó el tiempo. Hiciste ${dealt} de daño.`;
-          this.say([msg], () => this.enemyTurn());
+          this.afterFight(dealt, res); // número flotante y directo a su turno
         },
       }, DarkTask);
     }, 1500 * diff().time);

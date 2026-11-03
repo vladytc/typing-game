@@ -268,10 +268,10 @@ addWorld({
 
   treasures: {
     flauta_poligono: { name: 'Flauta Polígono', desc: 'Regalo de Ocarín. Con la Canción de Despertar, hasta lo más dormido abre los ojos.' },
-    estrella_120: { name: 'Estrella 120', desc: 'Hay una leyenda sobre 120 estrellas. Tú tienes una. Es suficiente.' },
+    estrella_120: { name: 'Estrella 120', effect: { hp: 5 }, desc: 'Hay una leyenda sobre 120 estrellas. Tú tienes una. Es suficiente.' },
     camara_amiga: { name: 'Cámara amiga', sprite: 'camaraloca', desc: 'Ahora apunta a donde tú quieres. Milagro.' },
     pak_vibra: { name: 'Pak Vibra', sprite: 'pakito', desc: 'Hace brrr. Es todo. Es suficiente.' },
-    palanca_analogica: { name: 'Palanca analógica', desc: 'La primera palanca de Nintendo. Se desgastaba, pero valía la pena.' },
+    palanca_analogica: { name: 'Palanca analógica', effect: { time: 8 }, desc: 'La primera palanca de Nintendo. Se desgastaba, pero valía la pena.' },
     flauta_repuesto: { name: 'Flauta de repuesto', sprite: 'flauta_poligono', desc: 'Regalo de Ocarín por el concierto. Por si la otra se pierde en el pasto.' },
   },
 

@@ -80,7 +80,7 @@ const CONSOLES = [
 const TREASURES = {
   manual: { room: 'gb', name: 'Manual de instrucciones', desc: 'Nadie lo leyó nunca. Excepto tú.' },
   cartucho: { room: 'gb', name: 'Cartucho misterioso', desc: 'Sopla antes de usar. Es la regla.' },
-  pilas: { room: 'gb', name: 'Pilas AA', desc: 'Para jugar en el carro durante horas.' },
+  pilas: { room: 'gb', name: 'Pilas AA', effect: { hp: 5 }, desc: 'Para jugar en el carro durante horas.' },
   cable: { room: 'gb', name: 'Cable Link', desc: 'Sirve para jugar con un amigo. ¡Ya tienes varios!' },
   bloques: { room: 'pueblo', name: 'Cartucho de bloques', sprite: 'cartucho', desc: 'Regalo de Don Chip. Venía incluido con la Game Boy.' },
   espada: { room: 'pueblo', name: 'Espada de madera', desc: 'Es peligroso ir solo. Un clásico de 1986.' },
@@ -88,6 +88,29 @@ const TREASURES = {
   ficha: { room: 'pueblo', name: 'Ficha dorada', desc: 'Premio por llegar a 40 puntos en BLOQUES.' },
   zapper: { room: 'pueblo', name: 'Pistola de luz', desc: 'Premio de Toby. Las de verdad solo funcionaban en teles de tubo.' },
 };
+
+// Tesoros con efecto: algunos dan un bonus chiquito mientras estén en tu vitrina.
+// En el tesoro: effect: { tipo: cantidad }. Los tipos (se suman si tienes varios):
+//   hp: HP máximo extra · cookies: galletas extra en cada pelea · mercy: % más de PAZ al ACTUAR
+//   slow: % más lento caen las letras del turno enemigo · time: % más de tiempo para LUCHAR
+const TREASURE_EFFECTS = {
+  hp: (n) => `+${n} HP máximo`,
+  cookies: (n) => `+${n} galleta${n > 1 ? 's' : ''} en cada pelea`,
+  mercy: (n) => `ACTUAR da ${n}% más PAZ`,
+  slow: (n) => `lo que cae baja ${n}% más lento`,
+  time: (n) => `${n}% más tiempo para LUCHAR`,
+};
+const treasureEffectText = (id) => Object.entries((TREASURES[id] || {}).effect || {})
+  .map(([k, n]) => TREASURE_EFFECTS[k](n)).join(' · ');
+// Suma del bonus de ese tipo en los tesoros que ya tienes (0 si ninguno).
+function treasureBonus(kind) {
+  let n = 0;
+  for (const id in Save.data.treasures) {
+    const e = Save.data.treasures[id] && TREASURES[id] && TREASURES[id].effect;
+    if (e && e[kind]) n += e[kind];
+  }
+  return n;
+}
 
 // Enemigos y mundos se llenan desde js/worlds/*.js con addWorld().
 const ENEMIES = {};

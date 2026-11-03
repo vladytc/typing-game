@@ -7,7 +7,7 @@ Object.assign(Scenes.arena7, {
   enter(params) {
     document.body.className = 'theme-snes';
     Scenes.tecloides.enter.call(this, params);
-    this.items = 5 + (Save.data.konami ? 3 : 0); // 3 contra 3: unas galletas más
+    this.items = 5 + (Save.data.konami ? 3 : 0) + treasureBonus('cookies'); // 3 contra 3: unas galletas más
     const mon = $('.mon');
     mon.classList.add('arena7');
     const cv = document.createElement('canvas');

@@ -141,7 +141,8 @@ const pace = (k) => (diff().pace || {})[k] || 1;
 const scaledDmg = (n) => Math.max(1, Math.round(n * diff().dmg));
 
 const xpToNext = (level) => 15 + level * 10;
-const playerMaxHp = () => 20 + Save.data.level * 4;
+// (los tesoros con effect.hp suman un poquito, ver treasureBonus en js/data.js)
+const playerMaxHp = () => 20 + Save.data.level * 4 + treasureBonus('hp');
 
 function addXp(n) {
   const d = Save.data;

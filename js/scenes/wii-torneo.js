@@ -9,7 +9,7 @@ Scenes.wiitorneo = Object.assign(Object.create(Scenes.tecloides), {
   enter(params) {
     document.body.className = 'theme-wii';
     Scenes.tecloides.enter.call(this, params);
-    this.items = 5 + (Save.data.konami ? 3 : 0); // 3 contra 3: unas galletas más
+    this.items = 5 + (Save.data.konami ? 3 : 0) + treasureBonus('cookies'); // 3 contra 3: unas galletas más
     const mon = $('.mon');
     mon.classList.add('wiitorneo');
     const cv = document.createElement('canvas');

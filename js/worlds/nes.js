@@ -596,6 +596,7 @@ addWorld({
       bullets: { count: 9, interval: 1250, speed: 32, pool: 'qwertyuiop'.split('').concat(['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P']) },
       drop: 'ladrillo_dorado',
       keysHint: 'Fila de arriba (Q W E R T Y U I O P) + mayúscula inicial',
+      trick: 'volteo', // las palabras de LUCHAR salen de cabeza
     },
     caparacho: {
       name: 'Caparacho',
@@ -617,6 +618,7 @@ addWorld({
       ],
       bullets: { count: 9, interval: 1350, speed: 30, pool: ['Ma', 'Lu', 'To', 'Pe', 'Yo', 'Ki', 'Ro', 'Bi', 'Sa', 'Ne', 'Da', 'Li'] },
       keysHint: 'Nombres propios con mayúscula (Mario, Lima...)',
+      trick: 'patina', // las palabras que caen patinan de lado
     },
 
     // ---------- Castillo 1 ----------
@@ -753,8 +755,8 @@ addWorld({
   },
 
   treasures: {
-    superhongo: { name: 'Súper hongo', desc: 'Premio por terminar el Mundo 1-1. Te hace grande... en la vitrina.' },
-    ladrillo_dorado: { name: 'Ladrillo dorado', desc: 'Todavía tiene un signo de interrogación. Nadie lo ha golpeado.' },
+    superhongo: { name: 'Súper hongo', effect: { hp: 5 }, desc: 'Premio por terminar el Mundo 1-1. Te hace grande... bueno, un poquito.' },
+    ladrillo_dorado: { name: 'Ladrillo dorado', effect: { cookies: 1 }, desc: 'Todavía tiene un signo de interrogación. Nadie lo ha golpeado.' },
     zapper_dorada: { name: 'Pistola de luz dorada', desc: 'Regalo de Toby por atrapar 20 patos. Solo brilla en teles de tubo.' },
     guantes_verdes: { name: 'Guantes verdes', desc: 'Los guantes del Campeón Puñín. Huelen a esfuerzo... y un poquito a pies.' },
     mapa_mazmorra: { name: 'Mapa de la mazmorra', desc: 'Regalo del Anciano. Con él, todos los cuartos del Castillo 2 se ven en el minimapa.' },

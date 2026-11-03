@@ -10,18 +10,24 @@
 //   niño lento {ms:450, react:1000, err:0.07}; niño de 80 PPM {ms:150, react:400, err:0.03}.
 // Si no hay "go", abre ENEMIES[enemy].mode || 'battle' con {enemyId, back:'title'}.
 // level "auto": el nivel que tendría al llegar a ese enemigo peleando todo lo anterior.
-// Imprime una línea JSON: { enemy, result, sec, minHp, endHp, maxHp, foeHp, keys, wrong, errs, log }
+// "read": ms por letra que tarda en leer cada página de diálogo (0 = aprieta Enter cada 450 ms).
+//   Con read, salta el efecto de máquina de escribir con Enter (como el niño) y luego lee.
+// Imprime una línea JSON: { enemy, result, sec, minHp, endHp, maxHp, foeHp, keys, wrong, errs, log, tm }
+// tm: segundos y % de la pelea en cada cosa: type (hay algo que escribir), read (diálogo que
+//   espera ENTER), menu (menús), wait (todo lo demás: animaciones, lluvia sin palabras, cuentas).
+//   El adaptador puede ayudar con cat(scene) -> 'type' | 'read' | 'menu' | 'wait' | null.
 // result: 'win' | 'lose' | 'timeout' | 'crash' | el nombre de la escena final.
 //
 // El bot genérico sabe jugar TypingTask y Dodge (js/typing.js) y aprieta Enter cuando
 // no hay nada que teclear. Para escenas propias, "bot" apunta a un archivo JS que define
 //   window.__kidAdapter = { step(now, kid) -> true | ms | false, done(scene) -> 'win'|'lose'|null }
+// Adaptadores listos en tools/bots/ (dani, tetrorey, chupin, kongo).
 // kid trae: send(key), type(ch) (con errores), gap(ch), find() (TypingTask/Dodge activo), cost(ch), ms, react, err, rnd().
 // jsdom no tiene layout: window.__layout = [[selector, ancho, alto], ...] da medidas a los campos
 // (medidas reales del navegador: .dodge 600x176; bala "hola" 82x46).
 const fs = require('fs'); const path = require('path');
 const { JSDOM, VirtualConsole } = require('jsdom');
-const cfg = Object.assign({ root: process.env.GAME_ROOT || path.join(__dirname, '..'), diff: 'normal', seed: 1, maxSec: 600, ms: 330, react: 700, err: 0.04 }, JSON.parse(process.argv[2] || '{}'));
+const cfg = Object.assign({ root: process.env.GAME_ROOT || path.join(__dirname, '..'), diff: 'normal', seed: 1, maxSec: 600, ms: 330, react: 700, err: 0.04, read: 0 }, JSON.parse(process.argv[2] || '{}'));
 const ROOT = cfg.root;
 let html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const esc = (s) => s.replace(/<\/script/gi, '<\\/script');
@@ -92,9 +98,43 @@ const dom = new JSDOM(html, { runScripts: 'dangerously', url: 'http://127.0.0.1/
 const w = dom.window;
 
 const BOT = `
-window.__kid = { ms: ${cfg.ms}, react: ${cfg.react}, err: ${cfg.err}, keys: 0, wrong: 0, log: [] };
+window.__kid = { ms: ${cfg.ms}, react: ${cfg.react}, err: ${cfg.err}, read: ${cfg.read}, keys: 0, wrong: 0, log: [], tm: { type: 0, read: 0, menu: 0, wait: 0 } };
 (function () {
   const kid = window.__kid;
+  // Diálogos vivos (los que esperan ENTER), para medir lectura.
+  const live = new Set();
+  const _show = Dialog.prototype.show, _stop = Dialog.prototype.stop;
+  Dialog.prototype.show = function () { if (this.wait) live.add(this); return _show.apply(this, arguments); };
+  Dialog.prototype.stop = function () { live.delete(this); return _stop.apply(this, arguments); };
+  kid.dialog = () => { for (const d of live) { if (!d.el.isConnected) { live.delete(d); continue; } return d; } return null; };
+  const isMenu = (v) => v instanceof ListMenu;
+  kid.cat = () => {
+    const s = Game.scene; if (!s) return 'wait';
+    const A = window.__kidAdapter;
+    const c = A && A.cat ? A.cat(s, kid) : null; if (c) return c;
+    const t = kid.find();
+    if (t instanceof TypingTask) return 'type';
+    if (t instanceof Dodge) return t.bullets.length ? 'type' : 'wait';
+    for (const k of ['ui', 'sub', 'task', 'dialog']) { let v; try { v = s[k]; } catch (e) { continue; } if (v instanceof ChoicePrompt && !v.done) return 'type'; }
+    if (kid.dialog()) return 'read';
+    for (const k of ['ui', 'sub', 'endMenu']) { let v; try { v = s[k]; } catch (e) { continue; } if (isMenu(v) && v.el && v.el.isConnected) return 'menu'; }
+    if (s.phase === 'menu' || s.phase === 'submenu') return 'menu';
+    return 'wait';
+  };
+  setInterval(() => { kid.tm[kid.cat()] += 0.1; }, 100);
+  let readPage = null;
+  // Lectura: salta la máquina de escribir y lee la página a read ms por letra.
+  kid.reader = (now) => {
+    if (!kid.read) return false;
+    const d = kid.dialog(); if (!d) return false;
+    const id = d.i + '|' + d.pages.length;
+    if (readPage !== d || d.__seen !== id) {
+      readPage = d; d.__seen = id;
+      if (d.typing) kid.send('Enter');
+      return 250 + kid.read * (d.el.textContent || '').length;
+    }
+    kid.send('Enter'); return 150;
+  };
   kid.rnd = Math.random;
   kid.send = (k) => { kid.keys++; document.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true })); document.dispatchEvent(new KeyboardEvent('keyup', { key: k, bubbles: true })); };
   kid.cost = (ch) => /[áéíóúüñ¿¡]/i.test(ch || '') ? 2.6 : (ch && ch !== ch.toLowerCase()) ? 1.8 : 1;
@@ -128,6 +168,7 @@ window.__kid = { ms: ${cfg.ms}, react: ${cfg.react}, err: ${cfg.err}, keys: 0, w
       let handled = A && A.step ? A.step(now, kid) : false;
       if (typeof handled === 'number') { next = now + handled; return; }
       if (!handled) handled = kid.generic(now);
+      if (!handled) { const r = kid.reader(now); if (r) { next = now + r; return; } }
       if (!handled) { next = now + 450; kid.send('Enter'); }
     } catch (e) { kid.log.push('BOT: ' + e.message); next = now + 500; }
   }, 20);
@@ -140,6 +181,8 @@ function finish(result) {
     Object.assign(out, { result, sec: Math.round(w.__vt() / 1000), keys: w.__kid && w.__kid.keys, wrong: w.__kid && w.__kid.wrong });
     out.errs = [...new Set([...w.__errs, ...jsErr])].slice(0, 6);
     if (w.__kid && w.__kid.log.length) out.log = w.__kid.log.slice(-8);
+    if (w.__kid) { const tm = w.__kid.tm; const tot = Object.values(tm).reduce((a, b) => a + b, 0) || 1;
+      out.tm = Object.fromEntries(Object.entries(tm).map(([k, v]) => [k, [Math.round(v), Math.round((v / tot) * 100)]])); }
     if (w.__L) out.trace = w.__L;
   } catch (e) { out.result = 'crash'; out.errs = [e.message]; }
   console.log(JSON.stringify(out));

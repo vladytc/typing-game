@@ -227,9 +227,8 @@ Scenes.caparazon = nesScene({
     d.consoles.nes = true;
     Save.write();
     Quests.complete('mundo_nes');
-    pages.push('* ¡¡RESCATASTE LA NES!!\n* Ya brilla en tu vitrina.');
-    if (WORLDS.some((w) => w.requires === 'nes')) pages.push('* A lo lejos, algo retumbó en el pueblo...\n* ¿Será en la Plaza de las Tuberías?');
-    pages.push('* (Pssst... Don Chip, en el pueblo, querrá verla.)');
+    pages.push(`* ¡¡RESCATASTE LA NES!! Ya brilla en tu vitrina.${WORLDS.some((w) => w.requires === 'nes')
+      ? '\n* A lo lejos, algo retumbó en la Plaza de las Tuberías...' : ''}\n* (Pssst... Don Chip querrá verla.)`);
     this.say(pages, () => Game.go(this.back));
   },
 

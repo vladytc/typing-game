@@ -50,7 +50,7 @@ Scenes.vitrina = {
       if (c) rows.push({ title: 'CONSOLA', slots: [{ sprite: c.id, got: !!d.consoles[c.id], name: `${c.name} (${c.year})`, facts: c.facts, colors: look(c.id) }] });
     }
     const treasures = Object.entries(TREASURES).filter(([, t]) => (t.room || 'pueblo') === id)
-      .map(([tid, t]) => ({ sprite: t.sprite || tid, got: !!d.treasures[tid], name: t.name, desc: t.desc, colors: look(t.sprite || tid) }));
+      .map(([tid, t]) => ({ sprite: t.sprite || tid, got: !!d.treasures[tid], name: t.name, desc: t.desc, effect: t.effect ? treasureEffectText(tid) : '', colors: look(t.sprite || tid) }));
     for (let i = 0; i < treasures.length; i += PER_ROW) {
       rows.push({ title: i ? '' : 'TESOROS', slots: treasures.slice(i, i + PER_ROW) });
     }
@@ -100,7 +100,7 @@ Scenes.vitrina = {
     else if (s.facts) {
       const n = this.fact % s.facts.length;
       box.innerHTML = `* ${esc(upper(s.name))} <span class="dim">· DATO ${n + 1}/${s.facts.length} · ENTER: otro</span><br>* ${esc(s.facts[n])}`;
-    } else box.innerHTML = `* ${esc(upper(s.name))}<br>* ${esc(s.desc)}`;
+    } else box.innerHTML = `* ${esc(upper(s.name))}<br>* ${esc(s.desc)}${s.effect ? `<br>* Efecto: ${esc(s.effect)}` : ''}`;
   },
 
   goRoom(id) {

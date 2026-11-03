@@ -249,7 +249,8 @@ const NES_BASE = {
     return typed ? Math.round((this.tally.chars / typed) * 100) : 100;
   },
 
-  // Guarda la victoria (como las otras escenas) y devuelve las páginas del resumen.
+  // Guarda la victoria (como las otras escenas) y devuelve las páginas del resumen:
+  // un solo panel de resultados (resultsPanel en js/ui.js). spared undefined = sin titular de perdón.
   finish(spared) {
     const d = Save.data;
     const def = ENEMIES[this.id];
@@ -258,28 +259,23 @@ const NES_BASE = {
     const acc = this.calcAcc();
     const isRecord = Stats.addBattle({ enemy: this.id, wpm, acc, date: Date.now() });
     const ups = addXp(def.xp);
-    const pages = [];
-    if (spared !== undefined) {
-      pages.push(spared
-        ? `* ¡Perdonaste a ${NAME}!\n* Ahora es tu AMIGO.`
-        : `* ¡GANASTE!\n* ${NAME} huyó muy lejos.`);
-    }
-    pages.push(`* Ganaste ${def.xp} XP.\n* Velocidad: ${wpm} PPM · Precisión: ${acc}%`);
-    if (isRecord && d.stats.battles.length > 1) pages.push(`* ¡¡NUEVO RECORD DE VELOCIDAD: ${wpm} PPM!!`);
-    if (ups) {
-      pages.push(`* ¡SUBISTE A NIVEL ${d.level}!\n* Tu HP máximo ahora es ${playerMaxHp()} y pegas más fuerte.`);
-      Sfx.levelup();
-    }
+    if (ups) Sfx.levelup();
     if (spared) d.spared[this.id] = true;
+    let treasure = null;
     if (!d.done[this.id]) {
       d.done[this.id] = true;
       if (def.drop && !d.treasures[def.drop]) {
         d.treasures[def.drop] = true;
-        pages.push(`* Encontraste: ${upper(TREASURES[def.drop].name)}.\n* (Se guardó en tu vitrina.)`);
+        treasure = def.drop;
       }
     }
     Save.write();
-    return pages;
+    return [resultsPanel({
+      title: spared ? `¡Perdonaste a ${NAME}!` : '¡GANASTE!',
+      sub: spared === undefined ? NAME : spared ? 'Ahora es tu AMIGO.' : `${NAME} huyó muy lejos.`,
+      xp: def.xp, wpm, acc, record: isRecord && d.stats.battles.length > 1,
+      level: ups ? d.level : 0, treasure,
+    })];
   },
 
   // Texto flotante sobre el lienzo.

@@ -57,11 +57,8 @@ const TRAINERS = {
     name: 'Dani Turbo',
     sprite: 'dani',
     team: (starter) => [{ id: COUNTER[starter], lv: 5 }],
-    intro: [
-      '* DANI: ¿Tú también recibiste uno?\n* ¡Pues a ver si sabes usarlo!',
-      '* ¡DANI TURBO quiere pelear!',
-    ],
-    lose: ['* DANI: Te dejé ganar. Para que no llores.', '* DANI: ...Ok, ok. Fuiste rápido.\n* No se lo digas a nadie.'],
+    intro: ['* DANI: ¿Tú también recibiste uno? ¡Pues a ver si sabes usarlo!\n* ¡DANI TURBO quiere pelear!'],
+    lose: ['* DANI: Te dejé ganar. Para que no llores.\n* ...Ok, ok. Fuiste rápido. No se lo digas a nadie.'],
     win: ['* DANI: ¡Ja! ¿Eso fue un intento?\n* Yo tecleo más rápido dormido.'],
     retry: ['* PROFESORA LETRA: ¡Tranquilo! Ya curé a tu Tecloide.', '* DANI: Te doy otra oportunidad porque soy generoso.'],
     reward: 'medalla',
