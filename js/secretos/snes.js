@@ -340,7 +340,7 @@ async function snesEspecialReto(ctx) {
     looks: {
       ...looks,
       cielo: '* Puro espacio y estrellas.\n* Mejor no te asomes mucho.',
-      estrella: '* La estrella de regreso a las Colinas Dinosaurio.',
+      estrella: '* La estrella de regreso a Dinosaur Land.',
     },
     bitTips: [
       '* ¡Estamos caminando en el espacio!\n* ...Bueno, en bloques amarillos. Pero en el espacio.',
