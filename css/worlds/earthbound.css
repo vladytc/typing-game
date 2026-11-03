@@ -1,0 +1,232 @@
+/* ==========================================================================
+   ZONA SECRETA — EarthBound (js/secretos/earthbound.js).
+   Onett en tonos pastel, Moonside de neón sobre negro y la Cueva del Pasado rojiza.
+   Las batallas: fondo psicodélico (canvas .eb-bg), ventanas negras de orilla blanca redondeada
+   y la cajita de HP con el odómetro que rueda.
+   ========================================================================== */
+
+.theme-eb {
+  --c0: #28202c;
+  --c1: #98582c;
+  --c2: #98d070;
+  --c3: #f8f0d8;
+}
+.theme-moonside {
+  --c0: #ffffff;
+  --c1: #ff3cf0;
+  --c2: #3cfff0;
+  --c3: #000000;
+}
+.theme-pasado {
+  --c0: #f8e0d0;
+  --c1: #e83838;
+  --c2: #c88850;
+  --c3: #200810;
+}
+
+/* Ventanas de EarthBound: negras con orilla blanca y esquinas redondas. */
+.theme-eb .box, .theme-eb .tbox,
+.theme-moonside .box, .theme-moonside .tbox,
+.theme-pasado .box, .theme-pasado .tbox {
+  --c0: #ffffff;
+  --c1: #b8b8c8;
+  --c2: #f8d838;
+  --c3: #141018;
+  color: #ffffff;
+  background: #141018;
+  border: 4px solid #f8f8f8;
+  border-radius: 10px;
+  box-shadow: 0 0 0 3px #28202c, inset 0 0 0 2px #686878;
+}
+.theme-moonside .box, .theme-moonside .tbox {
+  border-color: #ff3cf0;
+  box-shadow: 0 0 10px #ff3cf0, inset 0 0 0 2px #3cfff0;
+}
+.theme-pasado .box, .theme-pasado .tbox { border-color: #e8c0b0; }
+.theme-eb .box .tt-ready, .theme-moonside .box .tt-ready, .theme-pasado .box .tt-ready { background: transparent; }
+
+/* Moonside: todo brilla. */
+.theme-moonside .ent canvas { filter: drop-shadow(0 0 3px #ff3cf0); }
+.theme-moonside .area-name { color: #3cfff0; text-shadow: 0 0 6px #ff3cf0; }
+
+/* Mr. Saturn habla con su letra especial (un estilo propio, chueco y redondito). */
+.tbox.eb-saturn-font .tb-text {
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive;
+  font-size: 15px;
+  letter-spacing: 1px;
+  line-height: 1.7;
+  display: inline-block;
+  transform: rotate(-1.5deg);
+  animation: ebWobbleText 1.6s ease-in-out infinite;
+}
+@keyframes ebWobbleText { 50% { transform: rotate(1deg) translateY(1px); } }
+
+/* El humo del meteorito. */
+.ent.eb-humo::before, .ent.eb-humo::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(200, 200, 210, 0.7);
+  animation: ebHumo 2.4s ease-out infinite;
+  pointer-events: none;
+}
+.ent.eb-humo::after { left: 18px; animation-delay: 1.2s; }
+@keyframes ebHumo {
+  0% { transform: translate(0, 0) scale(0.6); opacity: 0.9; }
+  100% { transform: translate(6px, -34px) scale(1.8); opacity: 0; }
+}
+
+/* El fotógrafo baja en su nube y se va. */
+.eb-fotografo { z-index: 40; animation: ebBaja 0.6s ease-out; }
+.eb-fotografo.eb-fotoadios { transition: transform 0.6s ease-in, opacity 0.6s; opacity: 0; }
+@keyframes ebBaja { from { margin-top: -200px; opacity: 0; } to { margin-top: 0; opacity: 1; } }
+.town.eb-flash::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 70;
+  background: #ffffff;
+  pointer-events: none;
+  animation: ebFlash 0.5s ease-out forwards;
+}
+@keyframes ebFlash { from { opacity: 1; } to { opacity: 0; } }
+
+/* ---------- Batalla ---------- */
+.eb-battle .eb-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  image-rendering: pixelated;
+  background: #3858a0;
+}
+.eb-battle > :not(.eb-bg) { z-index: 1; }
+.eb-battle .enemy-info,
+.eb-battle .bbox,
+.eb-battle .cmds {
+  --c0: #ffffff;
+  --c1: #b8b8c8;
+  --c2: #f8d838;
+  --c3: #141018;
+  color: #ffffff;
+  background: #141018;
+  border: 3px solid #f8f8f8;
+  border-radius: 8px;
+  box-shadow: 0 0 0 2px #28202c;
+}
+.eb-battle .enemy-info { padding: 6px 10px; top: 8px; }
+.eb-battle .bbox { padding: 6px; }
+.eb-battle .cmds { padding: 4px; }
+.eb-battle .cmd { border-color: transparent; color: #b8b8c8; }
+.eb-battle .cmd.sel { border-color: #f8f8f8; background: #3858a0; color: #ffffff; }
+.eb-battle .bubble { --c0: #ffffff; --c3: #141018; color: #ffffff; background: #141018; border-color: #f8f8f8; border-radius: 8px; }
+.eb-battle .float { color: #ffffff; text-shadow: 2px 2px 0 #28202c, -1px -1px 0 #28202c; }
+.eb-battle .float.eb-smash { font-size: 22px; color: #f8d838; letter-spacing: 1px; }
+.eb-battle .pinfo { display: flex; gap: 6px; align-items: flex-end; }
+.eb-battle .pinfo > div:not(.eb-hpbox) { display: none; }
+
+/* La cajita de HP con el odómetro. */
+.eb-hpbox {
+  min-width: 92px;
+  padding: 4px 8px 6px;
+  color: #28202c;
+  background: #f8f0d8;
+  border: 3px solid #28202c;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 2px #f8f8f8;
+  text-align: left;
+}
+.eb-hpname { font-size: 9px; margin-bottom: 4px; }
+.eb-hprow { display: flex; align-items: center; gap: 6px; font-size: 8px; }
+.eb-odo { display: inline-flex; gap: 2px; }
+.eb-dig {
+  display: inline-block;
+  width: 13px;
+  height: 16px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #28202c;
+  border-radius: 2px;
+}
+.eb-dig i { display: block; font-style: normal; }
+.eb-dig b { display: block; height: 16px; line-height: 16px; font-size: 10px; font-weight: normal; text-align: center; }
+.eb-hpbox.mortal { animation: ebMortal 0.4s steps(1) infinite; }
+@keyframes ebMortal { 50% { background: #e83838; color: #ffffff; } }
+.eb-nessbox { min-width: 74px; }
+.eb-rockin { font-size: 7px; color: #e83838; }
+
+/* Moonside: las palabras al revés se marcan de derecha a izquierda. */
+.eb-alreves { direction: ltr; }
+.eb-battle .eb-alreves .c.next { outline: 2px solid #ff3cf0; }
+
+/* Lluvias que tiemblan y letras con falla (Giygas). */
+.eb-wobble .bullet { color: #ffffff; background: #141018; border-color: #f8f8f8; }
+.bullet.eb-glitch { animation: ebGlitch 0.3s steps(2) infinite; }
+@keyframes ebGlitch { 50% { text-shadow: 3px 0 #ff3cf0, -3px 0 #3cfff0; filter: hue-rotate(90deg); } }
+
+/* Giygas: la máquina, y después nada más que el remolino rojo. */
+.eb-giygas .esprite { transition: opacity 1.2s, transform 1.2s; }
+.eb-giygas .esprite.eb-gone { opacity: 0; transform: scale(2.5); }
+.eb-stage2 .enemy-info { border-color: #e83838; }
+.eb-stage2 .ehp i { background: #e83838; }
+.eb-stage2 .eb-bg { animation: ebLatido 2.2s ease-in-out infinite; }
+@keyframes ebLatido { 50% { filter: brightness(1.25) saturate(1.3); } }
+.eb-whiteout::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: #ffffff;
+  pointer-events: none;
+  animation: ebBlanco 2.5s ease-in forwards;
+}
+.eb-whiteout .bbox { z-index: 6; }
+@keyframes ebBlanco { from { opacity: 0; } to { opacity: 0.85; } }
+
+/* Tu nombre. */
+.eb-name { padding: 6px 8px; }
+.eb-name-q { margin: 14px 0 10px; font-size: 13px; color: #f8d838; }
+.eb-name-field {
+  display: inline-block;
+  min-width: 260px;
+  padding: 8px 10px;
+  font-size: 18px;
+  background: #f8f0d8;
+  color: #28202c;
+  border: 3px solid #f8f8f8;
+  border-radius: 6px;
+}
+.eb-cursor { animation: blink 0.8s steps(1) infinite; }
+.eb-name-help { margin-top: 12px; font-size: 8px; color: #b8b8c8; }
+
+/* El álbum de fotos. */
+.eb-album {
+  position: absolute;
+  inset: 0;
+  z-index: 90;
+  padding: 20px;
+  color: #ffffff;
+  background: #141018;
+  text-align: center;
+}
+.eb-album-t { font-size: 12px; margin-bottom: 16px; color: #f8d838; }
+.eb-album-g { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
+.eb-foto {
+  width: 178px;
+  padding: 10px 6px 6px;
+  border: 6px solid #f8f8f8;
+  border-bottom-width: 20px;
+  box-shadow: 3px 3px 0 #686878;
+  position: relative;
+}
+.eb-foto:nth-child(odd) { transform: rotate(-2deg); }
+.eb-foto:nth-child(even) { transform: rotate(2deg); }
+.eb-foto-p { display: flex; justify-content: center; align-items: flex-end; flex-wrap: wrap; min-height: 64px; }
+.eb-foto-n { position: absolute; left: 0; right: 0; bottom: -17px; font-size: 7px; color: #28202c; }
+.eb-foto.falta { filter: grayscale(1) brightness(0.4); }
+.eb-album-k { margin-top: 22px; font-size: 9px; color: #b8b8c8; }

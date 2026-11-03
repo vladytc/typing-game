@@ -17,6 +17,7 @@ const SECRETOS = {
   nes_zelda: { world: 'nes', name: 'La Segunda Misión', sprite: 'zelda2q', curio: 'secreto_nes_zelda' },
   nes_nube: { world: 'nes', name: 'Nube y arbusto', sprite: 'nubearbusto', curio: 'secreto_nes_nube' },
   snes_otono: { world: 'snes', name: 'La Zona Especial', sprite: 'mascara_mario', curio: 'secreto_snes_otono' },
+  snes_earthbound: { world: 'snes', name: 'El meteorito de Onett', sprite: 'eb_saturn', curio: 'secreto_snes_earthbound' },
   n64_yoshi: { world: 'n64', name: 'Yoshi en el techo', sprite: 'yoshi64', curio: 'secreto_n64_yoshi' },
   n64_huevos: { world: 'gc', name: 'Stop \'n\' Swop', sprite: 'huevo_swop', curio: 'secreto_n64_huevos' },
   gc_nes: { world: 'gc', name: 'Una NES en tu casa', sprite: 'nes_mueble', curio: 'secreto_gc_nes' },
