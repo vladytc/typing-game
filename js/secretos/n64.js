@@ -274,7 +274,7 @@ function n64SecretosListos() {
     m.npcs.push(n64Swop(id, x, y));
   });
   // Pistas suaves de Bit (no dicen qué ni dónde exactamente).
-  MAPS['n64-playa'].bitTips.push('* ¿Y si el oso de la islita escondió algo en una esquina de la playa?\n* En su juego había huevos raros que nadie sabía para qué servían.');
+  MAPS['n64-playa'].bitTips.push('* ¿Y si Banjo y Kazooie escondieron algo en una esquina de la playa?\n* En su juego había huevos raros que nadie sabía para qué servían.');
   MAPS['n64-circuito'].bitTips.push('* Allá en lo más hondo de la niebla brilló algo azul...\n* ¿O fue mi imaginación? Desde aquí no termina de cargar.');
   MAPS['n64-estadio'].bitTips.push('* En la meseta del cofre se siente un frío raro.\n* ¿Hielo? ¿En una isla flotante?');
 
