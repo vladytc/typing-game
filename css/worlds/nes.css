@@ -90,3 +90,72 @@
 .nn-name { font-size: 20px; letter-spacing: 4px; margin: 12px 0 8px; }
 .nn-keys { font-size: 8px; opacity: 0.7; }
 .m1-hud { display: flex; gap: 40px; }
+
+/* ---------- Marco de la consola: tele de tubo de los 80 ----------
+   Mueble de madera (veta con degradados), pantalla de tubo con esquinas redondas y,
+   a la derecha, un tablero con perillas de CANAL y VOL, el foquito rojo de encendido
+   y la bocina. Lo de adentro (#game) mide y queda igual: solo crece el mueble a la derecha. */
+.theme-nes { --tubo: #141210; --nes-tablero: #2b2420; }
+.theme-nes #device {
+  padding: 26px 118px 18px 26px;
+  border-radius: 28px;
+  background:
+    radial-gradient(ellipse 40px 9px at 82% 88%, rgba(40, 18, 4, 0.35), transparent 70%),
+    radial-gradient(ellipse 60px 12px at 12% 6%, rgba(40, 18, 4, 0.30), transparent 70%),
+    repeating-linear-gradient(91deg, transparent 0 6px, rgba(0, 0, 0, 0.09) 6px 8px, rgba(255, 255, 255, 0.04) 8px 13px),
+    repeating-linear-gradient(89deg, transparent 0 21px, rgba(50, 22, 6, 0.28) 21px 24px, transparent 24px 37px),
+    linear-gradient(180deg, #93613a, #774a28 55%, #5f3a1e);
+  box-shadow: inset 0 2px 0 rgba(255, 220, 170, 0.25), inset 0 -8px 0 rgba(0, 0, 0, 0.3), 0 20px 50px rgba(0, 0, 0, 0.55);
+}
+.theme-nes #screen-frame {
+  background: var(--tubo);
+  border-radius: 40px / 32px;
+  box-shadow: 0 0 0 5px #3a2412, 0 0 0 7px #a87545, inset 0 0 26px #000;
+}
+/* El tablero de la derecha, con la bocina (rayitas) abajo. */
+.theme-nes #device::before {
+  content: '';
+  position: absolute;
+  top: 26px;
+  right: 18px;
+  width: 84px;
+  height: 520px;
+  border-radius: 14px;
+  background:
+    repeating-linear-gradient(180deg, #0d0b0a 0 3px, transparent 3px 8px) center bottom 18px / 56px 172px no-repeat,
+    linear-gradient(180deg, #342c27, var(--nes-tablero) 40%, #221c19);
+  box-shadow: inset 0 0 0 2px #1a1512, inset 0 3px 0 rgba(255, 255, 255, 0.07);
+}
+/* Perillas de CANAL (grande) y VOL (chica): rayitas en círculo, una tapita y la marca blanca. */
+.theme-nes #device::after,
+.theme-nes #device-label::before {
+  position: absolute;
+  right: 32px;
+  width: 56px;
+  padding-top: 60px;
+  text-align: center;
+  font-size: 6px;
+  font-style: normal;
+  letter-spacing: 1px;
+  color: #c9b79c;
+  background:
+    linear-gradient(#f3e6cf, #f3e6cf) center 4px / 3px 14px no-repeat,
+    radial-gradient(circle closest-side, #4a4440 0 10px, transparent 11px) center top / 56px 56px no-repeat,
+    radial-gradient(circle closest-side, transparent 0 calc(100% - 1px), var(--nes-tablero) 100%) center top / 56px 56px no-repeat,
+    repeating-conic-gradient(#c8c1b4 0 7deg, #8a8378 7deg 14deg) center top / 56px 56px no-repeat;
+}
+.theme-nes #device::after { content: 'CANAL'; top: 48px; }
+.theme-nes #device-label::before { content: 'VOL'; top: 142px; transform: scale(0.8); transform-origin: center top; }
+/* El foquito rojo de encendido, en el tablero (se acomoda desde la orilla del tubo). */
+.theme-nes #led {
+  left: auto;
+  right: -62px;
+  top: 224px;
+  width: 8px;
+  height: 8px;
+  background: #ff3b30;
+  box-shadow: 0 0 8px #ff3b30, 0 0 0 3px #1a1512;
+}
+.theme-nes #device-label { color: #f3e1bf; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4); }
+.theme-nes #device-label span { display: none; }
+.theme-nes #device-label::after { content: ' · CANAL 3 · NO TE SIENTES TAN CERCA ·'; color: #d8bf98; }

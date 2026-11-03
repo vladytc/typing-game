@@ -33,11 +33,63 @@
   --w-ink: #FAFAFA;
 }
 
-/* La consola de afuera también se pone blanca, como la de verdad. */
-.theme-wii #device, .theme-cometa #device { background: #eef1f5; box-shadow: inset 0 0 0 2px #d4d9e0; }
-.theme-wii #device-label, .theme-cometa #device-label { color: #8a94a3; }
-.theme-wii #device-label span, .theme-cometa #device-label span { color: #b0b8c4; }
-.theme-wii #screen-frame, .theme-cometa #screen-frame { background: #1c2230; }
+/* ---------- Marco de la consola: pantalla plana blanca, panorámica ----------
+   Orilla blanca delgadita y brillosa; la pantalla negra es 16:9 y el juego (4:3, mismo
+   tamaño y centrado) queda con franjas negras a los lados, como en una tele de verdad.
+   Arriba, la barra del sensor: barrita negra con sus puntitos en cada punta. Foquito verde
+   de encendido abajo a la derecha. (Ciudad Sensor y el Cometa.) */
+.theme-wii #device, .theme-cometa #device {
+  padding: 26px 16px 14px;
+  border-radius: 12px;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.9), transparent 40%),
+    linear-gradient(180deg, #f7f8fa, #e6e9ee);
+  box-shadow: inset 0 0 0 2px #d4d9e0, inset 0 -4px 0 #cdd3db, 0 20px 50px rgba(0, 0, 0, 0.45);
+}
+.theme-wii #screen-frame, .theme-cometa #screen-frame {
+  padding: 20px 142px; /* 924 × 520: panorámica; #game sigue en 640 × 480 al centro */
+  border-radius: 3px;
+  background: linear-gradient(135deg, #15181e, #0b0d11 60%);
+  box-shadow: 0 0 0 1px #b8c0cb;
+}
+/* Brillo de vidrio plano: una diagonal muy suave sobre todo el panel (no recibe clics). */
+.theme-wii #screen-frame::after, .theme-cometa #screen-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 199;
+  background: linear-gradient(120deg, transparent 55%, rgba(255, 255, 255, 0.04) 62%, transparent 70%);
+}
+/* La barra del sensor: los puntitos van en las puntas y el centro se tapa con negro. */
+.theme-wii #device::before, .theme-cometa #device::before {
+  content: '';
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  width: 220px;
+  height: 11px;
+  margin-left: -110px;
+  border-radius: 6px;
+  background:
+    linear-gradient(90deg, transparent 0 46px, #16181c 46px 174px, transparent 174px),
+    radial-gradient(circle, #5a3a44 0 1.3px, transparent 1.8px) 6px center / 7px 7px repeat-x,
+    linear-gradient(180deg, #2a2d33, #16181c);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
+}
+.theme-wii #led, .theme-cometa #led {
+  left: auto;
+  right: 0;
+  top: auto;
+  bottom: -20px;
+  width: 6px;
+  height: 6px;
+  background: #3ddc6a;
+  box-shadow: 0 0 6px #3ddc6a;
+}
+.theme-wii #device-label, .theme-cometa #device-label { margin-top: 8px; text-align: center; color: #8a94a3; font-size: 10px; }
+.theme-wii #device-label span, .theme-cometa #device-label span { display: none; }
+.theme-wii #device-label::after, .theme-cometa #device-label::after { content: ' · ¡PONTE LA CORREA! ·'; color: #b0b8c4; }
 
 /* Ventanas redondas y limpias, como el menú. */
 .theme-wii .box {

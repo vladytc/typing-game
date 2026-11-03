@@ -262,3 +262,53 @@
 .locutor b { color: var(--n64-yellow); font-weight: normal; }
 .locutor.pop { animation: n64loc 0.4s ease-out; }
 @keyframes n64loc { from { transform: translateX(-30px); opacity: 0.2; } to { transform: none; opacity: 1; } }
+
+/* ---------- Marco de la consola: tele de los 90, negra ----------
+   Plástico gris muy oscuro, tubo con esquinas redondas, cuatro puntitos de color del logo
+   (rojo, amarillo, verde, azul) abajo a la derecha y un foquito rojo chiquito como el de la
+   consola. También para el pueblo en era N64. */
+.theme-n64, .theme-hub-n64 { --tubo: #0b0b0d; }
+.theme-n64 #device, .theme-hub-n64 #device {
+  padding: 24px 24px 20px;
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 30%),
+    linear-gradient(180deg, #34343a, #26262b 60%, #1c1c20);
+  box-shadow: inset 0 2px 0 #46464e, inset 0 -6px 0 #121215, 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+.theme-n64 #screen-frame, .theme-hub-n64 #screen-frame {
+  background: var(--tubo);
+  border-radius: 34px / 28px;
+  box-shadow: 0 0 0 4px #121215, 0 0 0 6px #3e3e46, inset 0 0 26px #000;
+}
+/* Los cuatro puntitos: uno pintado y tres con box-shadow. */
+.theme-n64 #device::after, .theme-hub-n64 #device::after {
+  content: '';
+  position: absolute;
+  right: 80px;
+  bottom: 18px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e53935;
+  box-shadow: 13px 0 0 #fdd835, 26px 0 0 #43a047, 39px 0 0 #1e88e5;
+}
+/* Foquito rojo de encendido, a la derecha de los puntitos (el #led del marco no se usa). */
+.theme-n64 #led, .theme-hub-n64 #led { display: none; }
+.theme-n64 #device-label::before, .theme-hub-n64 #device-label::before {
+  content: '';
+  position: absolute;
+  right: 30px;
+  bottom: 19px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ff3b30;
+  box-shadow: 0 0 6px #ff3b30;
+}
+.theme-n64 #device-label, .theme-hub-n64 #device-label { color: #a7a7b3; }
+.theme-n64 #device-label span, .theme-hub-n64 #device-label span { display: none; }
+.theme-n64 #device-label::after, .theme-hub-n64 #device-label::after {
+  content: ' · CUATRO CONTROLES, CERO PLEITOS ·';
+  color: #74747f;
+}

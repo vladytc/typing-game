@@ -12,6 +12,8 @@ function fit() {
 }
 window.addEventListener('resize', fit);
 fit();
+// Cada era trae su propio marco de consola (más ancho, más alto): al cambiar la clase del body, se vuelve a medir.
+new MutationObserver(fit).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
 // Teclas que el navegador usaría para otra cosa (scroll, buscar, volver atrás).
 const BLOCKED = new Set([' ', 'Backspace', 'Tab', "'", '/', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']);

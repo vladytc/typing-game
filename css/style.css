@@ -57,6 +57,7 @@ body {
   padding: 22px 22px 16px;
   box-shadow: inset 0 -6px 0 #2a2b33, 0 20px 50px rgba(0, 0, 0, 0.5);
   transform-origin: center;
+  position: relative; /* para las perillas, botones y foquitos de cada era (::before / ::after) */
 }
 
 #screen-frame {
@@ -85,6 +86,35 @@ body {
   letter-spacing: 1px;
 }
 #device-label span { font-size: 8px; color: #6d6e7c; }
+/* Las eras cambian el letrero de abajo: esconden el <span> y ponen su texto en ::after. */
+#device-label::after { font-size: 8px; }
+
+/* ---------- Vidrio de tele de tubo (NES, SNES, N64, GameCube) ----------
+   Capa encima de #game que NO cambia su tamaño ni lugar ni recibe clics: un brillo de vidrio
+   curvo arriba a la izquierda, las orillas un poquito oscuras y las esquinas redondeadas
+   (solo 8 px, pintadas con el color del tubo, --tubo, que pone cada era). */
+.theme-nes #screen-frame::after,
+.theme-snes #screen-frame::after, .theme-hub-snes #screen-frame::after, .theme-nebula #screen-frame::after,
+.theme-eb #screen-frame::after, .theme-moonside #screen-frame::after, .theme-pasado #screen-frame::after,
+.theme-n64 #screen-frame::after, .theme-hub-n64 #screen-frame::after,
+.theme-gc #screen-frame::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 44px;
+  width: 640px;
+  height: 480px;
+  pointer-events: none;
+  z-index: 199; /* arriba de todo lo del juego, abajo de los avisos (.toast) */
+  background:
+    radial-gradient(circle at 100% 100%, transparent 7.5px, var(--tubo, #111) 8px) left top / 8px 8px no-repeat,
+    radial-gradient(circle at 0 100%, transparent 7.5px, var(--tubo, #111) 8px) right top / 8px 8px no-repeat,
+    radial-gradient(circle at 100% 0, transparent 7.5px, var(--tubo, #111) 8px) left bottom / 8px 8px no-repeat,
+    radial-gradient(circle at 0 0, transparent 7.5px, var(--tubo, #111) 8px) right bottom / 8px 8px no-repeat,
+    radial-gradient(ellipse 60% 38% at 26% 10%, rgba(255, 255, 255, 0.10), transparent 70%),
+    linear-gradient(115deg, transparent 62%, rgba(255, 255, 255, 0.035) 70%, transparent 78%);
+  box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.32);
+}
 
 #game {
   position: relative;
