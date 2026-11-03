@@ -4,7 +4,7 @@
 // hace que se vean con polígonos. Sin three.js se ven en 2D con la paleta de la N64.
 //
 //   PLAYA POLIGONO (28×20)                    CIRCUITO ISLA + BOSQUE DE LA NIEBLA (30×22)
-//   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ (oso)        TTTTTTTTTTTTTTTTTTTTTTTTTTT:TT  -> estadio
+//   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ (islita)      TTTTTTTTTTTTTTTTTTTTTTTTTTT:TT  -> estadio
 //   ~~sss~~~~~~~~~~ss#^^^#s~~~~               T bosque A  [Texturín] bosque B [Niebla] C  T
 //   ~sss:::::s====Trianguloso^^ meseta        T  (niebla)    ::::     (cofre)   ::::      T
 //   ~sps:sss~~~~~~ss##/##sss~~                Tooooooooooo[Piloto]oooooooooo~~~~~~~~~~~~~~~
@@ -210,7 +210,7 @@ const N64_LOOKS = {
   tele: '* Una tele de tubo con una consola gris enfrente.\n* "Cuatro puertos. Cuatro amigos. Cero cables largos."',
   sillas: '* Cuatro sillas frente a la tele.\n* Una para cada control. Nadie quiere el control que se atora.',
   vacio: '* Abajo solo hay nubes... y más abajo, más nubes.\n* Mejor no te asomes tanto.',
-  castillo: '* El Castillo de los Cuadros.\n* Sus ventanas están pintadas. Literalmente.',
+  castillo: '* El castillo de la princesa Peach. Marco le dice "de los Cuadros".\n* Sus ventanas están pintadas. Literalmente.',
   torre: '* Una torre con techo rojo puntiagudo.\n* Alguien vive arriba. O algo.',
   puertaCastillo: '* Una puerta enorme de madera.\n* Del otro lado se oye un marco crujir... y una pausa muy larga.',
   pilar: '* Un pilar blanco del templo.\n* Si lo tocas suena un "do". Bueno, casi.',
@@ -239,7 +239,7 @@ const N64_CASTILLO_MAP = [
   'T.Stttttttt..T....:::......X.T',
   'T..Ittttttt:::::::...........T',
   '::::ttttttt..T..........X....T',
-  'T..IttttttI..T..X..........*.T',
+  'T..IttttttI..T..X..........S.T',
   'T..tttttttt..T.,,,,,,,,,,,,,.T',
   'T..ItItItIt..T.,,,,,,,,,,,,,.T',
   'T............T.,,,,,X,,,,,,,.T',
@@ -309,16 +309,15 @@ addMaps('n64', {
       wild: ['trianguloso', 'cactin'],
       signs: {
         '3,13': ['* ISLA POLIGONO · PLAYA\n* (Tubería al Pueblo Vitrina, al sur.)', '* La Nintendo 64 salió en Japón el 23 de junio de 1996.', `* ${N64_FACTS[1]}`],
-        '18,5': ['* MIRADOR DE LA PLAYA\n* Desde aquí arriba se ve toda la isla. Bueno, hasta la niebla.', `* ${N64_FACTS[0]}`],
+        '18,5': ['* MONTAÑA ESPIRAL (versión playa)\n* Desde aquí arriba se ve toda la isla. Bueno, hasta la niebla.', `* ${N64_FACTS[0]}`],
       },
       looks: N64_LOOKS,
       bitTips: [
         '* ¡Puedo ver ATRAS de las palmeras! En el Valle eso era imposible.',
         '* Dicen que esta consola seguía usando cartuchos cuando todos ya usaban CD.\n* Cargaba rapidísimo.',
         '* ¿Ves esa meseta? En 3D hay ARRIBA y ABAJO. ¡Sube por el escalón!',
-        '* Allá en la islita pasa un oso con un pájaro en la mochila.\n* ...No le digas que lo vi. Se ve ocupado.',
+        '* Ese oso con un pájaro en la mochila... ¡son BANJO y KAZOOIE!\n* Viven al pie de la meseta. Ellos le dicen Montaña Espiral.',
       ],
-      decor3d: [{ model: 'bear', path: [[24, 2], [26, 2]], speed: 0.8, scale: 0.7 }],
       npcs: [
         {
           id: 'pingui', sprite: 'pingui', x: 6, y: 8,
@@ -343,7 +342,7 @@ addMaps('n64', {
     },
 
     'n64-circuito': {
-      name: 'Circuito Isla',
+      name: 'Circuito Isla y Bosque Kokiri',
       render: '3d',
       view3d: { edge: 'sea', missing: true, fog: [14, 50], fogColor: '#D5DEE8' },
       music: 'n64kart',
@@ -352,8 +351,8 @@ addMaps('n64', {
         'TTTTTTTTTTTTTTTTTTTTTTTTTTT:TT',
         'TnnnnnnnnnnnnTnnnnnTnnnT...:.T',
         'TnTnnnTnnnnnnTnTnnnnnnnTT..:*T',
-        'Tn,,nnnnnTnnnTnnnnTnnTnT...:.T',
-        'Tn,,.......n::::nnnnnnnT...:.T',
+        'Tn,,nnDDDTnnnTnnnnTnnTnT...:.T',
+        'Tn,,..DDD..n::::nnnnnnnT...:.T',
         'Tnnn.......:nTnn:nnnTnnTT..:.T',
         'TnnT..T....:nTTnn:nnnnnT..:.*T',
         'Tnnn.......:nTnnnn:nnnnT.:...T',
@@ -376,6 +375,8 @@ addMaps('n64', {
         ...N64_TILES,
         T: { s: 'tree', solid: true, look: 'arbol' },
         '~': { s: 'water', solid: true, look: 'agua' },
+        // Raíces del Gran Árbol Deku (el árbol lo dibuja js/worlds/n64-nintendo.js).
+        D: n64T('grass', { a: '#a8c8b0', b: '#c9d6e3', c: '#6a9a78', d: '#4a6a58' }, { solid: true, d3: 'fog', look: 'deku' }),
       },
       spawns: { start: [1, 16, 'right'] },
       exits: {
@@ -393,7 +394,7 @@ addMaps('n64', {
       wild: ['trianguloso', 'cactin', 'texturin', 'niebla'],
       signs: {
         '11,14': ['* CIRCUITO ISLA\n* Pista de 3 vueltas. ¡Cuidado con los plátanos!', '* Mario Kart 64 (1996) dejaba correr a 4 personas al mismo tiempo, con la pantalla partida en 4.', `* ${N64_FACTS[4]}`],
-        '10,9': ['* BOSQUE DE LA NIEBLA\n* Lo que está lejos... todavía no carga.', '* Muchos juegos de N64 usaban niebla para tapar lo que estaba lejos.\n* Así la consola dibujaba menos y el juego iba más fluido.'],
+        '10,9': ['* BOSQUE KOKIRI (aquí)  ·  BOSQUE PERDIDO (en la niebla)\n* Lo que está lejos... todavía no carga.', '* Muchos juegos de N64 usaban niebla para tapar lo que estaba lejos.\n* Así la consola dibujaba menos y el juego iba más fluido.'],
       },
       looks: N64_LOOKS,
       bitTips: [
@@ -485,10 +486,10 @@ addMaps('n64', {
     },
 
     'n64-castillo': {
-      name: 'Castillo de los Cuadros',
+      name: 'Castillo de Peach',
       render: '3d',
       view3d: { edge: 'forest', missing: true, fog: [22, 70] },
-      intro: ['* Escucha... música. Viene del templo de los pilares.', '* Y allá, detrás del foso... ¡el CASTILLO DE LOS CUADROS!\n* Ahí debe estar la Nintendo 64.'],
+      intro: ['* Escucha... música. Viene del templo de los pilares.', '* Y allá, detrás del foso... ¡el CASTILLO DE PEACH!\n* Marco lo llenó de cuadros. Ahí debe estar la Nintendo 64.'],
       music: 'n64castle',
       ground: 'grass',
       map: N64_CASTILLO_MAP,
@@ -509,7 +510,9 @@ addMaps('n64', {
       wild: ['texturin', 'niebla', 'camaraloca', 'pakito'],
       signs: {
         '2,13': ['* TEMPLO DE LA MELODIA\n* (Se ruega tocar bonito.)', '* En Ocarina of Time (1998) la ocarina se tocaba con 5 botones del control.\n* ¡Cada botón era una nota!'],
-        '24,12': ['* CASTILLO DE LOS CUADROS', '* Este castillo tiene menos cuadros que el original.\n* Pero los nuestros hablan.', `* ${N64_FACTS[2]}`],
+        '24,12': ['* CASTILLO DE PEACH\n* (Abajo, con plumón: "de los Cuadros". Firma: Marco.)', '* Este castillo tiene menos cuadros que el original.\n* Pero los nuestros hablan.', `* ${N64_FACTS[2]}`],
+        // El mito de la placa del patio de Super Mario 64 (se cuenta como mito).
+        '27,16': ['* Una placa al pie de una estrella. Las letras están MUY borrosas.', '* Hay quien jura que dice "L is real 2401" (¡Luigi existe!).\n* Lo más probable: "Eternal Star". Nintendo nunca lo aclaró. Es un mito.'],
       },
       looks: N64_LOOKS,
       bitTips: [
