@@ -564,8 +564,8 @@ addWorld({
     caja_prototipo: { name: 'Caja del prototipo', desc: 'Caja de cartón, sin dibujo, sin nombre. Pesa mucho para lo que es.' },
     buzon_rojo: { name: 'Buzón rojo', desc: 'Regalo de la Alcaldesa Bellota. Llegan cartas de vecinos que todavía no conoces.' },
     figurita_dorada: { name: 'Figurita dorada', desc: 'Un guante dorado chiquito. Lo dejaron las cuatro sombras al despedirse.' },
-    silbato_brotes: { name: 'Silbato de brotes', desc: 'Suena "¡fiiu!" y aparecen tres hojitas. Regalo del Capitán Brotes.' },
-    disco_mini: { name: 'Disco mini', sprite: 'disquin', desc: 'Ocho centímetros de aventura.' },
+    silbato_brotes: { name: 'Silbato de brotes', effect: { mercy: 15 }, desc: 'Suena "¡fiiu!" y aparecen tres hojitas. Regalo del Capitán Brotes.' },
+    disco_mini: { name: 'Disco mini', effect: { slow: 5 }, sprite: 'disquin', desc: 'Ocho centímetros de aventura.' },
     manija: { name: 'Manija', desc: 'La manija de la consola. Para llevarla a casa de un amigo.' },
   },
 

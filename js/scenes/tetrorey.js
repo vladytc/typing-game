@@ -229,19 +229,13 @@ Scenes.tetrorey = Object.assign(Object.create(Scenes.battle), {
         if (this.e.hp <= 0) { this.later(() => this.win(false), 700); return; }
         if (this.stage === 1 && this.e.hp <= floor) {
           this.say([
-            '* ¡El Tetro Rey se pone ROJO! Bueno, verde oscuro.',
-            '* "¡SUFICIENTE! ¡Conecta tu cable, retador!\n* ¡¡TETRIS VS!!"',
+            '* ¡El Tetro Rey se pone ROJO! Bueno, verde oscuro.\n* "¡SUFICIENTE! ¡Conecta tu cable, retador! ¡¡TETRIS VS!!"',
             '* (Cada pieza trae una palabra: escríbela y cae sola.\n* Sin errores, cae en el MEJOR lugar.)',
-            '* (2 líneas juntas le mandan basura al rey; ¡un TETRIS le manda 4!\n* Si te llega basura, escribe su palabra y se borra.)',
-            '* (¡Llena la torre del rey hasta el tope!)',
+            '* (2 líneas juntas le mandan basura al rey; ¡un TETRIS, 4!\n* Basura en tu pozo: escribe su palabra y se borra.\n* ¡Llena la torre del rey hasta el tope!)',
           ], () => this.startTetris());
           return;
         }
-        const pages = [];
-        if (dealt === 0) pages.push('* ¡Se acabó el tiempo! No lograste atacar.');
-        else if (res.completed) pages.push(`* ¡Combo completo! Hiciste ${dealt} de daño.`);
-        else pages.push(`* Se acabó el tiempo. Hiciste ${dealt} de daño.`);
-        this.say(pages, () => this.enemyTurn());
+        this.afterFight(dealt, res); // número flotante y directo al turno del rey
       },
     });
   },
@@ -740,8 +734,7 @@ Scenes.tetrorey = Object.assign(Object.create(Scenes.battle), {
     const px = $('.glitch-px');
     if (px) px.classList.add('reveal');
     this.say([
-      spared ? '* El Tetro Rey deja de girar por fin.\n* Se ve... aliviado.' : '* El Tetro Rey se tambalea y deja de girar.',
-      '* "Yo no quería... algo morado me puso a girar y no me dejaba parar."',
+      `${spared ? '* El Tetro Rey deja de girar por fin. Se ve... aliviado.' : '* El Tetro Rey se tambalea y deja de girar.'}\n* "Yo no quería... algo morado me puso a girar y no me dejaba parar."`,
       '* (Por un instante, un píxel de un color IMPOSIBLE parpadea en la torre... y desaparece.)',
     ], () => {
       if (px) px.remove();

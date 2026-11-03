@@ -31,7 +31,7 @@ addWorld({
   console: 'snes',          // consola del mundo (informativo; quien la rescata es el jefe, ver abajo)
   nodes: ['modosiete', 'setita', 'nebula'],   // camino del mapa, en orden
   enemies: { /* un objeto por cada id de `nodes` (ver abajo) */ },
-  treasures: { /* id: { name, desc, sprite? } */ },
+  treasures: { /* id: { name, desc, sprite?, effect? } — effect: { hp | cookies | mercy | slow | time: n } (ver treasureBonus en js/data.js; 1-2 por mundo, chiquitos) */ },
   sprites: { /* id: [16 filas de 16 letras] (ver "Sprites") */ },
   tracks: { /* id: pista de música (ver "Música") */ },
   quests: {
@@ -78,7 +78,7 @@ nebula: {
 
 | `mode` | Escena | Qué es | Campos propios |
 |---|---|---|---|
-| `battle` (por defecto) | `js/scenes/battle.js` | Combate estilo Deltarune: LUCHAR/ACTUAR/OBJETO/PERDONAR + lluvia de letras | `hp, atk, def, fightWords, words, intro, check, idle, calm, taunts, acts[], bullets{count, interval, speed, pool}, drop, console` (copia a Pixelito en `worlds/gb.js`) |
+| `battle` (por defecto) | `js/scenes/battle.js` | Combate estilo Deltarune: LUCHAR/ACTUAR/OBJETO/PERDONAR + lluvia de letras | `hp, atk, def, fightWords, words, intro, check, idle, calm, taunts, acts[], bullets{count, interval, speed, pool}, drop, console, trick?` (trick: ver TRICKS en battle.js; copia a Pixelito en `worlds/gb.js`) |
 | `tecloides` | `js/scenes/tecloides.js` | Batalla de Tecloides contra un entrenador de `TRAINERS` (`js/tecloides.js`) | El id del nodo = id del entrenador |
 | `mario` | `js/scenes/mario.js` | Nivel de plataformas por tecleo (Mundo 1-1) | — (el nivel está en `L11` dentro de la escena) |
 | `tetrorey` | `js/scenes/tetrorey.js` | Jefe en 3 fases: batalla → TETRIS VS (dos pozos con Cable Link) → palabras en vertical | Los de `battle` + `vsWords`, `vsLong`, `vsJunk`, `tallWords` |

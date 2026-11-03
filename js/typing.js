@@ -41,10 +41,14 @@ class TypingTask {
   // texts: lista de palabras/frases. onUnit(unit) se llama al terminar cada una;
   // si devuelve false, la tarea se detiene (por ejemplo, porque el enemigo ya cayó).
   // caps: exige mayúsculas (Mundo 2). strict: exige acentos y ñ (Mundo 3, ver strictOn).
-  constructor(box, { label, texts, timeLimit, onUnit, onDone, caps = false, strict = false }) {
-    Object.assign(this, { box, label, texts, timeLimit: timeLimit * diff().time, onUnit, onDone, strict: strictOn(strict) });
+  // Trucos de enemigo (opcionales): dust = fracción de letras tapadas con polvo (se ve solo la que
+  // toca escribir); flip = las palabras salen de cabeza.
+  constructor(box, { label, texts, timeLimit, onUnit, onDone, caps = false, strict = false, dust = 0, flip = false }) {
+    Object.assign(this, { box, label, texts, timeLimit: timeLimit * diff().time, onUnit, onDone, strict: strictOn(strict), flip });
     this.match = pickMatch({ caps, strict: this.strict });
     this.totalChars = texts.join('').length;
+    // Qué letras lleva tapadas cada palabra (nunca la primera ni los espacios).
+    this.dusty = texts.map((t) => [...t].map((c, k) => dust > 0 && k > 0 && c !== ' ' && Math.random() < dust));
   }
 
   start() {
@@ -52,7 +56,7 @@ class TypingTask {
     this.box.innerHTML = `
       <div class="tt">
         <div class="tt-label">${esc(this.label)}${this.strict ? ' <span class="tt-strict">ACENTOS Y Ñ CUENTAN</span>' : ''}</div>
-        <div class="tt-words"></div>
+        <div class="tt-words${this.flip ? ' tt-flip' : ''}"></div>
         <div class="tt-timer"><i></i></div>
         <div class="tt-ready">¿LISTO?</div>
       </div>`;
@@ -65,7 +69,7 @@ class TypingTask {
       this.active = true;
       this.t0 = this.unitT0 = performance.now();
       this.tick();
-    }, 750);
+    }, 550); // el "¿LISTO?" dura poquito: el reloj no corre mientras
   }
 
   tick = () => {
@@ -112,11 +116,13 @@ class TypingTask {
   render(err = false) {
     // Cada palabra va en un grupo que no se parte, para que las frases largas
     // salten de línea entre palabras y no a la mitad.
+    // Letra tapada con polvo (truco dust): se ve hasta que le toca.
+    const shown = (j, k, c) => (this.dusty[j] && this.dusty[j][k] && (j > this.i || k > this.pos) ? '▒' : c);
     const charSpan = (c, k) => {
       const state = k < this.pos ? 'ok' : k === this.pos ? `next${err ? ' err' : ''}` : '';
       return c === ' '
         ? `<span class="c sp ${state}">&nbsp;</span>`
-        : `<span class="c ${state}">${esc(c)}</span>`;
+        : `<span class="c ${state}">${esc(shown(this.i, k, c))}</span>`;
     };
     const chars = (text) => {
       let k = 0;
@@ -125,7 +131,7 @@ class TypingTask {
     };
     this.wordsEl.innerHTML = this.texts.map((t, j) => {
       if (j < this.i) return `<span class="w done">${esc(t)}</span>`;
-      if (j > this.i) return `<span class="w">${esc(t)}</span>`;
+      if (j > this.i) return `<span class="w">${esc([...t].map((c, k) => shown(j, k, c)).join(''))}</span>`;
       return `<span class="w cur">${chars(t)}</span>`;
     }).join(' ') + (this.tip ? `<div class="tt-tip">${esc(this.tip)}</div>` : '');
   }
@@ -152,21 +158,27 @@ class TypingTask {
   }
 }
 
+// cfg: count, interval, speed, pool (ver docs/MUNDOS.md), caps, strict, label (texto de arriba) y los
+// trucos de enemigo (opcionales): hop (las letras rebotan), slide: px/s (patinan de lado y rebotan
+// en las orillas), pairs (caen de dos en dos), dark (la luz se va a ratos), coin: N (una de cada N
+// es MONEDA: al escribirla llama onCoin).
 class Dodge {
-  constructor(box, cfg, { onHit, onDone }) {
-    Object.assign(this, { box, cfg, onHit, onDone });
+  constructor(box, cfg, { onHit, onDone, onCoin }) {
+    Object.assign(this, { box, cfg, onHit, onDone, onCoin });
     this.strict = strictOn(cfg.strict);
     this.match = pickMatch({ caps: cfg.caps, strict: this.strict });
     // Las palabras largas no caen más seguido de lo que un niño de ~30 PPM alcanza a escribir:
     // al menos 360 ms por letra (en Normal) entre una y otra.
     const avg = cfg.pool.reduce((a, w) => a + w.length, 0) / cfg.pool.length;
-    this.gap = Math.max(cfg.interval, avg * 360);
+    this.gap = Math.max(cfg.interval, avg * 360) * (cfg.pairs ? 1.8 : 1); // en pares: casi el mismo ritmo de letras
+    // Tesoros con effect.slow: lo que cae baja un pelín más lento.
+    this.slow = 1 - treasureBonus('slow') / 100;
   }
 
   start() {
     this.box.innerHTML = `
       <div class="dodge">
-        <div class="dodge-label">¡Escribe lo que cae!</div>
+        <div class="dodge-label">${esc(this.cfg.label || '¡Escribe lo que cae!')}</div>
         <div class="ground"></div>
         <div class="heart">♥</div>
       </div>`;
@@ -174,7 +186,7 @@ class Dodge {
     this.heart = $('.heart', this.box);
     this.W = this.field.clientWidth;
     this.groundY = this.field.clientHeight - 30;
-    Object.assign(this, { bullets: [], spawned: 0, target: null, chars: 0, errors: 0, active: true, elapsed: 0, nextSpawn: 300 });
+    Object.assign(this, { bullets: [], spawned: 0, target: null, chars: 0, errors: 0, active: true, elapsed: 0, nextSpawn: 300, emptyAt: null });
     this.last = performance.now();
     this.raf = requestAnimationFrame(this.loop);
   }
@@ -184,13 +196,20 @@ class Dodge {
     const dt = Math.max(0, Math.min(50, ts - this.last)) / 1000;
     this.last = ts;
     this.elapsed += dt * 1000;
-    if (this.spawned < this.cfg.count && this.elapsed >= this.nextSpawn) {
-      this.spawn();
-      this.nextSpawn += this.gap / diff().speed;
+    if (this.spawnDue()) {
+      this.spawn(0);
+      if (this.cfg.pairs && this.spawned < this.cfg.count) this.spawn(1);
     }
+    if (this.cfg.dark) this.field.classList.toggle('dark', this.elapsed % 2600 > 1800); // truco 'apagón'
     for (const b of [...this.bullets]) {
-      b.y += this.cfg.speed * diff().speed * dt;
-      b.el.style.transform = `translate(${b.x}px, ${b.y}px)`;
+      b.y += this.cfg.speed * diff().speed * this.slow * dt;
+      if (b.vx) { // truco 'patina': rebota en las orillas
+        b.x += b.vx * dt;
+        if (b.x < 6 || b.x > this.W - b.w - 6) { b.vx = -b.vx; b.x = Math.max(6, Math.min(this.W - b.w - 6, b.x)); }
+      }
+      // Truco 'rebote': saltitos hacia arriba (solo se ve; la caída real no cambia).
+      const hop = this.cfg.hop ? -Math.abs(Math.sin(b.y / 16)) * 12 : 0;
+      b.el.style.transform = `translate(${b.x}px, ${b.y + hop}px)`;
       if (b.y + b.h >= this.groundY) this.land(b);
     }
     if (!this.active) return;
@@ -198,15 +217,32 @@ class Dodge {
     this.raf = requestAnimationFrame(this.loop);
   };
 
-  spawn() {
+  // ¿Toca soltar la siguiente? (y agenda la que sigue). Si ya escribiste todo lo que había en
+  // pantalla, sale casi de inmediato (Dodge.EMPTY_MS): las mismas palabras, sin esperar. Con palabras
+  // cayendo se respeta el espaciado mínimo. Las lluvias propias que heredan de Dodge también la usan.
+  spawnDue(gap = this.gap / diff().speed) {
+    if (this.spawned >= this.cfg.count) return false;
+    const early = !this.bullets.length && this.emptyAt != null && this.elapsed >= this.emptyAt + Dodge.EMPTY_MS;
+    if (this.elapsed < this.nextSpawn && !early) return false;
+    this.nextSpawn = Math.min(this.elapsed, this.nextSpawn) + gap;
+    this.emptyAt = null;
+    return true;
+  }
+
+  // half: con pairs, 0 = mitad izquierda y 1 = mitad derecha (para que no se encimen).
+  spawn(half = 0) {
     const b = { text: rand(this.cfg.pool), pos: 0, y: -30 };
+    b.coin = !!this.cfg.coin && this.spawned % this.cfg.coin === this.cfg.coin - 1;
     b.el = document.createElement('div');
-    b.el.className = 'bullet';
+    b.el.className = `bullet${b.coin ? ' coin' : ''}`;
     this.field.appendChild(b.el);
     this.renderBullet(b);
     const w = b.el.offsetWidth;
+    b.w = w;
     b.h = b.el.offsetHeight;
-    b.x = 10 + Math.random() * Math.max(0, this.W - w - 20);
+    const room = Math.max(0, this.W - w - 20);
+    b.x = 10 + (this.cfg.pairs ? (half + Math.random()) * 0.5 : Math.random()) * room;
+    if (this.cfg.slide) b.vx = (Math.random() < 0.5 ? -1 : 1) * this.cfg.slide;
     b.el.style.transform = `translate(${b.x}px, ${b.y}px)`;
     this.bullets.push(b);
     this.spawned++;
@@ -220,6 +256,7 @@ class Dodge {
     const i = this.bullets.indexOf(b);
     if (i >= 0) this.bullets.splice(i, 1);
     if (this.target === b) this.target = null;
+    if (!this.bullets.length) this.emptyAt = this.elapsed; // pantalla vacía: ver loop
   }
 
   land(b) {
@@ -234,6 +271,7 @@ class Dodge {
 
   destroy(b) {
     this.removeBullet(b);
+    if (b.coin && this.onCoin) this.onCoin(b);
     Sfx.pop();
     b.el.classList.add('pop');
     setTimeout(() => b.el.remove(), 250);
@@ -278,3 +316,5 @@ class Dodge {
     cancelAnimationFrame(this.raf);
   }
 }
+// Con la pantalla vacía, cuánto espera la siguiente palabra (ms).
+Dodge.EMPTY_MS = 250;

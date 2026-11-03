@@ -7,9 +7,24 @@
 //   fightTime: 0.8      multiplica el tiempo de LUCHAR (menos de 1 = más prisa)
 //   fightList(words)    cambia la lista de palabras de LUCHAR (devuelve la lista nueva)
 //   fightUnit(unit, dmg, battle)  ajusta el daño de cada palabra (devuelve el daño)
+//   trick: 'pares'      truco propio del enemigo (ver TRICKS abajo), para que cada pelea se sienta distinta
 // El combate se pinta con el tema del mundo al que pertenece el enemigo.
 
 const COMMANDS = ['LUCHAR', 'ACTUAR', 'OBJETO', 'PERDONAR'];
+
+// Trucos de los enemigos normales (def.trick). Se enganchan en trickFor():
+//   bullets: se mezcla con def.bullets (opciones de Dodge en js/typing.js: hop, slide, pairs, dark, coin)
+//   fight: opciones extra para la TypingTask de LUCHAR (dust, flip)
+//   rain / hit: avisito corto en la lluvia / en LUCHAR
+const TRICKS = {
+  rebote: { bullets: { hop: true }, rain: '¡Las letras rebotan!' },                         // Pixelito
+  moneda: { bullets: { coin: 3 }, rain: '¡Atrapa las MONEDAS: +2 HP!' },                    // Monedín
+  polvo: { fight: { dust: 0.4 }, hit: '¡Error de lectura! El polvo tapa letras:' },         // Cartuchón
+  pares: { bullets: { pairs: true }, rain: '¡Vienen de DOS en DOS!' },                      // Linkito
+  apagon: { bullets: { dark: true }, rain: '¡Se va la luz a ratos!' },                      // Pilabat
+  volteo: { fight: { flip: true }, hit: '¡Te voltearon las palabras! Escribe:' },           // Ladrillín
+  patina: { bullets: { slide: 90 }, rain: '¡Las palabras patinan!' },                       // Caparacho
+};
 
 Scenes.battle = {
   enter({ enemyId, back = 'map' }) {
@@ -20,7 +35,7 @@ Scenes.battle = {
       id: enemyId, def, back,
       e: { hp: def.hp, mercy: 0 },
       p: { hp: playerMaxHp(), max: playerMaxHp() },
-      items: (def.boss ? 3 : 2) + (Save.data.konami ? 3 : 0),
+      items: (def.boss ? 3 : 2) + (Save.data.konami ? 3 : 0) + treasureBonus('cookies'),
       st: { chars: 0, errors: 0, ms: 0, perfect: 0 },
       cmd: 0, phase: 'intro', timers: [], strict: !!def.strictAccents,
     });
@@ -179,15 +194,21 @@ Scenes.battle = {
     return { dmg: Math.max(1, Math.round(dmg)), perfect };
   },
 
+  // El truco del enemigo (o {} si no tiene). Las escenas hijas pueden cambiarlo.
+  trickFor() { return TRICKS[this.def.trick] || {}; },
+
   fight() {
     let words = pickWords(this.def.words, this.def.fightWords);
     if (this.def.fightList) words = this.def.fightList(words);
     const total = words.join('').length;
+    const trick = this.trickFor();
     let dealt = 0;
     this.runTask({
-      label: '¡LUCHAR! Escribe rápido:',
+      label: trick.hit || '¡LUCHAR! Escribe rápido:',
+      ...(trick.fight || {}),
       texts: words,
-      timeLimit: (total * 560 + 2500) * (this.def.fightTime || 1),
+      // (los tesoros con effect.time dan un poquito más de tiempo)
+      timeLimit: (total * 560 + 2500) * (this.def.fightTime || 1) * (1 + treasureBonus('time') / 100),
       onUnit: (unit) => {
         let { dmg, perfect } = this.damageFor(unit);
         if (this.def.fightUnit) dmg = this.def.fightUnit(unit, dmg, this);
@@ -202,13 +223,21 @@ Scenes.battle = {
       },
       onDone: (res) => {
         if (this.e.hp <= 0) { this.later(() => this.win(false), 700); return; }
-        const pages = [];
-        if (dealt === 0) pages.push('* ¡Se acabó el tiempo! No lograste atacar.');
-        else if (res.completed) pages.push(`* ¡Combo completo! Hiciste ${dealt} de daño.`);
-        else pages.push(`* Se acabó el tiempo. Hiciste ${dealt} de daño.`);
-        this.say(pages, () => this.enemyTurn());
+        this.afterFight(dealt, res);
       },
     });
+  },
+
+  // Fin de LUCHAR: el daño ya salió flotando palabra por palabra; aquí solo el total, sin página
+  // que leer, y de inmediato el turno del enemigo.
+  afterFight(dealt, res) {
+    if (dealt === 0) this.floatText('¡TIEMPO!');
+    else if (res.completed) this.floatText(`¡COMBO! -${dealt}`, 'crit');
+    else this.floatText(`TIEMPO · -${dealt}`);
+    this.phase = 'busy';
+    this.renderCmds();
+    this.box.innerHTML = '';
+    this.later(() => this.enemyTurn(), 450);
   },
 
   actMenu() {
@@ -225,7 +254,8 @@ Scenes.battle = {
       texts: [a.text],
       timeLimit: a.text.length * 600 + 3000,
       onDone: (res) => {
-        const gain = res.completed ? a.mercy : Math.round(a.mercy * res.progress * 0.5);
+        let gain = res.completed ? a.mercy : Math.round(a.mercy * res.progress * 0.5);
+        gain = Math.round(gain * (1 + treasureBonus('mercy') / 100)); // tesoros con effect.mercy
         const was = this.e.mercy;
         this.e.mercy = Math.min(100, this.e.mercy + gain);
         if (gain) { Sfx.mercy(); this.floatText(`PAZ +${this.e.mercy - was}%`, 'mercy'); }
@@ -275,15 +305,24 @@ Scenes.battle = {
     const bubble = $('.bubble');
     bubble.textContent = rand(this.def.taunts);
     bubble.classList.remove('hidden');
-    this.later(() => {
-      bubble.classList.add('hidden');
-      this.startDodge();
-    }, 1500);
+    // La lluvia empieza mientras todavía se lee la burla (menos espera entre turnos).
+    this.later(() => this.startDodge(), 700);
+    this.later(() => bubble.classList.add('hidden'), 1700);
   },
 
   startDodge() {
     this.phase = 'dodge';
-    this.dodge = new Dodge(this.box, { caps: !!this.def.caps, strict: this.strict, ...this.def.bullets }, {
+    const trick = this.trickFor();
+    const cfg = { caps: !!this.def.caps, strict: this.strict, ...this.def.bullets, ...(trick.bullets || {}) };
+    if (trick.rain) cfg.label = trick.rain;
+    this.dodge = new Dodge(this.box, cfg, {
+      // Monedas (truco 'moneda'): atraparlas cura un poquito.
+      onCoin: () => {
+        const was = this.p.hp;
+        this.p.hp = Math.min(this.p.max, this.p.hp + 2);
+        if (this.p.hp > was) { Sfx.heal(); this.floatText(`+${this.p.hp - was} HP`, 'mercy'); }
+        this.updateBars();
+      },
       onHit: () => {
         this.p.hp = Math.max(0, this.p.hp - scaledDmg(this.def.atk));
         this.updateBars();
@@ -317,34 +356,33 @@ Scenes.battle = {
     const acc = typed ? Math.round((this.st.chars / typed) * 100) : 100;
     const isRecord = Stats.addBattle({ enemy: this.id, wpm, acc, date: Date.now() });
     const ups = addXp(def.xp);
+    if (ups) this.later(() => Sfx.levelup(), 400);
 
-    const pages = [spared
-      ? `* ¡Perdonaste a ${this.NAME}!\n* Ahora es tu AMIGO. Lo encontrarás en la vitrina.`
-      : `* ¡GANASTE!\n* ${this.NAME} huyó muy lejos.`];
-    pages.push(`* Ganaste ${def.xp} XP.\n* Velocidad: ${wpm} PPM · Precisión: ${acc}%`);
-    if (this.st.perfect >= 3) pages.push(`* ¡${this.st.perfect} ataques PERFECTOS! Tus dedos están on fire.`);
-    if (isRecord && d.stats.battles.length > 1) pages.push(`* ¡¡NUEVO RECORD DE VELOCIDAD: ${wpm} PPM!!`);
-    if (ups) {
-      pages.push(`* ¡SUBISTE A NIVEL ${d.level}!\n* Tu HP máximo ahora es ${playerMaxHp()} y pegas más fuerte.`);
-      this.later(() => Sfx.levelup(), 400);
-    }
+    // Todo el resumen va en UN panel (resultsPanel en js/ui.js); la historia, en páginas cortas después.
     if (spared) d.spared[this.id] = true;
     const first = !d.done[this.id];
+    let treasure = null;
+    const pages = [];
     if (!d.done[this.id]) {
       d.done[this.id] = true;
       if (def.drop && !d.treasures[def.drop]) {
         d.treasures[def.drop] = true;
-        pages.push(`* Encontraste: ${upper(TREASURES[def.drop].name)}.\n* (Se guardó en tu vitrina.)`);
+        treasure = def.drop;
       }
       if (def.console) {
         d.consoles[def.console] = true;
         Quests.complete('rescate_gb');
         const c = CONSOLES.find((x) => x.id === def.console);
-        pages.push(`* ¡¡RESCATASTE LA ${upper(c.name)}!!\n* Ya brilla en tu vitrina.`);
-        if (WORLDS.some((w) => w.requires === def.console)) pages.push('* A lo lejos, algo retumbó en el pueblo...\n* ¿Será en la Plaza de las Tuberías?');
-        pages.push('* (Pssst... Don Chip, en el pueblo, querrá verla.)');
+        pages.push(`* ¡¡RESCATASTE LA ${upper(c.name)}!! Ya brilla en tu vitrina.${WORLDS.some((w) => w.requires === def.console)
+          ? '\n* A lo lejos, algo retumbó en la Plaza de las Tuberías...' : ''}\n* (Pssst... Don Chip querrá verla.)`);
       }
     }
+    pages.unshift(resultsPanel({
+      title: spared ? `¡Perdonaste a ${this.NAME}!` : '¡GANASTE!',
+      sub: spared ? 'Ahora es tu AMIGO.' : `${this.NAME} huyó muy lejos.`,
+      xp: def.xp, wpm, acc, record: isRecord && d.stats.battles.length > 1,
+      level: ups ? d.level : 0, perfect: this.st.perfect, treasure,
+    }));
     if (def.onWin) def.onWin(this, { spared, first, pages });
     Save.write();
     this.say(pages, () => Game.go(this.back));

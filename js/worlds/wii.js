@@ -921,8 +921,8 @@ addWorld({
   treasures: {
     pelota_boliche: { name: 'Pelota de boliche', desc: 'Regalo del Entrenador Mi. Azul, pesada y con tres hoyitos.' },
     pelota_dorada: { name: 'Pelota dorada', desc: '10 chuzas seguidas. El Entrenador Mi lloró un poquito.' },
-    estrellita_capitan: { name: 'Estrellita del Capitán', desc: 'Una de las 7. Brilla más cuando escribes sin errores.' },
-    correa: { name: 'Correa', desc: 'Para que el control no vuele. Y la tele no llore.' },
+    estrellita_capitan: { name: 'Estrellita del Capitán', effect: { time: 8 }, desc: 'Una de las 7. Brilla más cuando escribes sin errores.' },
+    correa: { name: 'Correa', effect: { cookies: 1 }, desc: 'Para que el control no vuele. Y la tele no llore.' },
     sensor: { name: 'Barra sensora', desc: 'Solo son dos luces. En serio, solo eso.' },
     medalla_sensor: { name: 'Medalla Sensor', desc: 'Campeón del Torneo Sensor. Dani dice que fue de suerte.' },
     cara_mii: { name: 'Cara de puntitos', desc: 'Tu cara, diseñada por Muñequito. Ojos grandes, boca chica, gorra azul.' },

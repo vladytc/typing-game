@@ -86,10 +86,8 @@ class FinDodge extends Dodge {
     const dt = Math.max(0, Math.min(50, ts - this.last)) / 1000;
     this.last = ts;
     this.elapsed += dt * 1000;
-    if (this.spawned < this.cfg.count && this.elapsed >= this.nextSpawn) {
-      this.spawn();
-      this.nextSpawn += this.gap / diff().speed; // como la lluvia normal: no más seguido de lo que alcanza un niño
-    }
+    // Como la lluvia normal: espaciado mínimo, pero sin esperar si ya no queda nada (spawnDue).
+    if (this.spawnDue()) this.spawn();
     for (const b of [...this.bullets]) {
       let v = this.cfg.speed * diff().speed;
       if (this.cfg.finMode === 'pausa') {
@@ -371,12 +369,9 @@ Scenes.fin = Object.assign(Object.create(Scenes.battle), {
           else this.later(() => this.neutral(), 600);
           return;
         }
-        const pages = [];
-        if (dealt === 0) pages.push('* ¡Se acabó el tiempo! No lograste atacar.');
-        else if (res.completed) pages.push(`* ¡Combo completo! Hiciste ${dealt} de daño.`);
-        else pages.push(`* Se acabó el tiempo. Hiciste ${dealt} de daño.`);
-        if (this.fase === 3) pages.push(`* EL GLITCH: ...Así terminan todos los juegos, ¿verdad? Peleando.`);
-        this.say(pages, () => this.enemyTurn());
+        // En la fase 3 el Glitch sí comenta (es historia); si no, número flotante y sigue.
+        if (this.fase === 3) { this.say(['* EL GLITCH: ...Así terminan todos los juegos, ¿verdad? Peleando.'], () => this.enemyTurn()); return; }
+        this.afterFight(dealt, res);
       },
     });
   },

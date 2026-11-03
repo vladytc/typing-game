@@ -138,11 +138,10 @@ Scenes.chupin = Object.assign(Object.create(Scenes.battle), {
 
   endAbsorb() {
     this.phase = 'busy';
-    const pages = [this.spat
-      ? `* ¡Le escupiste ${this.spat} palabra${this.spat > 1 ? 's' : ''}! Hiciste ${this.dealt} de daño.`
-      : '* Chupín se tragó todo. No lograste escupirle nada.'];
-    if (this.eaten.length) pages.push(`* Chupín se tragó: ${this.eaten.map(upper).join(', ')}.\n* ¡Ahora las va a escupir en su turno!`);
-    this.say(pages, () => this.enemyTurn());
+    // El daño ya salió flotando; solo se avisa (en una página) si se tragó palabras, porque las escupirá.
+    if (this.spat) this.floatText(`¡${this.spat} PTUI! -${this.dealt}`, 'crit');
+    if (!this.eaten.length) { this.renderCmds(); this.box.innerHTML = ''; this.later(() => this.enemyTurn(), 450); return; }
+    this.say([`* Chupín se tragó: ${this.eaten.map(upper).join(', ')}.\n* ¡Ahora las va a escupir en su turno!`], () => this.enemyTurn());
   },
 
   absorbKey(e) {
@@ -175,7 +174,7 @@ Scenes.chupin = Object.assign(Object.create(Scenes.battle), {
     this.cleanup();
     cancelAnimationFrame(this.chuRaf);
     if (!spared) {
-      this.say(['* Chupín sale rodando hacia el fondo de la cueva.', '* (Pssst... Bit cree que si lo PERDONAS, a lo mejor te regala algo.)'],
+      this.say(['* Chupín sale rodando hacia el fondo de la cueva.\n* (Pssst... Bit cree que si lo PERDONAS, a lo mejor te regala algo.)'],
         () => Scenes.battle.win.call(this, spared));
       return;
     }
@@ -184,8 +183,7 @@ Scenes.chupin = Object.assign(Object.create(Scenes.battle), {
     Sfx.secret();
     this.say([
       '* Chupín deja de inhalar.\n* "...Nadie me había dado de comer sin que yo lo pidiera."',
-      '* Chupín escupe algo brillante. ¡Es un cartucho!\n* Dice CHUPA-LETRAS.',
-      '* "Juégalo en la maquinita del pueblo. ¡A ver si comes más que yo!"',
+      '* Chupín escupe algo brillante. ¡Es un cartucho! Dice CHUPA-LETRAS.\n* "Juégalo en la maquinita del pueblo. ¡A ver si comes más que yo!"',
     ], () => {
       Quests.start('dulces_suenos');
       Scenes.battle.win.call(this, spared);

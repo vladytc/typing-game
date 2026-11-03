@@ -68,10 +68,8 @@ class WiiGravityDodge extends Dodge {
     const dt = Math.max(0, Math.min(50, ts - this.last)) / 1000;
     this.last = ts;
     this.elapsed += dt * 1000;
-    if (this.spawned < this.cfg.count && this.elapsed >= this.nextSpawn) {
-      this.spawn();
-      this.nextSpawn += this.gap / diff().speed; // como la lluvia normal: no más seguido de lo que alcanza un niño
-    }
+    // Como la lluvia normal: espaciado mínimo, pero sin esperar si ya no queda nada (spawnDue).
+    if (this.spawnDue()) this.spawn();
     for (const b of [...this.bullets]) {
       // Gravedad: más rápido mientras más cerca del planeta.
       b.r -= this.cfg.speed * diff().speed * (0.45 + 1.3 * (1 - b.r)) * dt;

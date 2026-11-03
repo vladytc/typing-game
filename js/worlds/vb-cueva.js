@@ -454,7 +454,8 @@ Object.assign(ENEMIES, {
     bullets: { count: 10, interval: 900, speed: 38, pool: ['rojo', 'luz', 'capa', 'eco', 'foco', 'lente', 'ojo', 'visor', 'mesa', 'fondo', 'vista', 'negro'] },
     onWin(scene, { first, pages }) {
       const d = Save.data;
-      for (let i = 0; i < pages.length; i++) pages[i] = pages[i].replace('RESCATASTE LA VIRTUAL BOY', 'RESCATASTE EL VIRTUAL BOY').replace('Lo encontrarás en la vitrina.', 'Vive en la Cueva Roja.');
+      // (el panel de resultados no es texto: solo se cambian las páginas de texto)
+      for (let i = 0; i < pages.length; i++) if (typeof pages[i] === 'string') pages[i] = pages[i].replace('RESCATASTE LA VIRTUAL BOY', 'RESCATASTE EL VIRTUAL BOY').replace('Ya brilla en tu vitrina.', 'Vive en la Cueva Roja.');
       if (!first) return;
       pages.splice(1, 0, '* VISORIO: ...¿Me vas a llevar? ¿A la vitrina?\n* ¿Aunque me digan "fracaso"?', '* BIT: ¡Claro! Don Chip le va a hacer su propio estante.\n* "Fracaso famoso. Lo queremos igual."');
       d.flags.ecoRojo = true;

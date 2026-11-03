@@ -71,10 +71,8 @@ class GCPunch {
     const dt = this.paused ? 0 : Math.max(0, Math.min(50, ts - this.last)) / 1000;
     this.last = ts;
     this.elapsed += dt * 1000;
-    if (this.spawned < this.cfg.count && this.elapsed >= this.nextSpawn) {
-      this.spawn();
-      this.nextSpawn += this.cfg.interval / diff().speed;
-    }
+    // Como Dodge.spawnDue: con la pantalla vacía, el siguiente golpe sale casi de inmediato.
+    if (Dodge.prototype.spawnDue.call(this, this.cfg.interval / diff().speed)) this.spawn();
     for (const b of [...this.bullets]) {
       b.t += dt;
       const dx = this.cx - (b.x + b.w / 2);
@@ -112,6 +110,7 @@ class GCPunch {
   removeBullet(b) {
     this.bullets = this.bullets.filter((x) => x !== b);
     if (this.target === b) this.target = null;
+    if (!this.bullets.length) this.emptyAt = this.elapsed;
   }
 
   land(b) {

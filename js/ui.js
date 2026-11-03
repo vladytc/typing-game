@@ -10,6 +10,7 @@ const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 // Texto que aparece letra por letra, estilo RPG. Con wait:false solo escribe
 // una página y no espera ENTER (para el texto de ambiente del menú).
+// Una página también puede ser un panel ya armado ({ html }, ver resultsPanel): sale de golpe.
 class Dialog {
   constructor(el, pages, onDone, { wait = true } = {}) {
     this.el = el;
@@ -20,10 +21,13 @@ class Dialog {
     this.show();
   }
   show() {
-    this.full = this.pages[this.i];
+    const page = this.pages[this.i];
+    clearInterval(this.iv);
+    this.html = page && page.html;
+    if (this.html) { this.full = ''; this.typing = false; this.render(); return; }
+    this.full = page;
     this.n = 0;
     this.typing = true;
-    clearInterval(this.iv);
     this.iv = setInterval(() => {
       this.n++;
       if (this.n % 2) Sfx.text();
@@ -34,6 +38,7 @@ class Dialog {
   }
   render() {
     const more = !this.typing && this.wait ? '<span class="more">▼</span>' : '';
+    if (this.html) { this.el.innerHTML = this.html + more; return; }
     this.el.innerHTML = esc(this.full.slice(0, this.n)).replace(/\n/g, '<br>') + more;
   }
   finishPage() {
@@ -50,6 +55,33 @@ class Dialog {
     if (this.i >= this.pages.length) { this.stop(); this.onDone && this.onDone(); } else this.show();
   }
   stop() { clearInterval(this.iv); }
+}
+
+// Panel de resultados de una victoria: XP, PPM, precisión, récord, nivel nuevo y tesoro, todo en
+// UNA caja (un ENTER y sigue). Es una página de Dialog: pages.push(resultsPanel({...})).
+//   title / sub: titular ("¡GANASTE!") y una línea corta debajo
+//   xp, wpm, acc: números de la pelea (wpm/acc null = no se muestran)
+//   record: nuevo récord de velocidad · level: nivel nuevo si subiste (0 = no)
+//   perfect: ataques perfectos (se muestra desde 3) · treasure: id del tesoro recibido
+//   extra: líneas cortas de más (p. ej. "VOLTIN subió a nivel 7")
+function resultsPanel({ title, sub = '', xp = 0, wpm = null, acc = null, record = false, level = 0, perfect = 0, treasure = null, extra = [] }) {
+  const cell = (k, v, cls = '') => `<div class="rp-cell ${cls}"><span>${esc(k)}</span><b>${esc(v)}</b></div>`;
+  const cells = [cell('XP', `+${xp}`)];
+  if (wpm != null) cells.push(cell(record ? '¡RECORD!' : 'PPM', `${wpm}`, record ? 'rp-hot' : ''));
+  if (acc != null) cells.push(cell('PRECISION', `${acc}%`));
+  if (perfect >= 3) cells.push(cell('PERFECTOS', `x${perfect}`, 'rp-hot'));
+  const lines = [];
+  if (level) lines.push(`★ ¡NIVEL ${level}! HP máximo ${playerMaxHp()} y pegas más fuerte.`);
+  const t = treasure && TREASURES[treasure];
+  if (t) lines.push(`◆ ${upper(t.name)}${t.effect ? ` · Efecto: ${treasureEffectText(treasure)}` : ' (a tu vitrina)'}`);
+  lines.push(...extra);
+  return {
+    html: `<div class="results">
+      <div class="rp-title">${esc(title)}${sub ? `<small>${esc(sub)}</small>` : ''}</div>
+      <div class="rp-grid">${cells.join('')}</div>
+      ${lines.map((l) => `<div class="rp-line">${esc(l)}</div>`).join('')}
+    </div>`,
+  };
 }
 
 // Lista de opciones con el corazón como cursor. También funciona con el mouse.

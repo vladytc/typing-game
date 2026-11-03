@@ -14,7 +14,7 @@ Scenes.tecloides = {
       id: enemyId, tr, back, def: ENEMIES[enemyId],
       cmd: 0, phase: 'busy', timers: [], ui: null, stunned: false,
       st: { chars: 0, errors: 0, ms: 0, perfect: 0 },
-      items: 3 + (Save.data.konami ? 3 : 0),
+      items: 3 + (Save.data.konami ? 3 : 0) + treasureBonus('cookies'),
     });
     document.body.className = `theme-${eraOfEnemy(enemyId)}`;
     Music.play(tr.music || 'tecloides');
@@ -65,6 +65,26 @@ Scenes.tecloides = {
 
   talk(pages) { return new Promise((done) => this.say(pages, done)); },
 
+  // Una línea que se lee sola y sigue (sin ENTER): para lo que pasa en cada ataque.
+  flash(text, ms = 1100) {
+    this.phase = 'busy';
+    $('.mcmds').classList.add('hidden');
+    $('.mtext').classList.remove('narrow');
+    this.ui = new Dialog($('.mtext'), [text], null, { wait: false });
+    return new Promise((done) => this.later(done, ms));
+  },
+
+  // Número flotante sobre un Tecloide (el daño ya no es una página).
+  floatOn(sel, text, cls = '') {
+    const el = document.createElement('div');
+    el.className = `float ${cls}`;
+    el.textContent = text;
+    el.style.top = '-12px';
+    el.style.left = '20%';
+    $(sel).appendChild(el);
+    setTimeout(() => el.remove(), 1100);
+  },
+
   updateInfo() {
     const f = this.foe[this.fi];
     const m = this.team[this.pi];
@@ -91,10 +111,8 @@ Scenes.tecloides = {
 
   async chooseStarter() {
     await this.talk([
-      '* PROFESORA LETRA: ¡Bienvenido al mundo de los TECLOIDES!\n* Criaturas que viven en las teclas.',
-      '* Cada Tecloide sabe 4 ataques, y cada ataque es una PALABRA.\n* Si la escribes rápido y sin errores, pega más fuerte.',
-      '* CHISPA le gana a GOTA, GOTA le gana a BROTE\n* y BROTE le gana a CHISPA.',
-      '* Escoge a tu primer compañero escribiendo su nombre.',
+      '* PROFESORA LETRA: ¡Bienvenido al mundo de los TECLOIDES!\n* Viven en las teclas, y cada ataque es una PALABRA:\n* rápido y sin errores, pega más fuerte.',
+      '* CHISPA le gana a GOTA, GOTA le gana a BROTE\n* y BROTE le gana a CHISPA. ¡Escoge a tu compañero!',
     ]);
     this.phase = 'choose';
     STARTERS.forEach((id, i) => {
@@ -107,10 +125,7 @@ Scenes.tecloides = {
       const id = STARTERS[i];
       Save.data.team = [{ id, lv: 5, xp: 0 }];
       Save.write();
-      await this.talk([
-        `* ¡Escogiste a ${upper(TECLOIDES[id].name)}!\n* ${TECLOIDES[id].desc}`,
-        '* PROFESORA LETRA: Un Tecloide bien escrito nunca falla.',
-      ]);
+      await this.talk([`* ¡Escogiste a ${upper(TECLOIDES[id].name)}!\n* ${TECLOIDES[id].desc}\n* PROFESORA LETRA: Un Tecloide bien escrito nunca falla.`]);
       this.showSprite('.foe-spr', this.tr.sprite);
       Sfx.confirm();
       this.begin();
@@ -129,11 +144,11 @@ Scenes.tecloides = {
     this.showSprite('.foe-spr', TECLOIDES[this.foe[0].id].sprite);
     $('.foe-info').classList.remove('hidden');
     this.updateInfo();
-    await this.talk([`* ${upper(this.tr.name)} envió a ${tecName(this.foe[0])}.`]);
+    await this.flash(`* ${upper(this.tr.name)} envió a ${tecName(this.foe[0])}.`, 900);
     this.showSprite('.me-spr', TECLOIDES[this.team[0].id].sprite, true);
     $('.me-info').classList.remove('hidden');
     this.updateInfo();
-    await this.talk([`* ¡Adelante, ${tecName(this.team[0])}!`]);
+    await this.flash(`* ¡Adelante, ${tecName(this.team[0])}!`, 800);
     this.toMenu();
   },
 
@@ -193,26 +208,26 @@ Scenes.tecloides = {
     this.st.errors += errors;
     this.st.ms += Math.max(ms, 300);
 
-    await this.talk([`* ¡${tecName(me)} usó ${upper(m.name)}!`]);
+    // Todo el ataque en una sola línea que sigue sola; el daño sale flotando.
     foe.hp = Math.max(0, foe.hp - dmg);
     eff > 1 ? Sfx.crit() : Sfx.hit();
     this.pulse('.foe-spr', 'hit');
+    this.floatOn('.foe-spr', perfect ? `¡PERFECTO! -${dmg}` : `-${dmg}`, perfect || eff > 1 ? 'crit' : '');
     this.updateInfo();
     const notes = [];
-    if (eff > 1) notes.push('* ¡Es muy eficaz!');
-    if (eff < 1) notes.push('* No es muy eficaz...');
-    if (perfect) notes.push(`* ¡Escritura PERFECTA! (${Math.round(Math.min(wpm, 200))} PPM)`);
+    if (eff > 1) notes.push('¡Muy eficaz!');
+    if (eff < 1) notes.push('No es muy eficaz...');
     if (perfect && m.effect === 'curar' && me.hp < me.max) {
       const heal = Math.min(me.max - me.hp, Math.ceil(me.max * 0.1));
       me.hp += heal;
       this.updateInfo();
-      notes.push(`* Las raíces curaron ${heal} HP.`);
+      this.floatOn('.me-spr', `+${heal} HP`, 'mercy');
     }
     if (perfect && m.effect === 'aturdir' && foe.hp > 0 && !this.justStunned) {
       this.stunned = true;
-      notes.push(`* ¡${tecName(foe)} rival quedó aturdido!`);
+      notes.push('¡Quedó aturdido!');
     }
-    if (notes.length) await this.talk([notes.join('\n')]);
+    await this.flash(`* ¡${tecName(me)} usó ${upper(m.name)}! ${notes.join(' ')}`);
     if (foe.hp <= 0) { await this.foeFainted(); return; }
     this.foeTurn();
   },
@@ -221,14 +236,14 @@ Scenes.tecloides = {
     const foe = this.foe[this.fi];
     $('.foe-spr').classList.add('faint');
     Sfx.pop();
-    await this.talk([`* ¡${tecName(foe)} rival se debilitó!`]);
+    await this.flash(`* ¡${tecName(foe)} rival se debilitó!`, 900);
     const next = this.foe.findIndex((x) => x.hp > 0);
     if (next < 0) { this.win(); return; }
     this.fi = next;
     this.stunned = false;
     this.showSprite('.foe-spr', TECLOIDES[this.foe[next].id].sprite);
     this.updateInfo();
-    await this.talk([`* ${upper(this.tr.name)} envió a ${tecName(this.foe[next])}.`]);
+    await this.flash(`* ${upper(this.tr.name)} envió a ${tecName(this.foe[next])}.`, 900);
     this.toMenu();
   },
 
@@ -304,8 +319,7 @@ Scenes.tecloides = {
     // La mitad de las veces escoge el ataque que más te duele.
     const best = moves.reduce((a, x) => (effectiveness(x.type, myType) * x.power > effectiveness(a.type, myType) * a.power ? x : a));
     const m = Math.random() < 0.5 ? best : rand(moves);
-    await this.talk([`* ¡${tecName(foe)} rival usó ${upper(m.name)}!`]);
-    const res = await this.dodge(m.word);
+    const res = await this.dodge(m.word, `¡${tecName(foe)} usó ${upper(m.name)}! Escríbelo para esquivar:`);
     const eff = effectiveness(m.type, myType);
     const stab = m.type === TECLOIDES[foe.id].type ? 1.2 : 1;
     let dmg = Math.max(1, Math.round(m.power * 0.22 * eff * stab * (1 + (foe.lv - 5) * 0.08)));
@@ -314,11 +328,10 @@ Scenes.tecloides = {
     me.hp = Math.max(0, me.hp - dmg);
     Sfx.hurt();
     this.pulse('.me-spr', 'hit');
+    this.floatOn('.me-spr', `-${dmg}`);
     this.updateInfo();
-    const notes = [res.completed ? '* ¡Esquivaste a medias! Recibiste la mitad del daño.' : '* ¡No alcanzaste a esquivar!'];
-    if (eff > 1) notes.push('* ¡Es muy eficaz!');
-    if (eff < 1) notes.push('* No es muy eficaz...');
-    await this.talk([notes.join('\n')]);
+    const eNote = eff > 1 ? ' ¡Muy eficaz!' : eff < 1 ? ' No es muy eficaz...' : '';
+    await this.flash(`* ${res.completed ? '¡Esquivaste a medias! (mitad de daño)' : '¡No alcanzaste a esquivar!'}${eNote}`, 900);
     if (me.hp > 0) { this.toMenu(); return; }
 
     $('.me-spr').classList.add('faint');
@@ -332,12 +345,13 @@ Scenes.tecloides = {
   },
 
   // Esquivar: escribir la palabra del ataque rival antes de que se acabe la barra.
-  dodge(word) {
+  dodge(word, label = '¡ESQUIVA! Escribe su ataque:') {
     return new Promise((done) => {
       this.phase = 'defend';
+      $('.mcmds').classList.add('hidden');
       $('.mtext').innerHTML = '';
       this.ui = new TypingTask($('.mtext'), {
-        label: '¡ESQUIVA! Escribe su ataque:',
+        label,
         texts: [word],
         // 300 ms por letra: con 100 las palabras largas ("raíces profundas") no se alcanzaban a 30 PPM.
         timeLimit: 2000 + word.length * 300,
@@ -374,28 +388,30 @@ Scenes.tecloides = {
     const acc = typed ? Math.round((this.st.chars / typed) * 100) : 100;
     const isRecord = Stats.addBattle({ enemy: this.id, wpm, acc, date: Date.now() });
     const ups = addXp(this.def.xp);
-    const pages = [`* ¡Derrotaste a ${upper(this.tr.name)}!`, ...this.tr.lose,
-      `* Ganaste ${this.def.xp} XP.\n* Velocidad de ataques: ${wpm} PPM · Precisión: ${acc}%`];
-
+    // Lo que dice el rival (historia) va primero; luego TODO el resumen en un panel.
+    const extra = [];
     // Los Tecloides que pelearon ganan experiencia.
     d.team.forEach((t, i) => {
       if (this.team[i].hp <= 0) return;
       t.xp = (t.xp || 0) + 12;
-      while (t.xp >= t.lv * 4) {
-        t.xp -= t.lv * 4;
-        t.lv++;
-        pages.push(`* ¡${upper(TECLOIDES[t.id].name)} subió a nivel ${t.lv}!`);
-      }
+      const was = t.lv;
+      while (t.xp >= t.lv * 4) { t.xp -= t.lv * 4; t.lv++; }
+      if (t.lv > was) extra.push(`▲ ${upper(TECLOIDES[t.id].name)} subió a nivel ${t.lv}.`);
     });
-    if (isRecord && d.stats.battles.length > 1) pages.push(`* ¡¡NUEVO RECORD DE VELOCIDAD: ${wpm} PPM!!`);
-    if (ups) { pages.push(`* ¡SUBISTE A NIVEL ${d.level}!`); Sfx.levelup(); }
+    if (ups) Sfx.levelup();
+    let treasure = null;
     if (!d.done[this.id]) {
       d.done[this.id] = true;
       if (this.tr.reward && !d.treasures[this.tr.reward]) {
         d.treasures[this.tr.reward] = true;
-        pages.push(`* Recibiste: ${upper(TREASURES[this.tr.reward].name)}.\n* (Se guardó en tu vitrina.)`);
+        treasure = this.tr.reward;
       }
     }
+    const pages = [...this.tr.lose, resultsPanel({
+      title: `¡Derrotaste a ${upper(this.tr.name)}!`,
+      xp: this.def.xp, wpm, acc, record: isRecord && d.stats.battles.length > 1,
+      level: ups ? d.level : 0, perfect: this.st.perfect, treasure, extra,
+    })];
     Quests.complete('primer_tecloide');
     Save.write();
     await this.talk(pages);

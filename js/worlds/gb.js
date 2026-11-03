@@ -418,6 +418,7 @@ addWorld({
       bullets: { count: 7, interval: 1300, speed: 30, pool: 'asdfghjkl'.split('') },
       drop: 'manual',
       keysHint: 'Fila del medio: A S D F G H J K L',
+      trick: 'rebote', // las letras rebotan al caer (ver TRICKS en js/scenes/battle.js)
       onWord: gbRacha,
     },
     monedin: {
@@ -446,6 +447,7 @@ addWorld({
       bullets: { count: 8, interval: 1250, speed: 31, pool: 'qwertyuiop'.split('') },
       drop: 'moneda_verde',
       keysHint: 'Fila de arriba: Q W E R T Y U I O P',
+      trick: 'moneda', // una de cada 3 letras es moneda: escribirla cura 2 HP
       onWord: gbRacha,
     },
     cartuchon: {
@@ -467,6 +469,7 @@ addWorld({
       bullets: { count: 9, interval: 1150, speed: 34, pool: 'qwertyuiopasdfghjkl'.split('') },
       drop: 'cartucho',
       keysHint: 'Fila de arriba + fila del medio',
+      trick: 'polvo',  // "error de lectura": letras tapadas con polvo al LUCHAR
       onWord: gbRacha,
     },
     linkito: {
@@ -495,6 +498,7 @@ addWorld({
       bullets: { count: 10, interval: 1200, speed: 32, pool: 'zxcvbnm'.split('').concat(['za', 'co', 'vi', 'bu', 'mo']) },
       drop: 'cable_doble',
       keysHint: 'Fila de abajo: Z X C V B N M',
+      trick: 'pares',  // la lluvia cae de dos en dos, conectada
       onWord: gbRacha,
     },
     pilabat: {
@@ -519,6 +523,7 @@ addWorld({
       },
       drop: 'pilas',
       keysHint: 'Todas las letras + sílabas',
+      trick: 'apagon', // la luz se va a ratos durante la lluvia
       onWord: gbRacha,
     },
     dani: {
@@ -599,7 +604,7 @@ addWorld({
   },
   treasures: {
     moneda_verde: { name: 'Moneda verde', desc: 'Moneda de cuatro tonos. No vale nada. Vale todo.' },
-    cable_doble: { name: 'Cable doble', desc: 'Para intercambiar. Nunca supiste bien qué.' },
+    cable_doble: { name: 'Cable doble', effect: { mercy: 15 }, desc: 'Para intercambiar. Nunca supiste bien qué.' },
     gameboy_lupa: { name: 'Lupa con luz', desc: 'Para jugar debajo de la cobija. Regalo de Chupín.' },
     moneda_dorada: { name: 'Moneda dorada', sprite: 'monedina', desc: 'La hermana de Monedín te la regaló. Bueno, es ella. Dice que no se gasta.' },
     pila_extra: { name: 'Pila Extra', sprite: 'pilas', desc: 'Premio por 20 palabras seguidas sin error. ¡Dedos con batería llena!' },
