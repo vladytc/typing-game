@@ -2,7 +2,7 @@
 // Seis zonas conectadas por puertas; cada encuentro está parado en un paso angosto, así el orden
 // del mundo sale del mapa (docs/MUNDOS.md §3d):
 //
-//   PATIO DE LADRILLOS ──puerta──> CASTILLO 1 ──puerta de arriba──> BOSQUE OSCURO ──puerta──>
+//   PATIO (REINO CHAMPIÑÓN) ─puerta──> CASTILLO 1 ──puerta de arriba──> BOSQUE PERDIDO ──puerta──>
 //   [tubo al pueblo] Mario 1-1 |    vigas y escaleras    Kongo      Bombita | Patoloco | Toby (patos)
 //      Ladrillín | Caparacho  |                                        |
 //   CASTILLO 2 ──puerta de arriba──> RING DE LA PLAZA ──puerta──> CASTILLO 3
@@ -542,8 +542,8 @@ addMaps('nes', {
   entry: { map: 'nes-patio', spawn: [3, 13, 'up'] },
   maps: {
     'nes-patio': {
-      name: 'Patio de Ladrillos',
-      intro: ['* ¡Ladrillos, bloques con signo de pregunta, tuberías!\n* Esto es el CASTILLO 8-BIT.', '* Aquí todos tienen solo tres colores. Y las MAYÚSCULAS importan:\n* usa SHIFT cuando un nombre empiece con mayúscula.'],
+      name: 'Patio del Reino Champiñón',
+      intro: ['* ¡Ladrillos, bloques con signo de pregunta, tuberías!\n* Esto es el REINO CHAMPIÑÓN, la puerta del CASTILLO 8-BIT.', '* Aquí todos tienen solo tres colores. Y las MAYÚSCULAS importan:\n* usa SHIFT cuando un nombre empiece con mayúscula.'],
       music: 'nes_patio',
       ground: 'nes_negro',
       map: NES_PATIO_MAP,
@@ -562,7 +562,7 @@ addMaps('nes', {
         { id: 'nes_moneda', x: 15, y: 14, treasure: 'moneda_8bit', word: 'Moneda' },
       ],
       signs: {
-        '5,13': ['* PATIO DE LADRILLOS\n* (Tubería al Pueblo Vitrina)', `* ${NES_FACTS[1]}`],
+        '5,13': ['* PATIO DEL REINO CHAMPIÑÓN\n* (Tubería al Pueblo Vitrina)', `* ${NES_FACTS[1]}`],
         '6,10': ['* MUNDO 1-1', '* La música de Super Mario Bros. (1985) la compuso Koji Kondo.\n* Seguro ya la estás tarareando.'],
         '14,13': ['* DATO DEL PATIO', '* Mario salió por primera vez en Donkey Kong (1981).\n* Se llamaba "Jumpman" y era carpintero, no plomero.'],
         '21,7': ['* DATO DEL PATIO', `* ${NES_FACTS[2]}`],
@@ -617,7 +617,7 @@ addMaps('nes', {
         '9,1': { map: 'nes-bosque', spawn: [1, 16, 'up'] },
       },
       encounters: [
-        { enemy: 'kongo', x: 9, y: 2, say: ['* ¡BUM BUM BUM!\n* ¿Quién se atreve a subir MIS vigas?', '* ¡La puerta de atrás es mía! ¡A ver si saltas mis barriles!'] },
+        { enemy: 'kongo', x: 9, y: 2, say: ['* ¡BUM BUM BUM!\n* ¿Quién se atreve a subir MIS vigas?', '* ¡Soy KONGO, primo de DONKEY KONG! Él no usó corbata hasta 1994.\n* Yo ya la traigo. ¡A ver si saltas mis barriles!'] },
       ],
       signs: {
         '2,11': ['* CASTILLO 1\n* Sube por las vigas y las escaleras.', '* Arriba toca el tambor un gorila con corbata.\n* Y avienta barriles. Muchos.'],
@@ -633,7 +633,7 @@ addMaps('nes', {
           id: 'paje1', sprite: 'paje', x: 5, y: 2, when: () => !!Save.data.done.kongo,
           talk: nesPaje('paje1', [
             '* ¡Hola otra vez!\n* Ya te di la noticia, ¿verdad? Me encanta darla.',
-            '* La puerta de arriba lleva al BOSQUE OSCURO.\n* Y detrás del bosque está el Castillo 2.',
+            '* La puerta de arriba lleva al BOSQUE PERDIDO de Hyrule.\n* Y detrás del bosque está el Castillo 2.',
             '* Practico mi frase todas las mañanas frente al espejo.\n* "Tu consola está en otro..." ¡Perfecta!',
           ]),
         },
@@ -641,7 +641,7 @@ addMaps('nes', {
     },
 
     'nes-bosque': {
-      name: 'Bosque Oscuro',
+      name: 'Bosque Perdido de Hyrule',
       music: 'patos',
       ground: 'nes_pasto',
       map: NES_BOSQUE_MAP,
@@ -667,14 +667,14 @@ addMaps('nes', {
         { id: 'nes_estrella', x: 18, y: 1, treasure: 'super_estrella', word: 'Estrella' },
       ],
       signs: {
-        '2,15': ['* BOSQUE OSCURO\n* Cuidado con el pasto alto.', '* Duck Hunt (1984) se jugaba con la Zapper, una pistola de luz.\n* Solo funcionaba en las teles de tubo.'],
+        '2,15': ['* BOSQUE PERDIDO (HYRULE)\n* Si te pierdes: norte, oeste, sur, oeste.', '* Duck Hunt (1984) se jugaba con la Zapper, una pistola de luz.\n* Solo funcionaba en las teles de tubo.'],
         '17,12': ['* DATO DEL BOSQUE', '* Entre la NES y la Famicom se vendieron casi 62 millones de consolas.'],
         '22,4': '* CASTILLO 2\n* Adentro: la MAZMORRA DE LLAVES.\n* Lleva frases con mayúscula y punto final.',
       },
       looks: NES_LOOKS,
       wild: ['bombita', 'patoloco'],
       bitTips: [
-        '* Qué oscuro... Bueno, aquí TODO es oscuro, pero esto más.',
+        '* ¡Esto ya no es el Reino Champiñón! Es HYRULE.\n* Árboles, cuevas... y pasto alto.',
         '* En el pasto alto vuelven a salir los que ya vencimos.\n* ¡Buena práctica para los dedos!',
         '* ¿Oíste eso? Algo hizo "cuac".',
         '* Toby dijo que nos esperaba antes del castillo.',
@@ -682,7 +682,7 @@ addMaps('nes', {
     },
 
     'nes-castillo2': {
-      name: 'Castillo 2',
+      name: 'Castillo 2: Mazmorra de Hyrule',
       music: 'mazmorra',
       ground: 'nes_piso2',
       map: NES_CASTILLO2_MAP,

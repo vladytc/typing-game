@@ -1,4 +1,4 @@
-// MINIJUEGO — PATOS DE LETRAS (guiño a Duck Hunt, NES 1984). Bosque Oscuro, con Toby.
+// MINIJUEGO — PATOS DE LETRAS (guiño a Duck Hunt, NES 1984). Bosque Perdido, con Toby.
 // Vuelan patos de izquierda a derecha con una letra. Escribir la letra = pato atrapado con la
 // RED DE LETRAS (nada de disparos: Toby lo trae y lo suelta). 3 patos por ronda, 10 rondas;
 // cada ronda vuelan 12 % más rápido. Desde la ronda 7 traen MAYUSCULAS (SHIFT).
@@ -24,7 +24,7 @@ Scenes.patos = nesScene({
     Quests.start('patos_toby');
     this.renderHud();
     const pages = [
-      '* ¡Guau! ¡Bienvenido al Bosque Oscuro!\n* Hoy no cazamos: ¡hoy ATRAPAMOS!',
+      '* ¡Guau! ¡Bienvenido al Bosque Perdido!\n* Hoy no cazamos: ¡hoy ATRAPAMOS!',
       `* Cada pato trae ${turbo ? 'una sílaba' : 'una letra'}. Escríbela y ¡ZAS!, cae en tu RED DE LETRAS.\n* Yo te lo traigo y luego lo suelto. Promesa de perro.`,
       `* Desde la ronda ${PATOS_CAPS_FROM} vienen en MAYUSCULAS: usa SHIFT.${this.arcade ? '' : `\n* Atrapa ${PATOS_GOAL} de 30 para seguir el camino.`}`,
     ];

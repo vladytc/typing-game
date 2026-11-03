@@ -519,7 +519,7 @@ provocado. Además, en el pueblo, Don Chip aporta: *"Hubo un apagón de verdad e
 cuadra. Pero este no fue de la luz. Fue de... otra cosa."*
 
 Zonas: **Patio de Ladrillos** (enemigos básicos) → **Castillo 1** (minijefe Kongo Tambor) →
-**Bosque Oscuro** (Toby te acompaña; minijuego Patos de Letras) → **Castillo 2** (Mazmorra de
+**Bosque Perdido** (Hyrule) (Toby te acompaña; minijuego Patos de Letras) → **Castillo 2** (Mazmorra de
 Llaves con el minijefe Tragabombas) → **Ring de la Plaza** (minijefe Campeón Puñín, opcional)
 → **Castillo 3** (Lord Caparazón).
 
@@ -668,7 +668,7 @@ Fantasmín (*"Toma, vivía en mi pantalla. Hace burbujas."*).
 
 | Misión | Pasos | Recompensa |
 |--------|-------|------------|
-| **"Los patos de Toby"** | 1. Hablar con Toby en el Bosque Oscuro. 2. Sacar 20 patos en Patos de Letras. 3. Volver. | `zapper_dorada` + 30 Fichas |
+| **"Los patos de Toby"** | 1. Hablar con Toby en el Bosque Perdido. 2. Sacar 20 patos en Patos de Letras. 3. Volver. | `zapper_dorada` + 30 Fichas |
 | **"Las tres llaves"** (Anciano) | 1. Encontrar las 3 llaves del Castillo 2. 2. Mostrárselas al Anciano. | `mapa_mazmorra` (desde entonces los cuartos se ven en el minimapa) |
 | **"Se busca robot"** (Don Chip) | 1. Perdonar a Robotito. 2. En el pueblo, Robotito pide que le escribas sus instrucciones: reto de 5 frases numeradas (`1. Prende la luz.`). | Robotito se queda en el museo y abre el **Modo Práctica** (batalla sin HP para practicar). |
 | **"Récord de ring"** (Puñín) | Vencer a Puñín con 9 esquives seguidos. | `guantes_verdes`, Dani te saluda distinto |
