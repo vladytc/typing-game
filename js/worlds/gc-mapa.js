@@ -4,7 +4,7 @@
 // casilla por casilla); `render: '3d'` hace que se vean con polígonos. Sin three.js: 2D con la
 // paleta índigo de la GameCube.
 //
-//   ISLA CELESTE (30×20, mar)                 JARDIN BROTITOS (30×20)
+//   ISLA INITIA (30×20, mar)                  JARDIN BROTITOS (30×20)
 //   ~~~~~~~~~~~~~~~~~~~ss.T.T.ss~~~            T.....F..O F..,,,,.F O..F...T
 //   ~~~~~~~~~~~~~~~~~ss..::::::::: -> jardín   T..*.....O .^^^^^(cofre) O.,,,,..T
 //   ~~~~~~~~~~~~~~~~~~s.:.S.p.ss~~             T.F......O .^^^^^::[CapBrotes]:::..T
@@ -205,7 +205,7 @@ Object.assign(SPRITES, GC_GROUND, {
 });
 
 // ---------- Música ORIGINAL de las zonas (era 'gc'; ayudantes gcBars/GC_* en js/worlds/gc.js) ----------
-// Isla Celeste: giga celta de mar en Sol mayor (6/8) al estilo Wind Waker; flauta, violín,
+// Isla Initia (la Outset de Wind Waker): giga celta de mar en Sol mayor (6/8) al estilo Wind Waker; flauta, violín,
 // arpa, bodhrán y una gaita con bordón en la parte C (Mi menor). AABB + C, 40 compases.
 TRACKS.gc_celeste = (() => {
   // Compases de 12 pasos: cada corchea de la giga son 2 pasos.
@@ -389,7 +389,7 @@ const GC_LOOKS = {
   vacio: '* Abajo hay estrellas. Y más abajo, más estrellas.\n* El cubo flota en medio del espacio. Mejor no te asomes.',
   arbol: '* Un árbol redondito con contorno negro, como de caricatura.\n* Parece dibujado con plumón.',
   palma: '* Una palmera que brilla un poquito.\n* Hasta los cocos tienen su puntito de luz.',
-  faro: '* El faro de la Isla Celeste.\n* Su luz gira y gira. Como un disco de 8 cm.',
+  faro: '* El MIRADOR DE ABRIL. Desde arriba se ve todo el mar.\n* Las gaviotas lo usan de hotel.',
   seto: '* Un seto altísimo... o tú eres chiquito.\n* Desde aquí abajo, todo el jardín se ve gigante.',
   florGigante: '* Una flor más alta que tú.\n* Huele a dulce. Los Brotitos duermen la siesta debajo.',
   casa: '* Una casita con la puerta cerrada.\n* Adentro se oye a alguien escribiendo una carta.',
@@ -558,9 +558,13 @@ const GC_PROPS = {
 // ---------- Enganches con el renderer 3D (una sola vez, solo para los mapas de este mundo) ----------
 const gcIsZone = (sc) => !!(sc && sc.m && sc.m.world === 'gc' && sc.m.render === '3d');
 
+// Modelos de los vecinos (sprite → GC3.models); los llena js/worlds/gc-nintendo.js.
+const GC_NPC_MODELS = {};
 // Modelo de gc3d.js para un personaje del mapa (o null = el renderer decide).
 function gcModelKey(e) {
-  if (e.kind !== 'foe' || typeof GC3 === 'undefined') return null;
+  if (typeof GC3 === 'undefined') return null;
+  if (!e.kind && e.id !== 'bit' && GC_NPC_MODELS[e.sprite] && GC3.models[GC_NPC_MODELS[e.sprite]]) return GC_NPC_MODELS[e.sprite];
+  if (e.kind !== 'foe') return null;
   const def = ENEMIES[e.enemy];
   if (def && def.model && GC3.models[def.model]) return def.model;
   if (e.enemy === 'guante') return 'guante';
@@ -1140,8 +1144,7 @@ const GC_NPC_MARINERA = {
       ctx.setFlag('gcMarinera');
       await ctx.say([
         '* ¡Ahoy! Soy la CAPITANA RAFAGA. Mi barco se quedó sin viento...\n* ...desde que llegó esa sombra morada.',
-        '* Antes yo dirigía el viento con una batuta: un, dos, tres. Un, dos, tres.\n* Así se navega en tres por cuatro.',
-        '* Para cruzar al norte tendrás que usar los puentes.\n* Y en los puentes hay cosas que ruedan. Y que giran.',
+        '* Yo dirigía el viento con una batuta: un, dos, tres. ¡En tres por cuatro!\n* Para ir al norte, usa los puentes. Ahí hay cosas que ruedan.',
       ], 'CAPITANA RAFAGA');
       return;
     }
@@ -1189,8 +1192,7 @@ const GC_NPC_SONDA = {
     if (!ctx.flag('gcSonda')) {
       ctx.setFlag('gcSonda');
       await ctx.say([
-        '* BIP. Soy SONDA V-1, robot de mantenimiento de la Estación Visor.',
-        '* El CASCO ESCANER se volvió loco. Escanea todo lo que se mueve.\n* BIP. También lo que no se mueve.',
+        '* BIP. Soy SONDA V-1, robot de mantenimiento de la Estación Visor.\n* El CASCO ESCANER se volvió loco. Escanea todo. BIP.',
         '* Está hasta arriba, en el laboratorio. Cuidado: de camino hay sombras.',
       ], 'SONDA V-1');
       return;
@@ -1208,7 +1210,7 @@ addMaps('gc', {
   entry: { map: 'gc-celeste', spawn: [6, 16, 'up'] },
   maps: {
     'gc-celeste': {
-      name: 'Isla Celeste',
+      name: 'Isla Initia',
       render: '3d',
       view3d: { edge: 'sea', sky: '#7EC8FF', fogColor: '#CFE6FF', fog: [26, 80] },
       intro: [
@@ -1256,7 +1258,7 @@ addMaps('gc', {
       ],
       wild: ['cubito', 'disquin'],
       signs: {
-        '4,14': ['* ISLA CELESTE\n* (Tubería al Pueblo Vitrina, al sur.)', '* La GameCube salió en Japón el 14 de septiembre de 2001.', `* ${GC_FACTS[0]}`],
+        '4,14': ['* ISLA INITIA\n* (Tubería al Pueblo Vitrina, al sur.)', '* En el Wind Waker de GameCube, aquí empezaba todo.\n* En inglés se llama Outset Island.', '* La GameCube salió en Japón el 14 de septiembre de 2001.', `* ${GC_FACTS[0]}`],
         '22,5': ['* MUELLE NORTE\n* Al este: JARDIN BROTITOS. Cuidado con los gigantes.', `* ${GC_FACTS[2]}`],
       },
       looks: GC_LOOKS,
@@ -1341,7 +1343,7 @@ addMaps('gc', {
         'T.RRR..*..~~.RRR....:..RRRRR.T',
         'T.WWW.....~~.WWW....:..WWWWW.T',
         'T.WdW..T..~~.WdW....:..WWdWW.T',
-        'T..:......~~..:...B.:.S..:...T',
+        'T..:......~~.S:...B.:.S..:...T',
         'T..:...*..~~..:.....:....:..TT',
         '::::::::::==::::::::::::::...T',
         'T.....:...~~.......T.....:...T',
@@ -1368,6 +1370,7 @@ addMaps('gc', {
       ],
       wild: ['delfinito', 'brotitos', 'disquin'],
       signs: {
+        '13,9': ['* TIENDA DE NOOK\n* Pala, red, caña... y casas a crédito.', '* En Animal Crossing la tienda crecía cuatro veces:\n* Nook\'s Cranny, Nook \'n\' Go, Nookway y Nookington\'s.'],
         '22,9': ['* ALCALDIA DE BELLOTA\n* Horario: cuando la alcaldesa despierte.', `* ${GC_FACTS[3]}`],
       },
       looks: { ...GC_LOOKS, casa: '* La casita de un vecino. La puerta está cerrada.\n* Adentro se oye a alguien escribiendo una carta.' },
