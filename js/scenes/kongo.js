@@ -1,17 +1,17 @@
 // MINIJEFE A — KONGO TAMBOR (guiño a Donkey Kong, arcade 1981). Obra en construcción 25m.
 // "Subir las vigas": cada barril trae una palabra con MAYUSCULA inicial. Si la escribes antes de
-// que te alcance, lo saltas y subes un escalón; si te alcanza, pierdes HP y bajas uno.
+// que te alcance, lo saltas y subes un escalón; si te alcanza, pierdes HP (pero no bajas: frustraba).
 // Hay cuatro barriles: el normal (café); el de FUEGO (rojo, con llamita: su palabra va TODA EN
 // MAYÚSCULAS); el AZUL, que baja por la escalera (más rápido, palabra corta); y el PARTIDO, que al
 // saltarlo se divide y suelta otra palabrita de inmediato (dos saltos seguidos).
-// Son 2 subidas (desde la 2.ª, los barriles traen DOS palabras). Arriba está el MARTILLO
-// (2 martillazos lo hacen huir)... o puedes hacerte su amigo (PAZ: dos ACTUAR completos la llenan).
-// Si fallas arriba, hay otra ronda. Dura ~1.5-2 min a 80 PPM.
+// Es UNA subida (de la 3.ª viga para arriba, los barriles traen DOS palabras). Arriba está el MARTILLO
+// (un martillazo lo hace huir)... o puedes hacerte su amigo (PAZ: dos ACTUAR completos la llenan).
+// Si fallas arriba, lo intentas otra vez ahí mismo: nadie te vuelve a bajar.
 // Con { endless: true } es el minijuego BARRILES del arcade: vigas infinitas y récord de vigas.
 
 const KONGO_PER_BEAM = 2; // barriles por viga (el lore pide 5; con 2 y barriles variados la pelea dura ~2 minutos)
 const KONGO_BEAMS = 4;    // vigas que hay que subir para llegar al martillo
-const KONGO_HITS = 2;     // martillazos para que Kongo huya (uno por subida)
+const KONGO_HITS = 1;     // martillazos para que Kongo huya
 const KONGO_W1 = ['Barril', 'Viga', 'Martillo', 'Kongo', 'Tambor', 'Plátano', 'Corbata', 'Gorila', 'Selva',
   'Escalera', 'Torre', 'Ritmo', 'Salto', 'Bum', 'Mono', 'Rueda'];
 const KONGO_W2 = ['Barril Rodante', 'Viga Roja', 'Gran Salto', 'Bum Bum', 'Tambor Loco', 'Torre Alta',
@@ -54,8 +54,8 @@ function kongoHeroX(beam, step) {
 function kongoBarrelTime(word, beam, level) {
   const letters = word.length + Math.max(0, word.replace(/[^A-ZÁÉÍÓÚÑ]/g, '').length - 1) * 0.5;
   const t = ((1.3 + letters * 0.55) * diff().time * pace('kongo')) / ((1 + 0.08 * beam) * (1 + 0.08 * (level - 1)));
-  // Piso humano: ~0.7 s para ver la palabra y reaccionar, más ~0.15 s por letra aunque escribas a 100 PPM.
-  return Math.max(t, 0.7 + letters * 0.15);
+  // Piso humano: ~0.9 s para ver la palabra y reaccionar, más ~0.18 s por letra aunque escribas a 100 PPM.
+  return Math.max(t, 0.9 + letters * 0.18);
 }
 
 Scenes.kongo = nesScene({
@@ -85,7 +85,7 @@ Scenes.kongo = nesScene({
     const best = (Save.data.arcade || {}).barriles || 0;
     hud.innerHTML = this.endless
       ? `${nesBar('HP', this.hp, this.hpMax)}<span>VIGAS ${this.climbed}</span><span>RECORD ${best}</span>`
-      : `${nesBar('HP', this.hp, this.hpMax)}${nesBar('PAZ', this.mercy, 100, 'mercy')}<span>KONGO ${'♥'.repeat(KONGO_HITS - this.hits)}${'♡'.repeat(this.hits)}</span><span>RONDA ${this.round}</span>`;
+      : `${nesBar('HP', this.hp, this.hpMax)}${nesBar('PAZ', this.mercy, 100, 'mercy')}<span>KONGO ${'♥'.repeat(KONGO_HITS - this.hits)}${'♡'.repeat(this.hits)}</span>`;
   },
 
   startClimb() {
@@ -116,8 +116,8 @@ Scenes.kongo = nesScene({
   spawn() {
     if (this.mode !== 'climb') return;
     const kind = this.nextKind();
-    // De la ronda 2 en adelante, TODOS traen dos palabras (Kongo lo promete; la mitad del partido es la excepción).
-    const two = this.endless ? this.level >= 2 : this.round >= 2;
+    // En las vigas de arriba, TODOS traen dos palabras (Kongo lo avisa; la mitad del partido es la excepción).
+    const two = this.endless ? this.level >= 2 : this.beam >= 2;
     const pool = { normal: [KONGO_W1, KONGO_W2], partido: [KONGO_W1, KONGO_W2], fuego: [KONGO_FIRE1, KONGO_FIRE2], azul: [KONGO_BLUE1, KONGO_BLUE2] }[kind];
     const word = rand(pool[two ? 1 : 0]);
     const dir = this.beam % 2 === 0 ? 1 : -1;
@@ -191,10 +191,7 @@ Scenes.kongo = nesScene({
     this.hp = Math.max(0, this.hp - scaledDmg(4));
     this.pop('¡AY!', this.hx, kongoBeamY(this.beam, this.hx) - 50, NES.F);
     this.word.set('', '');
-    // Bajas un escalón (o a la viga de abajo).
-    if (this.step > 0) this.step--;
-    else if (this.beam > 0) { this.beam--; this.step = KONGO_PER_BEAM - 1; }
-    this.hx = kongoHeroX(this.beam, this.step);
+    // Ya no bajas de escalón: solo duele (y viene otro barril en el mismo lugar).
     this.renderHud();
     if (this.hp <= 0) { this.lose(); return; }
     if (b) this.after(0.8, () => this.spawn());
@@ -223,11 +220,11 @@ Scenes.kongo = nesScene({
 
   // ---------- Arriba: martillo o amistad ----------
 
-  atTop() {
+  atTop(lead) {
     this.mode = 'top';
-    Sfx.secret();
+    if (!lead) Sfx.secret();
     const options = ['Martillo', ...KONGO_ACTS.map((a) => a.name)];
-    this.say(['* ¡Llegaste arriba! Aquí hay un MARTILLO.\n* Kongo deja de aventar barriles y te mira...'], () => {
+    this.say([lead || '* ¡Llegaste arriba! Aquí hay un MARTILLO.\n* Kongo deja de aventar barriles y te mira...'], () => {
       this.choose(options, (i) => (i === 0 ? this.hammer() : this.act(KONGO_ACTS[i - 1])), '¿Qué haces? (escribe una opción)');
     });
   },
@@ -272,17 +269,10 @@ Scenes.kongo = nesScene({
     });
   },
 
-  // Otra subida. Lo que pasó arriba y lo que dice Kongo van en UNA sola página.
+  // Si el martillo falla (o falta PAZ), te quedas arriba y vuelves a elegir: nadie te baja.
   afterTop(lead) {
-    this.round++;
-    this.beam = 0;
-    this.step = 0;
-    this.hx = kongoHeroX(0, 0);
     this.renderHud();
-    const line = this.round === 2
-      ? '* "¡BUM BUM! ¿Eso es todo? ¡Ahora van de DOS en DOS!"'
-      : '* "¡Otra vez! ¡Otra vez!" Kongo toca más rápido.';
-    this.say([`${lead}\n${line}`], () => this.startClimb());
+    this.atTop(`${lead}\n* "¡BUM BUM!" Kongo te mira de reojo... ¡otra vez!`);
   },
 
   win(spared) {
@@ -292,7 +282,7 @@ Scenes.kongo = nesScene({
     this.musicId = null;
     const first = spared
       ? ['* Kongo deja el tambor y te ofrece la mano.\n* "Nadie había tocado CONMIGO. ¡Eres buen baterista!"']
-      : ['* ¡PUM! ¡Segundo martillazo! ¡Kongo se tambalea!\n* "¡BUM... bum... bum!" Y huye saltando por las vigas.'];
+      : ['* ¡PUM! ¡Martillazo! ¡Kongo se tambalea!\n* "¡BUM... bum... bum!" Y huye saltando por las vigas.'];
     this.say(first, () => {
       this.paje = true;
       this.say(PAJE_LINES[1], () => {
