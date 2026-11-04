@@ -1,4 +1,4 @@
-// JEFE — LORD CAPARAZON (guiño a Super Mario Bros., NES 1985). Castillo 3. Rescata la NES.
+// JEFE — LORD CAPARAZON (guiño a Super Mario Bros., NES 1985). Castillo de Bowser. Rescata la NES.
 // "Plataformas al ritmo": una fila de bloques sobre la lava y un METRONOMO. Sobre el siguiente
 // bloque aparece una palabra: si la terminas antes de que se acaben sus tiempos, saltas; si no,
 // caes a la lava (-5 HP) y vuelves a intentarlo. Tras 6 bloques llegas al HACHA del puente:

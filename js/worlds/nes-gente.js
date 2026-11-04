@@ -1,14 +1,14 @@
 // MUNDO 2 — La gente de verdad del Castillo 8-Bit. Se carga después de js/worlds/nes-mapa.js.
-// El mundo pasa en dos lugares de la NES: el REINO CHAMPIÑÓN (Super Mario Bros., 1985: patio,
-// castillos 1 y 3) y HYRULE (The Legend of Zelda, 1986: el Bosque Perdido y la mazmorra del Castillo 2).
-// Cada quien da algo al hablarle: un dato de verdad, una pista o un objeto. Máximo 2 páginas.
+// El mundo es un viaje por los juegos de la NES: el REINO CHAMPIÑÓN (Super Mario Bros.), la OBRA 25m
+// (Donkey Kong), HYRULE y su mazmorra (The Legend of Zelda), la CIUDAD DEL BOX (Punch-Out!!) y el
+// CASTILLO DE BOWSER. Cada quien da algo al hablarle: un dato de verdad, una pista o un objeto. Máximo 2 páginas.
 //
-//   Patio      Pit (Kid Icarus)                          29,12
-//   Castillo 1 Toad (después de Kongo) 6,12 · Popo y Nana (Ice Climbers) 15,12 y 16,12
-//   Bosque     el anciano de la cueva con sus dos fuegos  4,11 (fuegos 3,11 y 5,11)
-//              el perro que se ríe (Duck Hunt), abuelo de Toby 28,6
-//   Plaza      Little Mac 10,14 · Doc Louis 12,14
-//   Castillo 3 Samus 2,5 · Peach 21,2 y Bowser 21,11 (después de Lord Caparazón)
+//   Reino Champiñón  Pit (Kid Icarus, bajo las nubes) 9,2 · Toad frente a su casa 9,15
+//   Obra 25m         Popo y Nana (Ice Climbers) 15,12 y 16,12
+//   Hyrule           el anciano de la cueva con sus dos fuegos 30,4 (fuegos 29,4 y 31,4)
+//                    el perro que se ríe (Duck Hunt), abuelo de Toby, en la pradera 8,11
+//   Ciudad del Box   Little Mac 10,12 · Doc Louis 14,12 (a los lados de la entrada del ring)
+//   Castillo Bowser  Samus 2,5 · Peach 21,2 y Bowser 21,11 (después de Lord Caparazón)
 
 // ---------- Dibujos (16×16, máximo 3 colores, como los sprites de la NES) ----------
 
@@ -270,8 +270,39 @@ const nesPerro = nesGente('perro', 'PERRO', [
 
 // ---------- Dónde están ----------
 
+// Toad, frente a su casa (como las Casas de Toad de Super Mario Bros. 3): antes de la Obra da el
+// camino; al vencer a Kongo por fin dice su frase famosa; después, datos de verdad.
+const nesToadFacts = nesGente('toadfacts', 'TOAD', null, [
+  '* En 1985 éramos siete: uno en cada castillo, del 1 al 7.\n* La princesa estaba hasta el 8-4. Pobre Mario.',
+  '* El manual de 1985 no nos decía Toad.\n* Nos llamaba "Mushroom People": la gente hongo.',
+  '* ¿Sabías? El "Bowser" del castillo 1-4 era un Goomba disfrazado.\n* Con bolas de fuego se le caía el disfraz.',
+  '* ¿Perdido? El camino de arena lleva a la OBRA 25m.\n* Y de ahí, una tubería a Hyrule.',
+]);
+async function nesToad(ctx) {
+  if (!Save.data.done.kongo && !ctx.flag('nesToadHola')) {
+    ctx.setFlag('nesToadHola');
+    await ctx.say([
+      '* ¡Hola! Soy TOAD y esta es mi casa.\n* En Super Mario Bros. 3, las Casas de Toad regalaban objetos.',
+      '* Yo regalo consejos: sigue el CAMINO DE ARENA.\n* Lleva a la OBRA 25m, donde un gorila toca el tambor.',
+    ], 'TOAD');
+    return;
+  }
+  if (Save.data.done.kongo && !ctx.flag('nesToadThanks')) {
+    ctx.setFlag('nesToadThanks');
+    await ctx.say([
+      '* THANK YOU MARIO!\n* BUT OUR PRINCESS IS IN ANOTHER CASTLE!',
+      '* ...¿No eres Mario? Ups. Es la única frase que me sé.\n* Mi primo el paje la dice en español. Y con tu consola.',
+    ], 'TOAD');
+    return;
+  }
+  await nesToadFacts(ctx);
+}
+
 MAPS['nes-patio'].npcs.push({
-  id: 'nes_pit', sprite: 'nes_pit', x: 29, y: 12,
+  id: 'nes_toad', sprite: 'nes_toad', x: 9, y: 15, talk: nesToad,
+}, {
+  // Pit bajó siguiendo las nubes: está justo debajo del cielo.
+  id: 'nes_pit', sprite: 'nes_pit', x: 9, y: 2,
   talk: nesGente('pit', 'PIT', [
     '* ¡Hola! Soy PIT, ángel de la diosa Palutena.\n* Bajé siguiendo las nubes. ¿Son de verdad o son arbustos?',
     '* En Angel Land busco los Tres Tesoros Sagrados:\n* el Escudo Espejo, las Flechas de Luz y las Alas de Pegaso.',
@@ -284,18 +315,6 @@ MAPS['nes-patio'].npcs.push({
 
 const NES_C1 = MAPS['nes-castillo1'];
 NES_C1.npcs.push(
-  {
-    // El "THANK YOU MARIO!" de verdad, justo al terminar el primer castillo.
-    id: 'nes_toad', sprite: 'nes_toad', x: 6, y: 12, when: () => !!Save.data.done.kongo,
-    talk: nesGente('toad', 'TOAD', [
-      '* THANK YOU MARIO!\n* BUT OUR PRINCESS IS IN ANOTHER CASTLE!',
-      '* ...¿No eres Mario? Ups. Es la única frase que me sé.\n* Mi primo el paje la dice en español. Y con tu consola.',
-    ], [
-      '* En 1985 éramos siete: uno en cada castillo, del 1 al 7.\n* La princesa estaba hasta el 8-4. Pobre Mario.',
-      '* El manual de 1985 no nos decía Toad.\n* Nos llamaba "Mushroom People": la gente hongo.',
-      '* ¿Sabías? El "Bowser" del castillo 1-4 era un Goomba disfrazado.\n* Con bolas de fuego se le caía el disfraz.',
-    ]),
-  },
   {
     id: 'nes_popo', sprite: 'nes_popo', x: 15, y: 12,
     talk: nesGente('popo', 'POPO', [
@@ -310,7 +329,7 @@ NES_C1.npcs.push(
   {
     id: 'nes_nana', sprite: 'nes_nana', x: 16, y: 12,
     talk: nesGente('nana', 'NANA', null, [
-      '* Popo y yo somos el MISMO dibujo. Él de azul, yo de rosa.\n* Como la nube y el arbusto del patio.',
+      '* Popo y yo somos el MISMO dibujo. Él de azul, yo de rosa.\n* Como la nube y el arbusto del Reino Champiñón.',
       '* En Japón nos estorbaban unas focas, los Topi.\n* Afuera las cambiaron por yetis chiquitos.',
       '* ¿El martillo? Es para romper hielo.\n* Aquí ni lo saco: estas vigas son de Kongo.',
     ]),
@@ -321,16 +340,18 @@ NES_C1.bitTips.push('* ¿Esos dos de parka? Vienen de escalar montañas de hielo
 const NES_BOSQUE = MAPS['nes-bosque'];
 NES_BOSQUE.npcs = NES_BOSQUE.npcs || [];
 NES_BOSQUE.npcs.push(
-  { id: 'nes_anciano', sprite: 'nes_anciano', x: 4, y: 11, talk: nesAnciano },
-  { id: 'nes_fuego1', sprite: 'nes_fuego', x: 3, y: 11, talk: nesFuego },
-  { id: 'nes_fuego2', sprite: 'nes_fuego', x: 5, y: 11, talk: nesFuego },
-  { id: 'nes_perro', sprite: 'nes_perro', x: 28, y: 6, talk: nesPerro },
+  // Adentro de la cueva (se entra por la boca negra de las rocas, junto al camino).
+  { id: 'nes_anciano', sprite: 'nes_anciano', x: 30, y: 4, talk: nesAnciano },
+  { id: 'nes_fuego1', sprite: 'nes_fuego', x: 29, y: 4, talk: nesFuego },
+  { id: 'nes_fuego2', sprite: 'nes_fuego', x: 31, y: 4, talk: nesFuego },
+  // En la Pradera de Duck Hunt, entre el pasto alto.
+  { id: 'nes_perro', sprite: 'nes_perro', x: 8, y: 11, talk: nesPerro },
 );
-NES_BOSQUE.bitTips.push('* Un anciano entre dos fuegos... ¡Eso es de Hyrule!\n* Hay que hablarle. Siempre regala algo.');
+NES_BOSQUE.bitTips.push('* En Zelda, en la primera cueva hay un anciano entre dos fuegos.\n* Hay que hablarle. Siempre regala algo.');
 
 MAPS['nes-plaza'].npcs.push(
   {
-    id: 'nes_littlemac', sprite: 'nes_littlemac', x: 10, y: 14,
+    id: 'nes_littlemac', sprite: 'nes_littlemac', x: 10, y: 12,
     talk: nesGente('littlemac', 'LITTLE MAC', [
       '* Soy LITTLE MAC: 17 años y 107 libras.\n* El más chiquito del circuito... y el más terco.',
       '* Puñín avisa sus golpes. Tú escríbelos y esquiva.\n* Así le gané yo a gigantes en Punch-Out!! (1987).',
@@ -341,7 +362,7 @@ MAPS['nes-plaza'].npcs.push(
     ]),
   },
   {
-    id: 'nes_doclouis', sprite: 'nes_doclouis', x: 12, y: 14,
+    id: 'nes_doclouis', sprite: 'nes_doclouis', x: 14, y: 12,
     async talk(ctx) {
       if (!Save.data.done.punin) {
         await ctx.say(['* ¡Oye, chico! Puñín se marea con 3 esquives seguidos.\n* ¡Ahí es cuando le das!'], 'DOC LOUIS');
@@ -379,8 +400,8 @@ NES_C3.npcs.push(
       '* ...Así terminaba en 1985. La "misión nueva" era el juego otra vez,\n* más difícil: los Goombas se volvían Buzzy Beetles.',
     ], [
       '* Soy PEACH. En el manual de 1985 me llamaban Princesa Toadstool.',
-      '* Mario revisó siete castillos equivocados.\n* Tú solo tres. ¡Récord!',
-      '* Ese hongo del Castillo 1 practica su frase en inglés todos los días.\n* Es la única que se sabe.',
+      '* Mario revisó siete castillos equivocados.\n* Tú, una obra, una mazmorra y un solo castillo. ¡Récord!',
+      '* Ese hongo de la Obra 25m practica su frase en inglés todos los días.\n* Es la única que se sabe.',
     ]),
   },
   {

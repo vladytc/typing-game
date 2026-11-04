@@ -1,11 +1,12 @@
 // Secretos jugables del mundo nes: curiosidades con el dato real (ver js/secretos.js).
 //
-//   nes_menos1  Patio de Ladrillos: el ladrillo con grieta junto a las dos tuberías de arriba
-//               (como la pared del final del 1-2). Se atraviesa y lleva al MUNDO -1 (Scenes.menos1),
-//               un nivel de agua que se repite. A la tercera vuelta se sale con RESET.
-//   nes_zelda   Castillo 2: el libro de registro pide tu nombre. Con ZELDA empieza la Segunda
-//               Misión de la mazmorra (js/scenes/mazmorra.js con { second: true }).
-//   nes_nube    Patio de Ladrillos: el arbusto debajo de la nube del medio. Habla, se pinta de nube.
+//   nes_menos1  Reino Champiñón, MUNDO 1-2 (bajo tierra, se entra por el tubo del norte): al final
+//               del nivel, el ladrillo azul con grieta de la pared, junto a las dos tuberías (como la
+//               pared del final del 1-2). Se atraviesa y lleva al MUNDO -1 (Scenes.menos1), un nivel
+//               de agua que se repite. A la tercera vuelta se sale con RESET.
+//   nes_zelda   Mazmorra del Nivel 1 (nes-castillo2): el libro de registro pide tu nombre. Con ZELDA
+//               empieza la Segunda Misión de la mazmorra (js/scenes/mazmorra.js con { second: true }).
+//   nes_nube    Reino Champiñón: el arbusto justo debajo de la primera nube. Habla, se pinta de nube.
 
 // ---------- Sprites (4 tonos con su paleta NES; el museo los pinta con `pal`) ----------
 
@@ -13,7 +14,8 @@
 const nesRepal = (rows, pal) => Object.assign(rows.slice(), { pal });
 
 const NES_SECRET_PAL = {
-  ladrillo: { a: '#fcbcb0', b: '#c84c0c', c: '#c84c0c', d: '#000000' },
+  // Los ladrillos azules del Mundo 1-2 (bajo tierra).
+  ladrillo: { a: '#3cbcfc', b: '#0058f8', c: '#0058f8', d: '#000000' },
   arbusto: { a: '#b8f818', b: '#b8f818', c: '#00a800', d: '#000000' },
   nube: { a: '#fcfcfc', b: '#fcfcfc', c: '#a4e4fc', d: '#000000' },
 };
@@ -63,14 +65,14 @@ Object.assign(SPRITES, {
     if (x < 8) return 'a';
     return ch === 'c' ? 'c' : 'b';
   }).join('')), { a: '#fcfcfc', b: '#b8f818', c: '#00a800', d: '#000000' }),
-  // Patio: un ladrillo igual a los demás... con una grieta finita.
+  // Mundo 1-2: un ladrillo igual a los demás... con una grieta finita.
   nes_ladrillo_raro: nesRepal(SPRITES.nes_ladrillo.map((row, y) => [...row].map((ch, x) => (
     [[4, 5], [5, 6], [5, 9], [6, 10], [10, 6], [11, 5]].some(([cx, cy]) => cx === x && cy === y) ? 'd' : ch
   )).join('')), NES_SECRET_PAL.ladrillo),
-  // Patio: el arbusto que habla. Y el mismo arbusto con la paleta de las nubes.
+  // Reino Champiñón: el arbusto que habla. Y el mismo arbusto con la paleta de las nubes.
   arbusto_parlante: nesRepal(SPRITES.nes_arbusto, NES_SECRET_PAL.arbusto),
   nube_parlante: nesRepal(SPRITES.nes_arbusto, NES_SECRET_PAL.nube),
-  // Castillo 2: atril con el libro de registro.
+  // Mazmorra del Nivel 1: atril con el libro de registro.
   atril: nesRepal([
     '................',
     '................',
@@ -93,7 +95,7 @@ Object.assign(SPRITES, {
 
 // ---------- Secreto 1: el MUNDO -1 ----------
 
-// La pared rara del patio: se empuja con el truco y se atraviesa.
+// La pared rara del final del Mundo 1-2: se empuja con el truco y se atraviesa.
 async function nesParedRara(ctx) {
   await ctx.say(['* Este ladrillo tiene una grieta finita.\n* Junto a esas dos tuberías... ¿te recuerda el final de algún nivel?']);
   if (await ctx.choose(['empujar', 'dejar']) === 1) return;
@@ -461,12 +463,12 @@ async function nesArbustoHabla(ctx) {
 
 const NES_PATIO = MAPS['nes-patio'];
 NES_PATIO.npcs.push(
-  // El ladrillo junto a las dos tuberías de arriba (la "Zona Warp" del patio).
-  { id: 'pared_rara', sprite: 'nes_ladrillo_raro', x: 23, y: 4, talk: nesParedRara },
-  // El arbusto justo debajo de la nube del medio.
-  { id: 'arbusto_parlante', sprite: 'arbusto_parlante', x: 11, y: 4, talk: nesArbustoHabla },
+  // Al final del Mundo 1-2 (bajo tierra): el ladrillo de la pared, junto a las dos tuberías.
+  { id: 'pared_rara', sprite: 'nes_ladrillo_raro', x: 24, y: 16, talk: nesParedRara },
+  // El arbusto justo debajo de la primera nube.
+  { id: 'arbusto_parlante', sprite: 'arbusto_parlante', x: 5, y: 2, talk: nesArbustoHabla },
 );
-NES_PATIO.bitTips.push('* Esas dos tuberías pegadas a la pared de arriba...\n* me recuerdan el final del Mundo 1-2.');
+NES_PATIO.bitTips.push('* Al final del Mundo 1-2 hay dos tuberías pegadas a la pared...\n* En el juego de 1985, esa pared escondía algo.');
 
 const NES_CASTILLO2 = MAPS['nes-castillo2'];
 NES_CASTILLO2.npcs.push({ id: 'registro', sprite: 'atril', x: 5, y: 12, talk: nesRegistro });

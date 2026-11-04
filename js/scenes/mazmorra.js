@@ -1,4 +1,4 @@
-// MINIJEFE B — LA MAZMORRA DE LLAVES y TRAGABOMBAS (guiño a The Legend of Zelda, 1986). Castillo 2.
+// MINIJEFE B — LA MAZMORRA DE LLAVES y TRAGABOMBAS (guiño a The Legend of Zelda, 1986). Mazmorra del Nivel 1 de Hyrule.
 // Una mazmorra vista desde arriba. Te mueves entre cuartos con las flechas; ENTER revisa.
 // Las puertas cerradas se abren escribiendo una "llave": una frase con mayúscula y punto final.
 // En tres cofres hay tres llaves (cada una es un reto de 3 frases). La puerta de madera es más
@@ -62,7 +62,7 @@ Scenes.mazmorra = nesScene({
     if (fresh && second) { this.say(MZ2_INTRO, () => this.explore(), 'BIT'); return; }
     if (fresh) {
       this.say([
-        '* ¡El Castillo 2 es una MAZMORRA!\n* Muévete con las flechas. ENTER revisa lo que hay en el cuarto.',
+        '* ¡Es una MAZMORRA de Hyrule!\n* Muévete con las flechas. ENTER revisa lo que hay en el cuarto.',
         '* Las puertas cerradas se abren escribiendo una LLAVE:\n* una frase con MAYUSCULA y punto final.',
         '* Tres cofres guardan tres llaves. Al fondo... algo ronca y huele a pólvora.',
       ], () => this.explore(), 'BIT');
