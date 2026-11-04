@@ -1,4 +1,4 @@
-// MINIJEFE A — KONGO TAMBOR (guiño a Donkey Kong, arcade 1981). Castillo 1.
+// MINIJEFE A — KONGO TAMBOR (guiño a Donkey Kong, arcade 1981). Obra en construcción 25m.
 // "Subir las vigas": cada barril trae una palabra con MAYUSCULA inicial. Si la escribes antes de
 // que te alcance, lo saltas y subes un escalón; si te alcanza, pierdes HP y bajas uno.
 // Hay cuatro barriles: el normal (café); el de FUEGO (rojo, con llamita: su palabra va TODA EN

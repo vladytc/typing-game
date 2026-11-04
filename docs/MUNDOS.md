@@ -242,10 +242,13 @@ addMaps('snes', {
       exits: {
         '3,13': { pueblo: 'snes' },                           // al pueblo, junto a la tubería del mundo
         '19,6': { map: 'snes-castillo', spawn: [1, 6, 'right'] },   // a otro mapa
+        '9,1': { map: 'snes-jardin', spawn: [3, 12, 'up'], say: ['* ¡Te perdiste!'] },  // say: Bit lo dice al llegar
       },
       wild: ['setita', 'modosiete'],    // salen en el pasto alto, solo si ya los venciste
       wildRate: 0.07,                   // probabilidad por paso en pasto alto (opcional)
       bitTips: ['* Lo que dice Bit en esta zona.'],
+      bitNext: () => '* A dónde ir ahora.',   // opcional: pista según el progreso (una vez sí y una no)
+      rev: 2,                           // súbelo al rediseñar el mapa: las partidas guardadas ahí entran por spawns.start
       variants: [                       // el mapa cambia con el progreso (la última que se cumpla)
         { when: () => !!Save.data.done.setita, map: [/* filas */], npcs: [/* se agregan */] },
         // opcionales en la variante: id + announce (Bit lo dice una vez), regions, signs, homes
@@ -277,10 +280,14 @@ Cómo funciona:
 - **Letreros** (`signs`): el texto también puede ser una función (por ejemplo, la puerta de una
   casa dice de quién es solo si ese amigo ya llegó).
 - **ESC** en un mundo abre "Seguir explorando / Volver al pueblo". En el pueblo va al título.
-- Se guarda el mapa y la casilla en `Save.data.pos`: "Continuar" regresa ahí.
+- Se guarda el mapa y la casilla en `Save.data.pos` (con el `rev` del mapa): "Continuar" regresa ahí.
+  Si el `rev` cambió, apareces en `spawns.start`. Si la casilla quedó sólida, fuera del mapa o
+  encima de alguien, apareces en la casilla libre más cercana a la que se llega desde la entrada.
+- Una casilla con `pipe: true` funciona como tubería (el jugador se hunde al salir) aunque tenga otro dibujo.
 - Lo exclusivo del pueblo (tuberías, eras, museo, intro de Bit) solo pasa en el mapa `pueblo`.
-- **Valida tu mapa**: haz un BFS en Node que, venciendo a los enemigos en orden, compruebe que
-  cada uno es alcanzable y el siguiente todavía no (como se hizo para el Valle Game Boy).
+- **Valida tu mapa** con `NODE_PATH=<jsdom> node tools/mapas-bfs.js <mundo>`: un BFS que, venciendo
+  a los enemigos en orden, comprueba que cada uno es alcanzable y el siguiente todavía no, y que
+  todas las salidas, cofres, personajes y letreros se alcanzan.
 
 Para probar desde la consola del navegador:
 

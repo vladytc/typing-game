@@ -1,7 +1,9 @@
 // MUNDO 2 — Castillo 8-Bit (NES, 1985). Diseño en docs/LORE.md §5.
-// Zonas: Patio de Ladrillos → Castillo 1 (Kongo Tambor) → Bosque Perdido (Patos de Letras)
-//        → Castillo 2 (Mazmorra de Llaves + Tragabombas) → Ring de la Plaza (Campeón Puñín)
-//        → Castillo 3 (Lord Caparazón, rescata la NES).
+// Zonas (un viaje por los juegos de la NES, mapas en js/worlds/nes-mapa.js):
+//   Reino Champiñón (Mundo 1-1, Ladrillín, Caparacho) → Obra 25m (Kongo Tambor)
+//   → Hyrule: Bosque Perdido y Pradera de Duck Hunt (Bombita, Patoloco, Patos de Letras)
+//   → Mazmorra del Nivel 1 (Mazmorra de Llaves + Tragabombas) → Ciudad del Box (Campeón Puñín)
+//   → Castillo de Bowser (Lord Caparazón, rescata la NES).
 // Aquí se practican las MAYUSCULAS con SHIFT (nombres propios, inicio de frase) y el punto final.
 
 // Dibujos a todo color (letras de la paleta NES de js/nes-kit.js). Ley del castillo: máximo 3 colores.
@@ -285,7 +287,7 @@ const PAJE_LINES = {
   ],
   2: [
     '* ¡Gracias! Pero tu consola está en otro...',
-    '* Sí, ya sé, ya sé. En OTRO castillo.\n* El tercero. El último. Te lo prometo.',
+    '* Sí, ya sé, ya sé. En OTRO castillo.\n* El de Bowser. El último. Te lo prometo.',
   ],
 };
 
@@ -574,7 +576,7 @@ addWorld({
       keysHint: 'Mayúsculas con SHIFT (Mario, Goomba)',
     },
 
-    // ---------- Patio de Ladrillos ----------
+    // ---------- Reino Champiñón ----------
     ladrillin: {
       name: 'Ladrillín',
       sprite: 'ladrillin',
@@ -583,7 +585,7 @@ addWorld({
       fightWords: 3,
       words: ['Torre', 'Perro', 'Tipo', 'Puerto', 'Repite', 'Poquito', 'Quiero', 'Tuyo', 'Pero', 'Trote', 'Ropero', 'Pirueta', 'Ladrillo', 'Tubo', 'Retiro'],
       blurb: 'Un bloque de ladrillo con cejas. Se enoja si saltas debajo de él.',
-      intro: '* ¡Un Ladrillín bloquea el Patio de Ladrillos!\n* (Aquí las MAYUSCULAS cuentan: usa SHIFT.)',
+      intro: '* ¡Un Ladrillín bloquea el camino del Reino Champiñón!\n* (Aquí las MAYUSCULAS cuentan: usa SHIFT.)',
       check: '* LADRILLIN - ATQ 3 DEF 2\n* Un bloque de ladrillo con cejas. Se enoja si saltas debajo de él.',
       idle: ['* Ladrillín frunce las cejas. También son de ladrillo.', '* Se oye una moneda adentro... ¿o te lo imaginaste?', '* "Aquí todos somos de tres colores. Es la ley del castillo."'],
       calm: '* Ladrillín ya no frunce tanto las cejas.',
@@ -605,7 +607,7 @@ addWorld({
       caps: true, music: 'nes_battle',
       fightWords: 3,
       words: ['Mario', 'Luigi', 'Yoshi', 'Toad', 'Peach', 'Ana', 'Pablo', 'Lucas', 'Diego', 'Sofía', 'Toby', 'Champi', 'Bit', 'Lima', 'Roma', 'Tokio', 'Kioto', 'Chile', 'Perú'],
-      blurb: 'Una tortuguita que se mete a su caparazón y patina por todo el patio.',
+      blurb: 'Una tortuguita que se mete a su caparazón y patina por todo el Reino Champiñón.',
       intro: '* ¡Caparacho llega patinando dentro de su caparazón!\n* (Los nombres propios llevan MAYUSCULA.)',
       check: '* CAPARACHO - ATQ 3 DEF 1\n* Patina rapidísimo. Nadie le ha preguntado nunca a dónde va.',
       idle: ['* Caparacho da vueltas dentro de su concha.', '* Se escucha un "¡vuuum!" a lo lejos.', '* Caparacho se asoma... y se vuelve a esconder.'],
@@ -621,13 +623,13 @@ addWorld({
       trick: 'patina', // las palabras que caen patinan de lado
     },
 
-    // ---------- Castillo 1 ----------
+    // ---------- Obra en construcción 25m ----------
     kongo: {
       name: 'Kongo Tambor',
       sprite: 'kongo',
       mode: 'kongo', // js/scenes/kongo.js
       xp: 30,
-      blurb: '¡MINIJEFE del Castillo 1! Un gorila con corbata avienta barriles. Escribe para saltarlos y sube las vigas.',
+      blurb: '¡MINIJEFE de la Obra 25m! Un gorila con corbata avienta barriles. Escribe para saltarlos y sube las vigas.',
       keysHint: 'Palabras con mayúscula inicial (Barril, Viga)',
     },
 
@@ -640,7 +642,7 @@ addWorld({
       fightWords: 4, fightTime: 0.8, // ¡tiene prisa! 20 % menos tiempo
       words: ['Bum', 'Pum', 'Uno', 'Dos', 'Tres', 'mecha', 'chispa', 'fuego', 'humo', 'luz', 'zas', 'Bomba', 'ya', 'corre', 'Fiu'],
       blurb: 'Una bomba con la mecha corta y MUCHA prisa. Aquí hay menos tiempo para escribir.',
-      intro: '* ¡Bombita Mecha corre en círculos por el Bosque Perdido!\n* "¡No hay tiempo! ¡NO HAY TIEMPO!"',
+      intro: '* ¡Bombita Mecha corre en círculos frente al Bosque Perdido!\n* "¡No hay tiempo! ¡NO HAY TIEMPO!"',
       check: '* BOMBITA MECHA - ATQ 4 DEF 0\n* Siempre tiene prisa. Nadie sabe a dónde va tan rápido.',
       idle: ['* La mecha de Bombita hace fssssss.', '* Bombita mira su reloj. No tiene reloj.', '* Huele a cerillo recién apagado.'],
       calm: '* La mecha de Bombita se apagó solita. Está tranquila.',
@@ -679,17 +681,17 @@ addWorld({
       sprite: 'toby',
       mode: 'patos', // js/scenes/patos.js
       xp: 20,
-      blurb: 'Toby te acompaña al Bosque Perdido. Atrapa patos con tu red de letras: ¡escribe la letra de cada pato!',
+      blurb: 'Toby te acompaña a la Pradera de Duck Hunt. Atrapa patos con tu red de letras: ¡escribe la letra de cada pato!',
       keysHint: 'Letras sueltas, reacción rápida',
     },
 
-    // ---------- Castillo 2 ----------
+    // ---------- Mazmorra del Nivel 1 (Hyrule) ----------
     mazmorra: {
       name: 'Mazmorra de Llaves',
       sprite: 'llave',
       mode: 'mazmorra', // js/scenes/mazmorra.js
       xp: 25,
-      blurb: '¡Castillo 2! Una mazmorra de cuartos con puertas que se abren escribiendo frases. Al fondo espera Tragabombas.',
+      blurb: '¡Nivel 1 de Hyrule! Una mazmorra de cuartos con puertas que se abren escribiendo frases. Al fondo espera Tragabombas.',
       keysHint: 'Frases con mayúscula y punto final',
     },
     // Minijefe del fondo de la mazmorra: combate normal con bombas (no es nodo del mapa).
@@ -749,7 +751,7 @@ addWorld({
       mode: 'caparazon', // js/scenes/caparazon.js
       console: 'nes',
       xp: 50,
-      blurb: '¡JEFE! El rey tortuga del Castillo 3. Está "trabado": repite su frase como disco rayado. Salta los bloques AL COMPAS.',
+      blurb: '¡JEFE! El rey tortuga que se adueñó del Castillo de Bowser. Está "trabado": repite su frase como disco rayado. Salta los bloques AL COMPAS.',
       keysHint: 'Palabras al ritmo del metrónomo',
     },
   },
@@ -759,7 +761,7 @@ addWorld({
     ladrillo_dorado: { name: 'Ladrillo dorado', effect: { cookies: 1 }, desc: 'Todavía tiene un signo de interrogación. Nadie lo ha golpeado.' },
     zapper_dorada: { name: 'Pistola de luz dorada', desc: 'Regalo de Toby por atrapar 20 patos. Solo brilla en teles de tubo.' },
     guantes_verdes: { name: 'Guantes verdes', desc: 'Los guantes del Campeón Puñín. Huelen a esfuerzo... y un poquito a pies.' },
-    mapa_mazmorra: { name: 'Mapa de la mazmorra', desc: 'Regalo del Anciano. Con él, todos los cuartos del Castillo 2 se ven en el minimapa.' },
+    mapa_mazmorra: { name: 'Mapa de la mazmorra', desc: 'Regalo del Anciano. Con él, todos los cuartos de la mazmorra de Hyrule se ven en el minimapa.' },
     cartucho_dorado: { name: 'Cartucho dorado', desc: 'Los cartuchos dorados guardaban tu partida con una pila. ¡Era magia!' },
     cinturon: { name: 'Cinturón de campeón', desc: 'Por esquivar 9 golpes seguidos de Puñín. Dani Turbo no lo puede creer.' },
   },
@@ -774,16 +776,16 @@ addWorld({
     // mundo_<id> se activa sola cuando Bit anuncia la tubería nueva.
     mundo_nes: {
       name: 'El Castillo 8-Bit',
-      desc: 'Una tubería nueva lleva a un mundo de ladrillos y bloques ?. Cruza los tres castillos y rescata la NES.',
+      desc: 'Una tubería nueva lleva a un mundo de ladrillos y bloques ?. Cruza el Reino Champiñón, Hyrule y la Ciudad del Box hasta el Castillo de Bowser y rescata la NES.',
     },
     patos_toby: {
       name: 'Los patos de Toby',
-      desc: 'Toby quiere ver cuántos patos atrapas con tu red de letras en el Bosque Perdido. ¡Atrapa 20!',
+      desc: 'Toby quiere ver cuántos patos atrapas con tu red de letras en la Pradera de Duck Hunt. ¡Atrapa 20!',
       progress: () => `${Math.min(20, Save.data.flags.nesDucks || 0)}/20`,
     },
     tres_llaves: {
       name: 'Las tres llaves',
-      desc: 'Encuentra las 3 llaves de la Mazmorra del Castillo 2 y muéstraselas al Anciano del pueblo.',
+      desc: 'Encuentra las 3 llaves de la Mazmorra del Nivel 1 de Hyrule y muéstraselas al Anciano del pueblo.',
       progress: () => `${[1, 2, 3].filter((n) => Save.data.flags[`nesKey${n}`]).length}/3`,
     },
     record_ring: {

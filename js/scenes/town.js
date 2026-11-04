@@ -42,7 +42,8 @@ Scenes.town = {
   mapId: null,
   p: null, // posición del jugador; es la misma que se guarda en Save.data.pos
 
-  enter({ map, spawn, from } = {}) {
+  // say (opcional): lo que se dice al llegar (p. ej. al perderse en el Bosque Perdido).
+  enter({ map, spawn, from, say } = {}) {
     // ¿En qué mapa? El que piden, o el pueblo si vienes de una tubería, o donde te quedaste.
     const pos = Save.data.pos;
     const toPipe = from && from.startsWith('pipe:');
@@ -55,7 +56,8 @@ Scenes.town = {
     if (spawn) p = spawn;
     else if (pipe) { const [px, py] = PIPE_SLOTS[pipe.order - 1]; p = [px, py + 1, 'down']; }
     else if (from && spawns[from]) p = spawns[from];
-    else if (pos && pos.map === id) p = [pos.x, pos.y, pos.face];
+    // La casilla guardada solo vale si el mapa no se rediseñó desde entonces (`rev` del mapa).
+    else if (pos && pos.map === id && (pos.rev || 0) === (m.rev || 0)) p = [pos.x, pos.y, pos.face];
     else p = spawns.start || [1, 1, 'down'];
     this.p = { x: p[0], y: p[1], face: p[2] || 'down' };
 
@@ -64,10 +66,11 @@ Scenes.town = {
     this.rows = variant ? variant.map : m.map;
     this.variant = variant;
     Object.assign(this, mapExtras(m, variant));
-    this.regionNow = this.regionAt(this.p.x, this.p.y);
     this.tiles = { ...TILES, ...(m.tiles || {}) };
     this.W = Math.max(...this.rows.map((r) => r.length));
     this.H = this.rows.length;
+    this.p = this.safeSpot(this.p, spawns.start);
+    this.regionNow = this.regionAt(this.p.x, this.p.y);
     this.music = m.music || (pueblo ? 'town' : 'title');
     this.savePos();
     Save.write();
@@ -109,6 +112,10 @@ Scenes.town = {
     this.idleIv = setInterval(() => this.idleCheck(), 1000);
     window.onblur = () => { this.held = null; };
 
+    if (say) {
+      this.later = setTimeout(() => this.run((ctx) => ctx.say([].concat(say), 'BIT')), 400);
+      return;
+    }
     if (!pueblo) {
       // Zona de un mundo: `intro` (páginas o función async (ctx)) se dice la primera vez que entras.
       if (m.intro && !Save.data.flags[`intro_${id}`]) {
@@ -193,6 +200,39 @@ Scenes.town = {
 
   savePos() {
     Save.data.pos = { map: this.mapId, x: this.p.x, y: this.p.y, face: this.p.face };
+    if (this.m.rev) Save.data.pos.rev = this.m.rev;
+  },
+
+  // Protege la posición al cargar: si la casilla quedó fuera del mapa, en algo sólido o encima de
+  // alguien (p. ej. una partida vieja después de rediseñar el mapa), busca la casilla libre más
+  // cercana a la que se llegue caminando desde la entrada del mapa (sin pasar enemigos). Si no hay, la entrada.
+  safeSpot(p, start) {
+    const d = Save.data;
+    const busy = new Set();
+    const npcs = [...(this.m.npcs || []), ...((this.variant && this.variant.npcs) || [])].filter((n) => !n.when || n.when());
+    npcs.forEach((n) => { const h = this.homes[n.id]; busy.add(h ? `${h[0]},${h[1]}` : `${n.x},${n.y}`); });
+    (this.m.encounters || []).filter((en) => ENEMIES[en.enemy] && !d.done[en.enemy]).forEach((en) => busy.add(`${en.x},${en.y}`));
+    (this.m.chests || []).forEach((c) => busy.add(`${c.x},${c.y}`));
+    const ok = (x, y) => { const t = this.tileAt(x, y); return !!t && !t.solid && !busy.has(`${x},${y}`); };
+    if (ok(p.x, p.y)) return p;
+    const s = start ? { x: start[0], y: start[1], face: start[2] || 'down' } : { x: 1, y: 1, face: 'down' };
+    if (!ok(s.x, s.y)) return s;
+    // Casillas a las que se llega caminando desde la entrada (las salidas no se cruzan: te llevan).
+    const seen = new Set([`${s.x},${s.y}`]);
+    const queue = [[s.x, s.y]];
+    let best = s;
+    let bestD = Math.abs(s.x - p.x) + Math.abs(s.y - p.y);
+    while (queue.length) {
+      const [x, y] = queue.shift();
+      const dd = Math.abs(x - p.x) + Math.abs(y - p.y);
+      if (dd < bestD && !this.exitAt(x, y)) { best = { x, y, face: p.face || 'down' }; bestD = dd; }
+      if (this.exitAt(x, y) && (x !== s.x || y !== s.y)) continue;
+      Object.values(DIRS).forEach(([dx, dy]) => {
+        const k = `${x + dx},${y + dy}`;
+        if (!seen.has(k) && ok(x + dx, y + dy)) { seen.add(k); queue.push([x + dx, y + dy]); }
+      });
+    }
+    return best;
   },
 
   // ---------- Mapa y personajes ----------
@@ -316,7 +356,13 @@ Scenes.town = {
       .find(([x, y]) => this.free(x, y) && !this.tileAt(x, y).warp && !this.exitAt(x, y));
     const [bx, by] = spot || [this.p.x, this.p.y];
     const tips = this.m.bitTips;
-    this.bit = mk({ id: 'bit', sprite: 'bit', cls: 'bit', x: bx, y: by, talk: tips && tips.length ? (ctx) => ctx.say([rand(tips)], 'BIT') : bitTalk });
+    // `bitNext()` (opcional): pista de a dónde ir. Bit la da una vez sí y una no, entre sus comentarios.
+    const next = this.m.bitNext;
+    const talk = tips && tips.length ? (ctx) => {
+      const hint = next && ctx.counter(`bitnext_${this.mapId}`) % 2 === 0 && next();
+      return ctx.say([hint || rand(tips)], 'BIT');
+    } : bitTalk;
+    this.bit = mk({ id: 'bit', sprite: 'bit', cls: 'bit', x: bx, y: by, talk });
     this.allEnts().forEach((e) => this.place(e, true));
     this.facePlayer();
   },
@@ -444,11 +490,11 @@ Scenes.town = {
   useExit(ex, t) {
     this.mode = 'busy';
     this.held = null;
-    const pipe = t && t.s === 'pipe';
+    const pipe = t && (t.s === 'pipe' || t.pipe); // `pipe: true` = casilla de tubería con otro dibujo
     if (pipe) { Sfx.warp(); this.player.el.classList.add('sink'); if (this.r3) this.r3.sink(this.player); } else { Sfx.confirm(); $('.town').classList.add('fade'); }
     this.later = setTimeout(() => (ex.pueblo
       ? Game.go('town', { map: 'pueblo', from: `pipe:${ex.pueblo}` })
-      : Game.go('town', { map: ex.map, spawn: ex.spawn })), pipe ? 450 : 300);
+      : Game.go('town', { map: ex.map, spawn: ex.spawn, say: ex.say })), pipe ? 450 : 300);
   },
 
   // Guiño a Pokémon: en el pasto alto aparecen enemigos salvajes para practicar.
